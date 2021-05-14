@@ -11,7 +11,7 @@
     DIG_IO_ENTRY(rev_in,      GPIOB, GPIO4,  PinMode::INPUT_FLT)   \
     DIG_IO_ENTRY(bms_in,      GPIOC, GPIO3,  PinMode::INPUT_PD)   \
     DIG_IO_ENTRY(dcsw_out,    GPIOC, GPIO7, PinMode::OUTPUT)      \
-    DIG_IO_ENTRY(led_out,     GPIOC, GPIO13, PinMode::OUTPUT)      \
+    DIG_IO_ENTRY(led_out,     GPIOE, GPIO2, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(err_out,     GPIOB, GPIO10, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(brk_out,     GPIOC, GPIO5,  PinMode::OUTPUT)      \
     DIG_IO_ENTRY(prec_out,     GPIOC, GPIO8,  PinMode::OUTPUT)      \
