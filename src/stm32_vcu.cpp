@@ -182,6 +182,7 @@ static void Ms10Task(void)
     int stt = STAT_NONE;
     ErrorMessage::SetTime(rtc_get_counter_val());
 
+
     if (Param::GetInt(Param::opmode) == MOD_RUN)
     {
         torquePercent = utils::ProcessThrottle(previousSpeed, can1);
@@ -329,7 +330,7 @@ static void Ms10Task(void)
     else
     {
         //switch to off mode via igntition digital input. To be implemented in release HW
-        if(!Param::GetBool(Param::din_forward)) opmode = MOD_OFF; //using the forward input to test in the E46
+        if(!Param::GetBool(Param::T15Digi)) opmode = MOD_OFF;
     }
     }
 
