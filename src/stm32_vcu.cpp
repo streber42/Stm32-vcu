@@ -52,12 +52,51 @@ chargerClass chgtype;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void Ms200Task(void)
 {
+    int opmode = Param::GetInt(Param::opmode);
     if(targetVehicle == _vehmodes::BMW_E65) BMW_E65Class::GDis();//needs to be every 200ms
     if(targetCharger == _chgmodes::Volt_Ampera)
     {
         //to be done
     }
+
+    if(targetCharger == _chgmodes::Off)
+    {
+        chargeMode = false;
+    }
+
+    if(targetCharger == _chgmodes::HV_ON)
+    {
+      if(opmode != MOD_RUN)  chargeMode = true;
+    }
+    if(targetCharger == _chgmodes::EXT_CAN)
+    {
+      // chargeMode = false;  //this mode accepts a request for HV via CAN from a charger controller e.g. Tesla Gen2/3 M3 PCS etc.
+                            //request expected on id 0x108
+                            //response with HV on given on id 0x109
+     if(opmode != MOD_RUN)
+        {
+    if(chargerClass::HVreq==true) chargeMode = true;
+    if(chargerClass::HVreq==false) chargeMode = false;
+        }
+
+
+    }
+
+    if(targetCharger == _chgmodes::EXT_DIGI)
+    {
+        chargeMode = false;             //this mode accepts a request for HV via a 12v inputfrom a charger controller e.g. Tesla Gen2/3 M3 PCS etc.
+                                        //response with a 12v output signal on a digital output.
+                                        //will be implemented on release HW.
+
+
+
+
+    }
 }
+
+
+
+
 
 
 static void Ms100Task(void)
@@ -96,7 +135,7 @@ static void Ms100Task(void)
         Param::SetInt(Param::tmphs,LeafINV::inv_temp);//send leaf temps to web interface
         Param::SetInt(Param::tmpm,LeafINV::motor_temp);
         Param::SetInt(Param::InvStat, LeafINV::error); //update inverter status on web interface
-        Param::SetInt(Param::INVudc,LeafINV::voltage);//display inverter derived dc link voltage on web interface
+        Param::SetInt(Param::INVudc,(LeafINV::voltage/2));//display inverter derived dc link voltage on web interface
     }
 
     if(targetVehicle == _vehmodes::BMW_E65)
@@ -127,6 +166,8 @@ static void Ms100Task(void)
     }
     int16_t IsaTemp=ISA::Temperature;
     Param::SetInt(Param::tmpaux,IsaTemp);
+
+    chargerClass::Send100msMessages();
 }
 
 
@@ -158,7 +199,7 @@ static void Ms10Task(void)
     if(targetInverter == _invmodes::Leaf_Gen1)
     {
         LeafINV::Send10msMessages();//send leaf messages on can1 if we select leaf
-        speed = LeafINV::speed;//set motor rpm on interface
+        speed = LeafINV::speed/2;//set motor rpm on interface
         torquePercent = utils::change(torquePercent, 0, 3040, 0, 2047); //map throttle for Leaf inverter
         LeafINV::SetTorque(Param::Get(Param::dir),torquePercent);//send direction and torque request to inverter
 
@@ -210,14 +251,20 @@ static void Ms10Task(void)
     stt |= udc >= Param::Get(Param::udcsw) ? STAT_NONE : STAT_UDCBELOWUDCSW;
     stt |= udc < Param::Get(Param::udclim) ? STAT_NONE : STAT_UDCLIM;
 
-    if (opmode==MOD_OFF && (Param::GetBool(Param::din_start) || E65Vehicle.getTerminal15()))//on detection of ign on we commence prechage and go to mode precharge
+
+    if (opmode==MOD_OFF && (Param::GetBool(Param::din_start) || E65Vehicle.getTerminal15() || chargeMode))//on detection of ign on or charge mode enable we commence prechage and go to mode precharge
     {
-        DigIo::inv_out.Set();//inverter power on (possibly needed here by leaf inverter)
+      if(chargeMode==false)
+      {
+        DigIo::inv_out.Set();//inverter power on but not if we are in charge mode!
+      }
         DigIo::prec_out.Set();//commence precharge
         opmode = MOD_PRECHARGE;
         Param::SetInt(Param::opmode, opmode);
         oldTime=rtc_get_counter_val();
     }
+
+
 
     if(targetVehicle == _vehmodes::BMW_E65)
     {
@@ -237,6 +284,15 @@ static void Ms10Task(void)
         }
     }
 
+
+
+        if(opmode==MOD_PCHFAIL && chargeMode)
+        {
+        //    opmode = MOD_OFF;
+        //    Param::SetInt(Param::opmode, opmode);
+        }
+
+
     /* switch on DC switch if
      * - throttle is not pressed
      * - start pin is high
@@ -251,10 +307,19 @@ static void Ms10Task(void)
             newMode = MOD_RUN;
         }
 
+         if (chargeMode)
+        {
+            newMode = MOD_CHARGE;
+        }
+
+
         stt |= opmode != MOD_OFF ? STAT_NONE : STAT_WAITSTART;
     }
 
     Param::SetInt(Param::status, stt);
+
+    if(opmode == MOD_RUN) //only shut off via ign command if not in charge mode
+    {
 
     if(targetVehicle == _vehmodes::BMW_E65)
     {
@@ -265,13 +330,14 @@ static void Ms10Task(void)
         //switch to off mode via igntition digital input. To be implemented in release HW
         if(!Param::GetBool(Param::din_forward)) opmode = MOD_OFF; //using the forward input to test in the E46
     }
+    }
+
+  if(opmode == MOD_CHARGE && !chargeMode) opmode = MOD_OFF; //if we are in charge mode and commdn charge mode off then go to mode off.
 
     if (newMode != MOD_OFF)
     {
         DigIo::dcsw_out.Set();
         DigIo::err_out.Clear();
-        // DigIo::prec_out.Clear();
-       // DigIo::inv_out.Set();//inverter power on
         Param::SetInt(Param::opmode, newMode);
         ErrorMessage::UnpostAll();
 
@@ -329,6 +395,8 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
     Param::SetInt(Param::inv, targetInverter);//Confirm mode
     targetVehicle=static_cast<_vehmodes>(Param::GetInt(Param::Vehicle));//get vehicle setting from menu
     Param::SetInt(Param::veh, targetVehicle);//Confirm mode
+    targetCharger=static_cast<_chgmodes>(Param::GetInt(Param::chargemode));//get charger setting from menu
+    Param::SetInt(Param::Charger, targetCharger);//Confirm mode
     Lexus_Gear=Param::GetInt(Param::GEAR);//get gear selection from Menu
     Lexus_Oil=Param::GetInt(Param::OilPump);//get oil pump duty % selection from Menu
     maxRevs=Param::GetInt(Param::revlim);//get revlimiter value
@@ -363,6 +431,9 @@ static void CanCallback(uint32_t id, uint32_t data[2]) //This is where we go whe
         break;
     case 0x528:
         ISA::handle528(data);//ISA CAN MESSAGE
+        break;
+    case 0x108:
+        chargerClass::handle108(data);// HV request from an external charger
         break;
     default:
         if (targetInverter == _invmodes::Leaf_Gen1)
@@ -435,6 +506,7 @@ extern "C" int main(void)
     c2.SetReceiveCallback(CanCallback);
     c2.RegisterUserMessage(0x130);//E65 CAS
     c2.RegisterUserMessage(0x192);//E65 Shifter
+    c2.RegisterUserMessage(0x108);//Charger HV request
 
     can = &c; // FIXME: What about CAN2?
 
