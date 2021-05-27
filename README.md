@@ -16,6 +16,16 @@ Video on progress : https://vimeo.com/506480876
 - BMW E39 CAN support
 - BMW E65 CAN Support
 
+Update : 14/05/21
+New brach GD_Zombie created to support the GD32F107VC version 
+
+Enclosure, header and connector : https://www.aliexpress.com/item/32857771975.html?spm=a2g0s.9042311.0.0.39f24c4dWOmGPE
+
+Enclosure, header with wiring harness : https://www.aliexpress.com/item/4001213569338.html?spm=a2g0o.cart.0.0.366c3c00qhBvGO&mp=1
+
+Full release of design files and boards for sale soon on the evbmw webshop.
+
+
 # Compiling
 You will need the arm-none-eabi toolchain: https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 The only external depedencies are libopencm3 and libopeninv. You can download and build this dependency by typing

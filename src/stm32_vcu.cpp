@@ -33,7 +33,8 @@
 HWREV hwRev; // Hardware variant of board we are running on
 static Stm32Scheduler* scheduler;
 static bool chargeMode = false;
-static Can* can;
+static Can* can1;
+static Can* can2;
 static _invmodes targetInverter;
 static _vehmodes targetVehicle;
 static _chgmodes targetCharger;
@@ -162,7 +163,7 @@ static void Ms100Task(void)
     if (!chargeMode && rtc_get_counter_val() > 100)
     {
         if (Param::GetInt(Param::canperiod) == CAN_PERIOD_100MS)
-            can->SendAll();
+            can2->SendAll();
     }
     int16_t IsaTemp=ISA::Temperature;
     Param::SetInt(Param::tmpaux,IsaTemp);
@@ -181,9 +182,10 @@ static void Ms10Task(void)
     int stt = STAT_NONE;
     ErrorMessage::SetTime(rtc_get_counter_val());
 
+
     if (Param::GetInt(Param::opmode) == MOD_RUN)
     {
-        torquePercent = utils::ProcessThrottle(previousSpeed, can);
+        torquePercent = utils::ProcessThrottle(previousSpeed, can1);
         FP_TOINT(torquePercent);
         if(ABS(previousSpeed)>=maxRevs) torquePercent=0;//Hard cut limiter:)
     }
@@ -220,7 +222,7 @@ static void Ms10Task(void)
     }
 
     Param::SetInt(Param::speed, speed);
-    utils::GetDigInputs(can);
+    utils::GetDigInputs(can2);
 
     // Send CAN 2 (Vehicle CAN) messages if necessary for vehicle integration.
     if (targetVehicle == BMW_E39)
@@ -328,7 +330,7 @@ static void Ms10Task(void)
     else
     {
         //switch to off mode via igntition digital input. To be implemented in release HW
-        if(!Param::GetBool(Param::din_forward)) opmode = MOD_OFF; //using the forward input to test in the E46
+        if(!Param::GetBool(Param::T15Digi)) opmode = MOD_OFF;
     }
     }
 
@@ -337,7 +339,7 @@ static void Ms10Task(void)
     if (newMode != MOD_OFF)
     {
         DigIo::dcsw_out.Set();
-        DigIo::err_out.Clear();
+        DigIo::gp_out1.Clear();
         Param::SetInt(Param::opmode, newMode);
         ErrorMessage::UnpostAll();
 
@@ -347,7 +349,7 @@ static void Ms10Task(void)
     if (opmode == MOD_OFF)
     {
         DigIo::dcsw_out.Clear();
-        DigIo::err_out.Clear();
+        DigIo::gp_out1.Clear();
         DigIo::prec_out.Clear();
         DigIo::inv_out.Clear();//inverter power off
         Param::SetInt(Param::opmode, newMode);
@@ -380,7 +382,8 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
 {
     // This function is called when the user changes a parameter
     if (Param::canspeed == paramNum)
-        can->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
+        can1->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
+        can2->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
 
     Throttle::potmin[0] = Param::GetInt(Param::potmin);
     Throttle::potmax[0] = Param::GetInt(Param::potmax);
@@ -406,6 +409,7 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
 
 static void CanCallback(uint32_t id, uint32_t data[2]) //This is where we go when a defined CAN message is received.
 {
+
     switch (id)
     {
     case 0x521:
@@ -477,7 +481,7 @@ extern "C" int main(void)
     clock_setup();
     rtc_setup();
     ConfigureVariantIO();
-    gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON,AFIO_MAPR_USART3_REMAP_PARTIAL_REMAP);//remap usart 3 to PC10 and PC11 for VCU HW
+    gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON,AFIO_MAPR_CAN2_REMAP);
     usart_setup();
     usart2_setup();//TOYOTA HYBRID INVERTER INTERFACE
     nvic_setup();
@@ -486,21 +490,23 @@ extern "C" int main(void)
     parm_Change(Param::PARAM_LAST);
     DigIo::inv_out.Clear();//inverter power off during bootup
 
-    Can c(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));//can1 Inverter / isa shunt.
+    Can c1(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));//can1 Inverter / isa shunt.
     Can c2(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed));//can2 vehicle side.
+    can1 = &c1;
+    can2 = &c2;
 
     // Set up CAN 1 callback and messages to listen for
-    c.SetReceiveCallback(CanCallback);
-    c.RegisterUserMessage(0x1DA);//Leaf inv msg
-    c.RegisterUserMessage(0x55A);//Leaf inv msg
-    c.RegisterUserMessage(0x521);//ISA MSG
-    c.RegisterUserMessage(0x522);//ISA MSG
-    c.RegisterUserMessage(0x523);//ISA MSG
-    c.RegisterUserMessage(0x524);//ISA MSG
-    c.RegisterUserMessage(0x525);//ISA MSG
-    c.RegisterUserMessage(0x526);//ISA MSG
-    c.RegisterUserMessage(0x527);//ISA MSG
-    c.RegisterUserMessage(0x528);//ISA MSG
+    c1.SetReceiveCallback(CanCallback);
+    c1.RegisterUserMessage(0x1DA);//Leaf inv msg
+    c1.RegisterUserMessage(0x55A);//Leaf inv msg
+    c1.RegisterUserMessage(0x521);//ISA MSG
+    c1.RegisterUserMessage(0x522);//ISA MSG
+    c1.RegisterUserMessage(0x523);//ISA MSG
+    c1.RegisterUserMessage(0x524);//ISA MSG
+    c1.RegisterUserMessage(0x525);//ISA MSG
+    c1.RegisterUserMessage(0x526);//ISA MSG
+    c1.RegisterUserMessage(0x527);//ISA MSG
+    c1.RegisterUserMessage(0x528);//ISA MSG
 
     // Set up CAN 2 (Vehicle CAN) callback and messages to listen for.
     c2.SetReceiveCallback(CanCallback);
@@ -508,7 +514,7 @@ extern "C" int main(void)
     c2.RegisterUserMessage(0x192);//E65 Shifter
     c2.RegisterUserMessage(0x108);//Charger HV request
 
-    can = &c; // FIXME: What about CAN2?
+    //can = &c; // FIXME: What about CAN2?
 
     Stm32Scheduler s(TIM3); //We never exit main so it's ok to put it on stack
     scheduler = &s;

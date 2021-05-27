@@ -29,6 +29,7 @@ void utils::GetDigInputs(Can* can)
         ErrorMessage::Post(ERR_CANTIMEOUT);
     }
 
+    Param::SetInt(Param::T15Digi, DigIo::t15_digi.Get());
     Param::SetInt(Param::din_cruise, DigIo::cruise_in.Get() | ((canio & CAN_IO_CRUISE) != 0));
     Param::SetInt(Param::din_start, DigIo::start_in.Get() | ((canio & CAN_IO_START) != 0));
     Param::SetInt(Param::din_brake, DigIo::brake_in.Get() | ((canio & CAN_IO_BRAKE) != 0));
@@ -53,7 +54,7 @@ int utils::GetUserThrottleCommand(Can* can)
         }
         else
         {
-            DigIo::err_out.Set();
+            DigIo::gp_out1.Set();
             utils::PostErrorIfRunning(ERR_CANTIMEOUT);
             return 0;
         }
@@ -69,7 +70,7 @@ int utils::GetUserThrottleCommand(Can* can)
     /* Error light on implausible value */
     if (!Throttle::CheckAndLimitRange(&potval, 0))
     {
-        DigIo::err_out.Set();
+        DigIo::gp_out1.Set();
         utils::PostErrorIfRunning(ERR_THROTTLE1);
         return 0;
     }
@@ -80,7 +81,7 @@ int utils::GetUserThrottleCommand(Can* can)
     {
         if (!Throttle::CheckDualThrottle(&potval, pot2val) || !throt2Res)
         {
-            DigIo::err_out.Set();
+            DigIo::gp_out1.Set();
             utils::PostErrorIfRunning(ERR_THROTTLE1);
             Param::SetInt(Param::potnom, 0);
             return 0;
@@ -248,13 +249,13 @@ s32fp utils::ProcessThrottle(int speed, Can* can)
 
     if (Throttle::TemperatureDerate(Param::Get(Param::tmphs), Param::Get(Param::tmphsmax), finalSpnt))
     {
-        DigIo::err_out.Set();
+        DigIo::gp_out1.Set();
         ErrorMessage::Post(ERR_TMPHSMAX);
     }
 
     if (Throttle::TemperatureDerate(Param::Get(Param::tmpm), Param::Get(Param::tmpmmax), finalSpnt))
     {
-        DigIo::err_out.Set();
+        DigIo::gp_out1.Set();
         ErrorMessage::Post(ERR_TMPMMAX);
     }
 
