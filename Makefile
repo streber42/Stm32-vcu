@@ -47,7 +47,7 @@ vpath %.cpp src/ libopeninv/src/
 OPENOCD_BASE	= /usr
 OPENOCD		= $(OPENOCD_BASE)/bin/openocd
 OPENOCD_SCRIPTS	= $(OPENOCD_BASE)/share/openocd/scripts
-OPENOCD_FLASHER	= $(OPENOCD_SCRIPTS)/interface/parport.cfg
+OPENOCD_FLASHER	= $(OPENOCD_SCRIPTS)/interface/stlink-v2-1.cfg
 OPENOCD_BOARD	= $(OPENOCD_SCRIPTS)/board/olimex_stm32_h103.cfg
 
 # Be silent per default, but 'make V=1' will show all compiler calls.
@@ -99,8 +99,6 @@ clean:
 	$(Q)rm -f $(BINARY).list
 
 flash: images
-	@printf "  FLASH   $(BINARY).bin\n"
-	@# IMPORTANT: Don't use "resume", only "reset" will work correctly!
 	$(Q)$(OPENOCD) -s $(OPENOCD_SCRIPTS) \
 		       -f $(OPENOCD_FLASHER) \
 		       -f $(OPENOCD_BOARD) \
