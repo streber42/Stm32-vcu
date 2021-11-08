@@ -1,3 +1,4 @@
+
 /*
  * This file is part of the tumanako_vc project.
  *
@@ -18,24 +19,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LEAFINV_H
-#define LEAFINV_H
+#ifndef CAN_OI_H
+#define CAN_OI_H
 #include <stdint.h>
 #include "my_fp.h"
 
-
-
-class LeafINV
+class Can_OI
 {
 public:
     static void DecodeCAN(int id, uint32_t data[2]);
-    static void DecodePDM679(uint32_t data[2]);
-    static void DecodePDM390(uint32_t data[2]);
-    static void Send10msMessages();
     static void Send100msMessages();
-    static bool ControlCharge(bool RunCh);
     static int16_t speed;
-    static void SetTorque(int8_t gear, int16_t torque);
+    static void SetThrottle(int8_t gear, int16_t torque);
     static int16_t inv_temp;
     static int16_t motor_temp;
     static bool error;
@@ -43,9 +38,7 @@ public:
 
 
 private:
-    static void nissan_crc(uint8_t *data, uint8_t polynomial);
-    static int8_t fahrenheit_to_celsius(uint16_t fahrenheit);
-    static uint8_t run10ms;
+
     static uint8_t run100ms;
     static uint32_t lastRecv;
 
@@ -55,4 +48,4 @@ private:
     //
 };
 
-#endif // LEAFINV_H
+#endif // CAN_OI_H
