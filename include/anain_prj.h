@@ -16,4 +16,3 @@
    ANA_IN_ENTRY(MG2_Temp,  GPIOC, 5) \
 
 #endif // ANAIN_PRJ_H_INCLUDED
-//uaux cct not in pre release hardware!

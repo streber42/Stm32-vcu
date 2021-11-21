@@ -416,7 +416,7 @@ static void Ms100Task(void)
     if (!chargeMode && rtc_get_counter_val() > 100)
     {
         if (Param::GetInt(Param::canperiod) == CAN_PERIOD_100MS)
-            can2->SendAll();
+            can->SendAll();
     }
     int16_t IsaTemp=ISA::Temperature;
     Param::SetInt(Param::tmpaux,IsaTemp);
@@ -510,7 +510,7 @@ static void Ms10Task(void)
     }
 
     Param::SetInt(Param::speed, speed);
-    utils::GetDigInputs(can2);
+    utils::GetDigInputs(can);
 
     // Send CAN 2 (Vehicle CAN) messages if necessary for vehicle integration.
     if (targetVehicle == BMW_E39)
@@ -715,8 +715,7 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
 {
     // This function is called when the user changes a parameter
     if (Param::canspeed == paramNum)
-        can1->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
-        can2->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
+        can->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
 
     Throttle::potmin[0] = Param::GetInt(Param::potmin);
     Throttle::potmax[0] = Param::GetInt(Param::potmax);
@@ -756,7 +755,6 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
 
 static void CanCallback(uint32_t id, uint32_t data[2]) //This is where we go when a defined CAN message is received.
 {
-
     switch (id)
     {
     case 0x521:
@@ -920,8 +918,6 @@ extern "C" int main(void)
 
     Can c(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));//can1 Inverter / isa shunt/LIM.
     Can c2(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed));//can2 vehicle side.
-    can1 = &c1;
-    can2 = &c2;
 
     // Set up CAN 1 callback and messages to listen for
     c.SetReceiveCallback(CanCallback);
@@ -953,7 +949,7 @@ extern "C" int main(void)
     c2.RegisterUserMessage(0x108);//Charger HV request
     c2.RegisterUserMessage(0x153);//E39/E46 ASC1 message
 
-    //can = &c; // FIXME: What about CAN2?
+    can = &c; // FIXME: What about CAN2?
 
     CANSPI_Initialize();// init the MCP25625 on CAN3
     CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
