@@ -48,3 +48,6 @@ stm32_vcu.bin
 
 # hex output - only keep for releases
 stm32_vcu.hex
+
+.pio
+.vscode
