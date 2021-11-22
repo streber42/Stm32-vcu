@@ -381,9 +381,10 @@ static void Ms1Task(void)
 extern void parm_Change(Param::PARAM_NUM paramNum)
 {
     // This function is called when the user changes a parameter
-    if (Param::canspeed == paramNum)
+    if (Param::canspeed == paramNum) {
         can1->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
         can2->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
+    }
 
     Throttle::potmin[0] = Param::GetInt(Param::potmin);
     Throttle::potmax[0] = Param::GetInt(Param::potmax);
