@@ -114,7 +114,7 @@ void Can_E46::Msg329(uint16_t tempValue)
     Can::GetInterface(0)->Send(0x329, (uint32_t*)bytes,8); //Send on CAN2
 }
 
-void Can_E46::Msg43F(uint8_t gear)
+void Can_E46::Msg43F(int8_t gear)
 {
     //Can bus data packet values to be sent
     uint8_t bytes[8];
