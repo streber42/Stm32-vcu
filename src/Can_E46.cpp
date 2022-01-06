@@ -171,7 +171,7 @@ void Can_E46::Msg43F(int8_t gear)
     // byte 7 = 0x00 //doesn't do anything to the ike
     bytes[7] = 0xFF;
 
-    Can::GetInterface(1)->Send(0x43F, (uint32_t*)bytes,8); //Send on CAN2
+    Can::GetInterface(0)->Send(0x43F, (uint32_t*)bytes,8); //Send on CAN2
 }
 
 void Can_E46::Msg545()
