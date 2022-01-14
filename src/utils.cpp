@@ -154,6 +154,12 @@ void SelectDirection(_vehmodes targetVehicle, BMW_E65Class E65Vehicle)
             selectedDir = 0;
     }
 
+    if (selectedDir == -1) {
+        DigIo::gp_out2.Set(); // Turn on reverse lights
+    } else {
+        DigIo::gp_out2.Clear(); // Turn off reverse lights
+    }
+
     Param::SetInt(Param::dir, selectedDir);
 }
 

@@ -563,7 +563,7 @@ static void Ms10Task(void)
           //activate inv during precharge if not oi.
       if(targetInverter != _invmodes::OpenI) DigIo::inv_out.Set();//inverter power on but not if we are in charge mode!
       }
-        DigIo::gp_out2.Set();//Negative contactors on
+      //   DigIo::gp_out2.Set();//Negative contactors on
         DigIo::gp_out1.Set();//Coolant pump on
         DigIo::prec_out.Set();//commence precharge
         opmode = MOD_PRECHARGE;
@@ -655,10 +655,11 @@ static void Ms10Task(void)
     {
         DigIo::inv_out.Clear();//inverter power off
         DigIo::dcsw_out.Clear();
-        DigIo::gp_out2.Clear();//Negative contactors off
+      //   DigIo::gp_out2.Clear();//Negative contactors off
         DigIo::gp_out1.Clear();//Coolant pump off
 //        DigIo::err_out.Clear();
         DigIo::prec_out.Clear();
+        Param::SetInt(Param::dir, 0);
         Param::SetInt(Param::opmode, newMode);
         if(targetVehicle == _vehmodes::BMW_E65) E65Vehicle.DashOff();
     }
