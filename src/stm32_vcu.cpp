@@ -37,6 +37,7 @@ static bool chargeMode = false;
 static bool chargeModeDC = false;
 static bool ChgLck = false;
 static Can* can;
+static Can* can2;
 static _invmodes targetInverter;
 static _vehmodes targetVehicle;
 static _chgmodes targetCharger;
@@ -416,7 +417,7 @@ static void Ms100Task(void)
     if (!chargeMode && rtc_get_counter_val() > 100)
     {
         if (Param::GetInt(Param::canperiod) == CAN_PERIOD_100MS)
-            can->SendAll();
+            can2->SendAll();
     }
     int16_t IsaTemp=ISA::Temperature;
     Param::SetInt(Param::tmpaux,IsaTemp);
@@ -949,8 +950,11 @@ extern "C" int main(void)
     c2.RegisterUserMessage(0x192);//E65 Shifter
     c2.RegisterUserMessage(0x108);//Charger HV request
     c2.RegisterUserMessage(0x153);//E39/E46 ASC1 message
+    c2.RegisterUserMessage(0x521);//ISA MSG
+    c2.RegisterUserMessage(0x522);//ISA MSG
 
     can = &c; // FIXME: What about CAN2?
+    can2 = &c2;
 
     CANSPI_Initialize();// init the MCP25625 on CAN3
     CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ

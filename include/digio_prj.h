@@ -20,7 +20,6 @@
     DIG_IO_ENTRY(sw_mode1,     GPIOD, GPIO8, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(lin_wake,     GPIOD, GPIO10, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(lin_nslp,     GPIOD, GPIO11, PinMode::OUTPUT)      \
-    DIG_IO_ENTRY(brk_out,     GPIOC, GPIO5,  PinMode::OUTPUT)      \
     DIG_IO_ENTRY(prec_out,     GPIOC, GPIO6,  PinMode::OUTPUT)      \
     DIG_IO_ENTRY(inv_out,     GPIOA, GPIO8,  PinMode::OUTPUT)      \
     DIG_IO_ENTRY(SL1_out,     GPIOC, GPIO9,  PinMode::OUTPUT)      \

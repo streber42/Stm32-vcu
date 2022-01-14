@@ -254,10 +254,10 @@ s32fp ProcessThrottle(int speed)
 
     Param::SetFlt(Param::potnom, finalSpnt);
 
-    if (finalSpnt < Param::Get(Param::brkout))
-        DigIo::brk_out.Set();
-    else
-        DigIo::brk_out.Clear();
+    // if (finalSpnt < Param::Get(Param::brkout))
+    //     DigIo::brk_out.Set();
+    // else
+    //     DigIo::brk_out.Clear();
 
     return finalSpnt;
 }
