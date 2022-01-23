@@ -4,13 +4,11 @@
 #include "hwdefs.h"
 
 #define DIG_IO_LIST \
-    DIG_IO_ENTRY(cruise_in,   GPIOD, GPIO4,  PinMode::INPUT_FLT)   \
     DIG_IO_ENTRY(HV_req,       GPIOD, GPIO5,  PinMode::INPUT_FLT)   \
     DIG_IO_ENTRY(start_in,    GPIOD, GPIO7,  PinMode::INPUT_FLT)   \
     DIG_IO_ENTRY(brake_in,    GPIOA, GPIO15,  PinMode::INPUT_FLT)   \
     DIG_IO_ENTRY(fwd_in,      GPIOB, GPIO4,  PinMode::INPUT_FLT)   \
     DIG_IO_ENTRY(rev_in,      GPIOB, GPIO3,  PinMode::INPUT_FLT)   \
-    DIG_IO_ENTRY(bms_in,      GPIOC, GPIO3,  PinMode::INPUT_PD)   \
     DIG_IO_ENTRY(dcsw_out,    GPIOC, GPIO7, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(led_out,     GPIOE, GPIO2, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(gp_out1,     GPIOD, GPIO15, PinMode::OUTPUT)      \
