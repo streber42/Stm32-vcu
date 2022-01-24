@@ -30,13 +30,13 @@
 #include "stm32_can.h"
 #include "terminalcommands.h"
 
-static void LoadDefaults(char *arg);
-static void GetAll(char *arg);
-static void PrintList(char *arg);
-static void PrintAtr(char *arg);
-static void Help(char *arg);
-static void PrintSerial(char *arg);
-static void PrintErrors(char *arg);
+static void LoadDefaults(Terminal* t, char *arg);
+static void GetAll(Terminal* t, char *arg);
+static void PrintList(Terminal* t, char *arg);
+static void PrintAtr(Terminal* t, char *arg);
+static void Help(Terminal* t, char *arg);
+static void PrintSerial(Terminal* t, char *arg);
+static void PrintErrors(Terminal* t, char *arg);
 
 extern "C" const TERM_CMD TermCmds[] =
 {
@@ -61,10 +61,11 @@ extern "C" const TERM_CMD TermCmds[] =
     { NULL, NULL }
 };
 
-static void PrintList(char *arg)
+static void PrintList(Terminal* t, char *arg)
 {
     const Param::Attributes *pAtr;
 
+    t = t;
     arg = arg;
 
     printf("Available parameters and values\r\n");
@@ -78,10 +79,11 @@ static void PrintList(char *arg)
     }
 }
 
-static void PrintAtr(char *arg)
+static void PrintAtr(Terminal* t, char *arg)
 {
     const Param::Attributes *pAtr;
 
+    t = t;
     arg = arg;
 
     printf("Parameter attributes\r\n");
@@ -98,17 +100,19 @@ static void PrintAtr(char *arg)
     }
 }
 
-static void LoadDefaults(char *arg)
+static void LoadDefaults(Terminal* t, char *arg)
 {
+    t = t;
     arg = arg;
     Param::LoadDefaults();
     printf("Defaults loaded\r\n");
 }
 
-static void GetAll(char *arg)
+static void GetAll(Terminal* t, char *arg)
 {
     const Param::Attributes *pAtr;
 
+    t = t;
     arg = arg;
 
     for (uint32_t  idx = 0; idx < Param::PARAM_LAST; idx++)
@@ -118,19 +122,22 @@ static void GetAll(char *arg)
     }
 }
 
-static void PrintErrors(char *arg)
+static void PrintErrors(Terminal* t, char *arg)
 {
+    t = t;
     arg = arg;
     ErrorMessage::PrintAllErrors();
 }
 
-static void PrintSerial(char *arg)
+static void PrintSerial(Terminal* t, char *arg)
 {
+    t = t;
     arg = arg;
     printf("%X%X%X\r\n", DESIG_UNIQUE_ID2, DESIG_UNIQUE_ID1, DESIG_UNIQUE_ID0);
 }
 
-static void Help(char *arg)
+static void Help(Terminal* t, char *arg)
 {
+    t = t;
     arg = arg;
 }
