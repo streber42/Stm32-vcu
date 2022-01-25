@@ -6,23 +6,27 @@
 */
 
 #include <stdint.h>
-#include "my_fp.h"
+#include "vehicle.h"
 
 
-class Can_E39
+class Can_E39: public Vehicle
 {
 
 public:
-    static      void DecodeCAN(int id, uint32_t data[2]);
-    static		void Msg316(uint16_t outRPM);
-    static		void Msg329(uint16_t tempValue);
-    static		void Msg545();
+   void Task10Ms();
+   void SetRevCounter(int s) { speed = s; }
+   void SetTemperatureGauge(float temp);
+   void DecodeCAN(int id, uint32_t* data);
+   bool Ready();
+   bool Start();
 
 private:
+   void Msg316();
+   void Msg329();
+   void Msg43F();
+   void Msg545();
 
-
-private:
-
+   uint16_t speed;
 };
 
 #endif /* Can_E39_h */

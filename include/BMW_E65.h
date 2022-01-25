@@ -7,34 +7,37 @@
 */
 
 #include <stdint.h>
-#include "my_fp.h"
+#include "vehicle.h"
+#include "my_math.h"
 
-class BMW_E65Class
+class BMW_E65Class: public Vehicle
 {
-
 public:
-    static		void Tacho(int16_t speed);
-    static		void absdsc(bool Brake_In);
-    static		void GDis();
-    void Cas(int id, uint32_t data[2]);
-    void DashOn();
-    void DashOff();
-    void Gear(int id, uint32_t data[2]);
-    uint8_t getGear();
-    void setGear();
-    bool getTerminal15();
-    void setTerminal15(bool);
-    BMW_E65Class()
-    {
-        Terminal15On = false;
-        dashInit = false;
-        gear = 0;
-    }
+   void Task10Ms();
+   void Task100Ms();
+   void Task200Ms();
+   void SetRevCounter(int speed) { revCounter = ABS(speed); }
+   void SetTemperatureGauge(float temp) { temperature = temp; }
+   void DecodeCAN(int, uint32_t* data);
+   bool Ready() { return terminal15On; }
+   bool Start() { return terminal15On; }
+   bool GetGear(Vehicle::gear& outGear);
+   void DashOff();
+   BMW_E65Class()
+   {
+      terminal15On = false;
+      dashInit = false;
+      gear = PARK;
+   }
 
 private:
-    bool Terminal15On;
-    bool dashInit;
-    uint8_t gear;
+   void SendAbsDscMessages(bool Brake_In);
+
+   bool terminal15On;
+   bool dashInit;
+   Vehicle::gear gear;
+   int revCounter;
+   float temperature;
 };
 
 #endif /* BMW_E65_h */

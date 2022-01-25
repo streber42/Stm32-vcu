@@ -287,7 +287,7 @@ enum _gear
     AUTO = 2
 };
 
-enum _vehmodes
+enum VehicleModes
 {
     BMW_E46 = 0,
     BMW_E65 = 1,

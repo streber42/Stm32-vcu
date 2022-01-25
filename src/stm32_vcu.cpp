@@ -28,7 +28,7 @@ static bool ChgLck = false;
 static Can* can;
 static Can* can2;
 static InvModes targetInverter;
-static _vehmodes targetVehicle;
+static VehicleModes targetVehicle;
 static _chgmodes targetCharger;
 static _interface targetChgint;
 static uint32_t oldTime;
@@ -50,11 +50,14 @@ alarm=0;			// != 0 when alarm is pending
 
 // Instantiate Classes
 static BMW_E65Class E65Vehicle;
+static Can_E39 e39Vehicle;
+static Can_VAG vagVehicle;
 static GS450HClass gs450Inverter;
 static uCAN_MSG rxMessage;
 static LeafINV leafInv;
 static Can_OI openInv;
 static Inverter* selectedInverter = &openInv;
+static Vehicle* selectedVehicle = &e39Vehicle;
 
 static void RunChaDeMo()
 {
@@ -162,7 +165,9 @@ static void Ms200Task(void)
    }
    if(ChgSet==0 && !ChgLck) RunChg=true;//enable from webui if we are not locked out from an auto termination
    if(ChgSet==1) RunChg=false;//disable from webui
-   if(targetVehicle == _vehmodes::BMW_E65) BMW_E65Class::GDis();//needs to be every 200ms
+
+   selectedVehicle->Task200Ms();
+
    if(targetCharger == _chgmodes::Volt_Ampera)
    {
       //to be done
@@ -312,29 +317,15 @@ static void SendCharger100MsMessages(int opmode)
 
 static void SendVehicle100MsMessages()
 {
-   if(targetVehicle == _vehmodes::BMW_E65)
+   if (selectedVehicle->Ready())
    {
-      if (E65Vehicle.getTerminal15())
-      {
-         E65Vehicle.DashOn();
-         Param::SetInt(Param::T15Stat,1);
-      }
-      else
-      {
-         Param::SetInt(Param::T15Stat,0);
-      }
+      selectedVehicle->Task100Ms();
+      Param::SetInt(Param::T15Stat,1);
    }
    else
    {
-      E65Vehicle.DashOff();
+      Param::SetInt(Param::T15Stat,0);
    }
-
-   if(targetVehicle != _vehmodes::BMW_E65) //if not E65 then T15 via digital input.
-   {
-      Param::SetInt(Param::T15Stat,DigIo::t15_digi.Get());
-   }
-
-   if(targetVehicle==VAG) Can_VAG::SendVAG100msMessage();
 }
 
 static void Ms100Task(void)
@@ -345,7 +336,7 @@ static void Ms100Task(void)
    Param::SetFloat(Param::cpuload, cpuLoad / 10);
    Param::SetInt(Param::lasterr, ErrorMessage::GetLastError());
    int opmode = Param::GetInt(Param::opmode);
-   utils::SelectDirection(targetVehicle, E65Vehicle);
+   utils::SelectDirection(selectedVehicle);
    utils::ProcessUdc(oldTime, GetInt(Param::speed));
    utils::CalcSOC();
 
@@ -428,9 +419,9 @@ static void Ms10Task(void)
       utils::displayThrottle();//just displays pot and pot2 when not in run mode to allow throttle cal
    }
 
-   if (opmode != MOD_OFF)  //send leaf messages only when not in off mode.
+   if (opmode != MOD_OFF)  //send messages only when not in off mode.
    {
-      selectedInverter->Task10Ms(); //send leaf messages on can1 if we select leaf
+      selectedInverter->Task10Ms();
       speed = selectedInverter->GetMotorSpeed(); //set motor rpm on interface
       selectedInverter->SetTorque(torquePercent);//send direction and torque request to inverter
    }
@@ -438,40 +429,11 @@ static void Ms10Task(void)
    Param::SetInt(Param::speed, speed);
    utils::GetDigInputs(can);
 
+   selectedVehicle->SetRevCounter(speed);
+   selectedVehicle->SetTemperatureGauge(Param::GetFloat(Param::tmphs));
+
    // Send CAN 2 (Vehicle CAN) messages if necessary for vehicle integration.
-   if (targetVehicle == BMW_E39)
-   {
-      uint16_t tempGauge = utils::change(Param::GetInt(Param::tmphs),15,80,88,254); //Map to e39 temp gauge
-      //Messages required for E39
-      Can_E39::Msg316(speed);//send rpm to e39 dash
-      Can_E39::Msg329(tempGauge);//send heatsink temp to E39 dash temp gauge
-      Can_E39::Msg545();
-   }
-   else if (targetVehicle == BMW_E46)
-   {
-      uint16_t tempGauge = utils::change(Param::GetInt(Param::tmphs),15,80,88,254); //Map to e46 temp gauge
-      //Messages required for E46
-      Can_E46::Msg316(speed);//send rpm to e46 dash
-      Can_E46::Msg329(tempGauge);//send heatsink temp to E64 dash temp gauge
-      Can_E46::Msg43F(Param::GetInt(Param::dir));//set the gear indicator on the dash
-      Can_E46::Msg545();
-   }
-   else if (targetVehicle == _vehmodes::BMW_E65)
-   {
-      BMW_E65Class::absdsc(Param::Get(Param::din_brake));
-      if(E65Vehicle.getTerminal15())
-         BMW_E65Class::Tacho(Param::GetInt(Param::speed));//only send tach message if we are starting
-   }
-   else if (targetVehicle == VAG)
-   {
-      Can_VAG::SendVAG10msMessage(Param::GetInt(Param::speed));
-   }
-
-   else if (targetVehicle == VAG)
-   {
-      Can_VAG::SendVAG10msMessage(Param::GetInt(Param::speed));
-   }
-
+   selectedVehicle->Task10Ms();
    //////////////////////////////////////////////////
    //            MODE CONTROL SECTION              //
    //////////////////////////////////////////////////
@@ -480,7 +442,7 @@ static void Ms10Task(void)
    stt |= udc >= Param::GetFloat(Param::udcsw) ? STAT_NONE : STAT_UDCBELOWUDCSW;
    stt |= udc < Param::GetFloat(Param::udclim) ? STAT_NONE : STAT_UDCLIM;
 
-   if (opmode==MOD_OFF && (Param::GetBool(Param::din_start) || E65Vehicle.getTerminal15() || chargeMode))//on detection of ign on or charge mode enable we commence prechage and go to mode precharge
+   if (opmode==MOD_OFF && (Param::GetBool(Param::din_start) || selectedVehicle->Start() || chargeMode))//on detection of ign on or charge mode enable we commence prechage and go to mode precharge
    {
       if(chargeMode==false)
       {
@@ -496,21 +458,10 @@ static void Ms10Task(void)
       oldTime=rtc_get_counter_val();
    }
 
-   if(targetVehicle == _vehmodes::BMW_E65)
+   if(opmode==MOD_PCHFAIL && !selectedVehicle->Start())//use start to reset
    {
-      if(opmode==MOD_PCHFAIL && E65Vehicle.getTerminal15()==false)//use T15 status to reset
-      {
-         opmode = MOD_OFF;
-         Param::SetInt(Param::opmode, opmode);
-      }
-   }
-   else
-   {
-      if(opmode==MOD_PCHFAIL && !Param::GetBool(Param::din_start)) //use start input to reset.
-      {
-         opmode = MOD_OFF;
-         Param::SetInt(Param::opmode, opmode);
-      }
+      opmode = MOD_OFF;
+      Param::SetInt(Param::opmode, opmode);
    }
 
    if(opmode==MOD_PCHFAIL && chargeMode)
@@ -528,7 +479,7 @@ static void Ms10Task(void)
     */
    if ((stt & (STAT_POTPRESSED | STAT_UDCBELOWUDCSW | STAT_UDCLIM)) == STAT_NONE)
    {
-      if (Param::GetBool(Param::din_start) || E65Vehicle.getTerminal15())
+      if (selectedVehicle->Start())
       {
          newMode = MOD_RUN;
       }
@@ -546,15 +497,7 @@ static void Ms10Task(void)
    if(opmode == MOD_RUN) //only shut off via ign command if not in charge mode
    {
       if(targetInverter == InvModes::OpenI) DigIo::inv_out.Set();//inverter power on in run only if openi.
-      if(targetVehicle == _vehmodes::BMW_E65)
-      {
-         if(!E65Vehicle.getTerminal15()) opmode = MOD_OFF; //switch to off mode via CAS command in an E65
-      }
-      else
-      {
-         //switch to off mode via igntition digital input.
-         if(!Param::GetBool(Param::T15Stat)) opmode = MOD_OFF;
-      }
+      if(!selectedVehicle->Ready()) opmode = MOD_OFF; //switch to off mode via CAS command in an E65
    }
 
    if(opmode == MOD_CHARGE && !chargeMode) opmode = MOD_OFF; //if we are in charge mode and commdn charge mode off then go to mode off.
@@ -574,7 +517,7 @@ static void Ms10Task(void)
       DigIo::gp_out1.Clear();//Coolant pump off
       DigIo::prec_out.Clear();
       Param::SetInt(Param::opmode, newMode);
-      if(targetVehicle == _vehmodes::BMW_E65) E65Vehicle.DashOff();
+      selectedVehicle->DashOff();
    }
 
    //Cabin heat control
@@ -601,6 +544,7 @@ static void Ms10Task(void)
 static void Ms1Task(void)
 {
    selectedInverter->Task1Ms();
+   selectedVehicle->Task1Ms();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -617,21 +561,39 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
 
       switch (Param::GetInt(Param::Inverter))
       {
-      case InvModes::Leaf_Gen1:
-         selectedInverter = &leafInv;
-         break;
-      case InvModes::GS450H:
-         selectedInverter = &gs450Inverter;
-         gs450Inverter.SetGS450H();
-         break;
-      case InvModes::Prius_Gen3:
-         selectedInverter = &gs450Inverter;
-         gs450Inverter.SetPrius();
-         break;
-      default: //default to OpenI, does the least damage ;)
-      case InvModes::OpenI:
-         selectedInverter = &openInv;
-         break;
+         case InvModes::Leaf_Gen1:
+            selectedInverter = &leafInv;
+            break;
+         case InvModes::GS450H:
+            selectedInverter = &gs450Inverter;
+            gs450Inverter.SetGS450H();
+            break;
+         case InvModes::Prius_Gen3:
+            selectedInverter = &gs450Inverter;
+            gs450Inverter.SetPrius();
+            break;
+         default: //default to OpenI, does the least damage ;)
+         case InvModes::OpenI:
+            selectedInverter = &openInv;
+            break;
+      }
+   }
+   else if (Param::Vehicle == paramNum)
+   {
+      switch (Param::GetInt(Param::Vehicle))
+      {
+         case VehicleModes::BMW_E65:
+            selectedVehicle = &E65Vehicle;
+            break;
+         case VehicleModes::BMW_E46:
+            selectedVehicle = &e39Vehicle;
+            break;
+         case VehicleModes::BMW_E39:
+            selectedVehicle = &e39Vehicle;
+            break;
+         case VehicleModes::VAG:
+            selectedVehicle = &vagVehicle;
+            break;
       }
    }
    else if (Param::Gear == paramNum)
@@ -644,6 +606,7 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
    }
 
    selectedInverter->SetCanInterface(can);
+   selectedVehicle->SetCanInterface(can2);
    Throttle::potmin[0] = Param::GetInt(Param::potmin);
    Throttle::potmax[0] = Param::GetInt(Param::potmax);
    Throttle::potmin[1] = Param::GetInt(Param::pot2min);
@@ -660,10 +623,10 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
    Throttle::regenRamp = 1.0f; //TODO: make parameter
    targetInverter = static_cast<InvModes>(Param::GetInt(Param::Inverter));//get inverter setting from menu
    Param::SetInt(Param::inv, targetInverter);//Confirm mode
-   targetVehicle=static_cast<_vehmodes>(Param::GetInt(Param::Vehicle));//get vehicle setting from menu
+   targetVehicle = static_cast<VehicleModes>(Param::GetInt(Param::Vehicle));//get vehicle setting from menu
    Param::SetInt(Param::veh, targetVehicle);//Confirm mode
-   targetCharger=static_cast<_chgmodes>(Param::GetInt(Param::chargemodes));//get charger setting from menu
-   targetChgint=static_cast<_interface>(Param::GetInt(Param::interface));//get interface setting from menu
+   targetCharger = static_cast<_chgmodes>(Param::GetInt(Param::chargemodes));//get charger setting from menu
+   targetChgint = static_cast<_interface>(Param::GetInt(Param::interface));//get interface setting from menu
    Param::SetInt(Param::Charger, targetCharger);//Confirm mode
    CabHeater=Param::GetInt(Param::Heater);//get cabin heater type
    CabHeater_ctrl=Param::GetInt(Param::Control);//get cabin heater control mode
@@ -731,19 +694,7 @@ static void CanCallback(uint32_t id, uint32_t data[2]) //This is where we go whe
 
    default:
       selectedInverter->DecodeCAN(id, data);
-
-      if(targetVehicle == _vehmodes::BMW_E65)
-      {
-         // process BMW E65 CAS (Conditional Access System) return messages
-         E65Vehicle.Cas(id, data);
-         // process BMW E65 CAN Gear Stalk messages
-         E65Vehicle.Gear(id, data);
-      }
-
-      if(targetVehicle == _vehmodes::BMW_E39)
-      {
-         Can_E39::DecodeCAN(id, data);
-      }
+      selectedVehicle->DecodeCAN(id, data);
 
       break;
    }
@@ -870,7 +821,7 @@ extern "C" int main(void)
    c2.RegisterUserMessage(0x521);//ISA MSG
    c2.RegisterUserMessage(0x522);//ISA MSG
 
-   can = &c; // FIXME: What about CAN2?
+   can = &c;
    can2 = &c2;
 
    CANSPI_Initialize();// init the MCP25625 on CAN3

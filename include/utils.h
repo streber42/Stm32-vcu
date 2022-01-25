@@ -12,6 +12,7 @@
 #include "anain.h"
 #include "throttle.h"
 #include "isa_shunt.h"
+#include "vehicle.h"
 
 namespace utils
 {
@@ -22,7 +23,7 @@ namespace utils
     void CalcSOC();
     void GetDigInputs(Can*);
     void PostErrorIfRunning(ERROR_MESSAGE_NUM);
-    void SelectDirection(_vehmodes, BMW_E65Class);
+    void SelectDirection(Vehicle*);
     void displayThrottle();
 }
 

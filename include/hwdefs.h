@@ -2,7 +2,8 @@
 #define HWDEFS_H_INCLUDED
 
 
-//Common for any config
+//For testing on STM32-P107 prototyping board, uncomment the following line
+#define TEST_P107
 
 //Maximum value for over current limit timer
 #define GAUGEMAX 4096
@@ -11,7 +12,7 @@
 #define MIN_PWM_DIGITS 11
 #define PERIPH_CLK      ((uint32_t)36000000)
 
-#define RCC_CLOCK_SETUP rcc_clock_setup_in_hse_8mhz_out_72mhz
+#define RCC_CLOCK_SETUP rcc_clock_setup_in_hse_25mhz_out_72mhz
 
 #define PWM_TIMER     TIM1
 #define PWM_TIMRST    RST_TIM1
