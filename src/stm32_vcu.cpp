@@ -356,7 +356,7 @@ static void Ms100Task(void)
    if (!chargeMode && rtc_get_counter_val() > 100)
    {
       if (Param::GetInt(Param::canperiod) == CAN_PERIOD_100MS)
-         can->SendAll();
+         can2->SendAll();
    }
    int16_t IsaTemp=ISA::Temperature;
    Param::SetInt(Param::tmpaux,IsaTemp);
@@ -453,6 +453,7 @@ static void Ms10Task(void)
       //Messages required for E46
       Can_E46::Msg316(speed);//send rpm to e46 dash
       Can_E46::Msg329(tempGauge);//send heatsink temp to E64 dash temp gauge
+      Can_E46::Msg43F(Param::GetInt(Param::dir));//set the gear indicator on the dash
       Can_E46::Msg545();
    }
    else if (targetVehicle == _vehmodes::BMW_E65)
