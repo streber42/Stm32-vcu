@@ -336,7 +336,7 @@ static void Ms100Task(void)
    Param::SetFloat(Param::cpuload, cpuLoad / 10);
    Param::SetInt(Param::lasterr, ErrorMessage::GetLastError());
    int opmode = Param::GetInt(Param::opmode);
-   utils::SelectDirection(selectedVehicle);
+   utils::SelectDirection(selectedVehicle); 
    utils::ProcessUdc(oldTime, GetInt(Param::speed));
    utils::CalcSOC();
 
@@ -513,9 +513,10 @@ static void Ms10Task(void)
    {
       DigIo::inv_out.Clear();//inverter power off
       DigIo::dcsw_out.Clear();
-      DigIo::gp_out2.Clear();//Negative contactors off
+    //   DigIo::gp_out2.Clear();//Negative contactors off
       DigIo::gp_out1.Clear();//Coolant pump off
       DigIo::prec_out.Clear();
+      Param::SetInt(Param::dir, 0);
       Param::SetInt(Param::opmode, newMode);
       selectedVehicle->DashOff();
    }
@@ -605,8 +606,8 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
       gs450Inverter.SetOil(Param::GetInt(Param::OilPump));
    }
 
-   selectedInverter->SetCanInterface(can);
-   selectedVehicle->SetCanInterface(can2);
+   selectedInverter->SetCanInterface(can2);
+   selectedVehicle->SetCanInterface(can);
    Throttle::potmin[0] = Param::GetInt(Param::potmin);
    Throttle::potmax[0] = Param::GetInt(Param::potmax);
    Throttle::potmin[1] = Param::GetInt(Param::pot2min);

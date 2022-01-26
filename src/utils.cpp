@@ -153,12 +153,6 @@ void SelectDirection(Vehicle* selectedVehicle)
             userDirSelection = -1 * dirSign;
       }
 
-    if (selectedDir == -1) {
-        DigIo::gp_out2.Set(); // Turn on reverse lights
-    } else {
-        DigIo::gp_out2.Clear(); // Turn off reverse lights
-    }
-
       /* Only change direction when below certain motor speed */
 //   if ((int)Encoder::GetSpeed() < Param::GetInt(Param::dirchrpm))
       selectedDir = userDirSelection;
@@ -167,6 +161,12 @@ void SelectDirection(Vehicle* selectedVehicle)
       if (selectedDir != userDirSelection)
          selectedDir = 0;
    }
+
+    if (selectedDir == -1) {
+        DigIo::gp_out2.Set(); // Turn on reverse lights
+    } else {
+        DigIo::gp_out2.Clear(); // Turn off reverse lights
+    }
 
    Param::SetInt(Param::dir, selectedDir);
 }
