@@ -786,7 +786,7 @@ extern "C" int main(void)
    DigIo::inv_out.Clear();//inverter power off during bootup
    DigIo::mcp_sby.Clear();//enable can3
 
-   Terminal t(USART3, TermCmds, true);
+   Terminal t(USART3, TermCmds, false);
    Can c(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed), remapCan1);//can1 Inverter / isa shunt/LIM.
    Can c2(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed), true);//can2 vehicle side.
 
@@ -825,8 +825,8 @@ extern "C" int main(void)
    can = &c;
    can2 = &c2;
 
-   CANSPI_Initialize();// init the MCP25625 on CAN3
-   CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
+//    CANSPI_Initialize();// init the MCP25625 on CAN3
+//    CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
 
    Stm32Scheduler s(TIM3); //We never exit main so it's ok to put it on stack
    scheduler = &s;
