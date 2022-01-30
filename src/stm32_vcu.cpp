@@ -834,7 +834,7 @@ extern "C" int main(void)
    DigIo::inv_out.Clear();//inverter power off during bootup
    DigIo::mcp_sby.Clear();//enable can3
 
-   Terminal t(USART3, TermCmds, true);
+   Terminal t(USART3, TermCmds, false);
    Can c(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed), remapCan1);//can1 Inverter / isa shunt/LIM.
    Can c2(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed), true);//can2 vehicle side.
 
