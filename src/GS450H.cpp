@@ -142,6 +142,7 @@ void GS450HClass::CalcHTMChecksum(uint16_t len)
 void GS450HClass::Task1Ms()
 {
    uint8_t speedSum2;
+   int dir = Param::GetInt(Param::dir);
 
    switch(htm_state)
    {
@@ -197,9 +198,9 @@ void GS450HClass::Task1Ms()
       break;
    case 4:
       // -3500 (reverse) to 3500 (forward)
-      if(gear==0) mg2_torque=0;//Neutral
-      if(gear==32) mg2_torque=this->scaledTorqueTarget;//Drive
-      if(gear==-32) mg2_torque=this->scaledTorqueTarget*-1;//Reverse
+      if(dir==0) mg2_torque=9;//Neutral
+      if(dir==1) mg2_torque=this->scaledTorqueTarget;//Drive
+      if(dir==-1) mg2_torque=this->scaledTorqueTarget*-1;//Reverse
 
       mg1_torque=((mg2_torque*5)/4);
       if (scaledTorqueTarget < 0) mg1_torque=0; //no mg1 torque in reverse.
@@ -311,12 +312,12 @@ void GS450HClass::Task1Ms()
       break;
    case 9:
       // -3500 (reverse) to 3500 (forward)
-      if(gear==0) mg2_torque=0;//Neutral
-      if(gear==32) mg2_torque=this->scaledTorqueTarget;//Drive
-      if(gear==-32) mg2_torque=this->scaledTorqueTarget*-1;//Reverse
+      if(dir==0) mg2_torque=0;//Neutral
+      if(dir==32) mg2_torque=this->scaledTorqueTarget;//Drive
+      if(dir==-32) mg2_torque=this->scaledTorqueTarget*-1;//Reverse
 
       mg1_torque=((mg2_torque*5)/4);
-      if(gear==-1) mg1_torque=0; //no mg1 torque in reverse.
+      if(dir==-1) mg1_torque=0; //no mg1 torque in reverse.
       Param::SetInt(Param::torque,mg2_torque);//post processed final torue value sent to inv to web interface
 
       //speed feedback
@@ -342,7 +343,7 @@ void GS450HClass::Task1Ms()
       htm_data[30]=(mg2_torque) & 0xFF; //positive is forward
       htm_data[31]=((mg2_torque)>>8) & 0xFF;
 
-      if(gear==1)
+      if(dir==1)
       {
          //forward direction these bytes should match
          htm_data[26]=htm_data[30];
@@ -351,7 +352,7 @@ void GS450HClass::Task1Ms()
          htm_data[29]=((mg2_torque/2)>>8) & 0xFF;
       }
 
-      if(gear==-1)
+      if(dir==-1)
       {
          //reverse direction these bytes should match
          htm_data[28]=htm_data[30];
