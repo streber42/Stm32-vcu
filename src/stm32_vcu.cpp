@@ -19,6 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "stm32_vcu.h"
+#include <libopencm3/cm3/scb.h>
 
 HWREV hwRev; // Hardware variant of board we are running on
 static Stm32Scheduler* scheduler;
@@ -127,6 +128,9 @@ static void Ms200Task(void)
    Param::SetInt(Param::Sec,seconds);
    Param::SetInt(Param::ChgT,ChgDur_tmp);
 
+   if (DigIo::gp_12Vin.Get()) {
+      scb_reset_system();
+   }
    if(ChgSet == 2 && !ChgLck)
    {
       //if in timer mode and not locked out from a previous full charge.
