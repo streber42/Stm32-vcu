@@ -19,6 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "stm32_vcu.h"
+#include <libopencm3/cm3/scb.h>
 
 #define RMS_SAMPLES 256
 #define SQRT2OV1 0.707106781187
@@ -148,6 +149,9 @@ static void Ms200Task(void)
     Param::SetInt(Param::Min,minutes);
     Param::SetInt(Param::Sec,seconds);
     Param::SetInt(Param::ChgT,ChgDur_tmp);
+   if (DigIo::gp_12Vin.Get()) {
+      scb_reset_system();
+   }
     if(ChgSet==2 && !ChgLck){ //if in timer mode and not locked out from a previous full charge.
         if(opmode!=MOD_CHARGE)
             {
