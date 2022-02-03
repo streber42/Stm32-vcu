@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define VER 1.00.A
+#define VER GIT_BRANCH_GIT_HASH_COMPILE_TIME
 
 
 /* Entries must be ordered as follows:

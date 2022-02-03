@@ -28,11 +28,15 @@ OBJCOPY		= $(PREFIX)-objcopy
 OBJDUMP		= $(PREFIX)-objdump
 MKDIR_P     = mkdir -p
 TERMINAL_DEBUG ?= 0
+GIT_HASH=`git rev-parse HEAD`
+COMPILE_TIME=`date -u +'%Y-%m-%d %H:%M:%S UTC'`
+GIT_BRANCH=`git branch | grep "^\*" | sed 's/^..//'`
+export VERSION_FLAGS=-DGIT_HASH="\"$(GIT_HASH)\"" -DCOMPILE_TIME="\"$(COMPILE_TIME)\"" -DGIT_BRANCH="\"$(GIT_BRANCH)\""
 CFLAGS		= -Os -Wall -Wextra -Werror -Ilibopeninv/include -Iinclude/ -Ilibopencm3/include \
-             -fno-common -fno-builtin -pedantic -DSTM32F1 -DT_DEBUG=$(TERMINAL_DEBUG)  \
+             -fno-common -fno-builtin -pedantic -DSTM32F1 -DT_DEBUG=$(TERMINAL_DEBUG)  $(VERSION_FLAGS) \
 				 -mcpu=cortex-m3 -mthumb -std=gnu99 -ffunction-sections -fdata-sections -ggdb3
 CPPFLAGS    = -Os -Wall -Wextra -Werror -Ilibopeninv/include -Iinclude/ -Ilibopencm3/include \
-            -fno-common -std=c++17 -pedantic -DSTM32F1 -DT_DEBUG=$(TERMINAL_DEBUG)  \
+            -fno-common -std=c++17 -pedantic -DSTM32F1 -DT_DEBUG=$(TERMINAL_DEBUG) $(VERSION_FLAGS) \
 		 -ffunction-sections -fdata-sections -fno-builtin -fno-rtti -fno-exceptions \
 		 -fno-unwind-tables -mcpu=cortex-m3 -mthumb -ggdb3
 LDSCRIPT	= $(BINARY).ld
@@ -49,6 +53,7 @@ OPENOCD		= $(OPENOCD_BASE)/bin/openocd
 OPENOCD_SCRIPTS	= $(OPENOCD_BASE)/share/openocd/scripts
 OPENOCD_FLASHER	= $(OPENOCD_SCRIPTS)/interface/stlink-v2.cfg
 OPENOCD_BOARD	= $(OPENOCD_SCRIPTS)/board/olimex_stm32_h103.cfg
+
 
 # Be silent per default, but 'make V=1' will show all compiler calls.
 ifneq ($(V),1)
