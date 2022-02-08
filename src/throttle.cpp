@@ -28,18 +28,15 @@ s32fp Throttle::brknom;
 s32fp Throttle::brknompedal;
 s32fp Throttle::brkmax;
 s32fp Throttle::brkcruise;
+s32fp Throttle::throtmax;
+s32fp Throttle::throtmin;
 int Throttle::idleSpeed;
 int Throttle::cruiseSpeed;
 s32fp Throttle::speedkp;
 int Throttle::speedflt;
-int Throttle::speedFiltered;
 s32fp Throttle::idleThrotLim;
-s32fp Throttle::potnomFiltered;
-s32fp Throttle::throtmax;
-s32fp Throttle::throtmin;
 s32fp Throttle::regenRamp;
 s32fp Throttle::throttleRamp;
-s32fp Throttle::throttleRamped;
 int Throttle::bmslimhigh;
 int Throttle::bmslimlow;
 s32fp Throttle::udcmin;
@@ -48,23 +45,27 @@ s32fp Throttle::idcmin;
 s32fp Throttle::idcmax;
 s32fp Throttle::fmax;
 
+int Throttle::speedFiltered;
+s32fp Throttle::potnomFiltered;
+s32fp Throttle::throttleRamped;
+
 bool Throttle::CheckAndLimitRange(int* potval, int potIdx)
 {
-    int potMin = potmax[potIdx] > potmin[potIdx] ? potmin[potIdx] : potmax[potIdx];
-    int potMax = potmax[potIdx] > potmin[potIdx] ? potmax[potIdx] : potmin[potIdx];
+    int potMin_local = Throttle::potmax[potIdx] > Throttle::potmin[potIdx] ? Throttle::potmin[potIdx] : Throttle::potmax[potIdx];
+    int potMax_local = Throttle::potmax[potIdx] > Throttle::potmin[potIdx] ? Throttle::potmax[potIdx] : Throttle::potmin[potIdx];
 
-    if (((*potval + POT_SLACK) < potMin) || (*potval > (potMax + POT_SLACK)))
+    if (((*potval + POT_SLACK) < potMin_local) || (*potval > (potMax_local + POT_SLACK)))
     {
-        *potval = potMin - 1;
+        *potval = potMin_local - 1;
         return false;
     }
-    else if (*potval < potMin)
+    else if (*potval < potMin_local)
     {
-        *potval = potMin - 1;
+        *potval = potMin_local - 1;
     }
-    else if (*potval > potMax)
+    else if (*potval > potMax_local)
     {
-        *potval = potMax;
+        *potval = potMax_local;
     }
 
     return true;
@@ -139,15 +140,16 @@ s32fp Throttle::CalcThrottle(int potval, int pot2val, bool brkpedal)
 
 s32fp Throttle::RampThrottle(s32fp potnom)
 {
-    // min(20, 100)
-    // max(20, -100)
+    // min(640, 3200)
+    // max(640, -3200)
     potnom = MIN(potnom, throtmax);
     potnom = MAX(potnom, throtmin);
-     // 20 >= 0
+     // 640 >= 0
     if (potnom >= throttleRamped)
     {
     //((potnom < throttleRamped || (throttleRamped + throttleRamp) > potnom) ? potnom : throttleRamped + throttleRamp)
     // 20 < 0 || (0 + 100) > 20 ? 20 : 0 + 100
+        // return throttleRamp;
         throttleRamped = RAMPUP(throttleRamped, potnom, throttleRamp);
         potnom = throttleRamped;
     }
@@ -161,7 +163,7 @@ s32fp Throttle::RampThrottle(s32fp potnom)
         throttleRamped = RAMPDOWN(throttleRamped, potnom, regenRamp);
         potnom = throttleRamped;
     }
-
+    // return 47;
     return potnom;
 }
 

@@ -10,6 +10,7 @@
 extern void setUp(void);
 extern void tearDown(void);
 extern void test_CheckAndLimit(void);
+extern void test_CheckAndLimitHigh(void);
 extern void test_CheckDualThrottle(void);
 extern void test_CalcThrottle(void);
 extern void test_RampThrottle(void);
@@ -81,15 +82,16 @@ int main(void)
 {
   UnityBegin("test_throttle.cpp");
   run_test(test_CheckAndLimit, "test_CheckAndLimit", 22);
-  run_test(test_CheckDualThrottle, "test_CheckDualThrottle", 36);
-  run_test(test_CalcThrottle, "test_CalcThrottle", 50);
-  run_test(test_RampThrottle, "test_RampThrottle", 61);
-  run_test(test_utils_change, "test_utils_change", 65);
-  run_test(test_utils_GetUserThrottleCommand, "test_utils_GetUserThrottleCommand", 70);
-  run_test(test_utils_ProcessThrottle, "test_utils_ProcessThrottle", 75);
-  run_test(test_IgnoredTest, "test_IgnoredTest", 87);
-  run_test(test_AnotherIgnoredTest, "test_AnotherIgnoredTest", 92);
-  run_test(test_ThisFunctionHasNotBeenTested_NeedsToBeImplemented, "test_ThisFunctionHasNotBeenTested_NeedsToBeImplemented", 97);
+  run_test(test_CheckAndLimitHigh, "test_CheckAndLimitHigh", 40);
+  run_test(test_CheckDualThrottle, "test_CheckDualThrottle", 48);
+  run_test(test_CalcThrottle, "test_CalcThrottle", 62);
+  run_test(test_RampThrottle, "test_RampThrottle", 73);
+  run_test(test_utils_change, "test_utils_change", 77);
+  run_test(test_utils_GetUserThrottleCommand, "test_utils_GetUserThrottleCommand", 83);
+  run_test(test_utils_ProcessThrottle, "test_utils_ProcessThrottle", 88);
+  run_test(test_IgnoredTest, "test_IgnoredTest", 115);
+  run_test(test_AnotherIgnoredTest, "test_AnotherIgnoredTest", 120);
+  run_test(test_ThisFunctionHasNotBeenTested_NeedsToBeImplemented, "test_ThisFunctionHasNotBeenTested_NeedsToBeImplemented", 125);
 
   return UnityEnd();
 }

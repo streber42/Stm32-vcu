@@ -736,6 +736,7 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
     Throttle::potmax[1] = Param::GetInt(Param::pot2max);
     Throttle::throtmax = Param::Get(Param::throtmax);
     Throttle::throtmin = Param::Get(Param::throtmin);
+    Throttle::throttleRamp = Param::Get(Param::throtramp);
     Throttle::idcmin = Param::Get(Param::idcmin);
     Throttle::idcmax = Param::Get(Param::idcmax);
     Throttle::udcmin = FP_MUL(Param::Get(Param::udcmin), FP_FROMFLT(0.95)); //Leave some room for the notification light

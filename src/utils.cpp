@@ -45,7 +45,7 @@ void GetDigInputs(Can* can)
     Param::SetInt(Param::din_bms, (canio & CAN_IO_BMS) != 0);
 }
 #endif
-int GetUserThrottleCommand()
+s32fp GetUserThrottleCommand()
 {
     int potval, pot2val;
     bool brake = Param::GetBool(Param::din_brake);
@@ -245,9 +245,6 @@ s32fp ProcessThrottle(int speed)
         Throttle::throttleRamp = Param::GetAttrib(Param::throtramp)->max;
 
     finalSpnt = utils::GetUserThrottleCommand();
-    // this should probably be a s23fp
-    finalSpnt = FP_FROMINT(utils::GetUserThrottleCommand());
-
 //   GetCruiseCreepCommand(finalSpnt, throtSpnt);
     finalSpnt = Throttle::RampThrottle(finalSpnt);
 
