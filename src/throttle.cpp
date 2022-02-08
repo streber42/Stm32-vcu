@@ -80,13 +80,24 @@ bool Throttle::CheckDualThrottle(int* potval, int pot2val)
     }
     else
     {
+        //         (100 * (0 - 200)) / (1800 - 200)
+        //             -20000 / 1600
+        //               -200/16
+        //                  -25/2
+        //                  -12
         potnom2 = (100 * (pot2val - potmin[1])) / (potmax[1] - potmin[1]);
     }
+    //        (100 * (1024-400)) / (3600 - 400)
+    //          62400 / 3200
+    //            624/32
+    //            156/8
+    //            78/4
+    //            39/2
+    //            19
     potnom1 = (100 * (*potval - potmin[0])) / (potmax[0] - potmin[0]);
-    int diff = potnom2 - potnom1;
-    diff = ABS(diff);
+    int diff = ABS(potnom2 - potnom1);
 
-    if (diff > 100)
+    if (diff > 10)
     {
         *potval = potmin[0];
         return false;
@@ -99,6 +110,7 @@ s32fp Throttle::CalcThrottle(int potval, int pot2val, bool brkpedal)
     s32fp potnom;
     s32fp scaledBrkMax = brkpedal ? brknompedal : brkmax;
 
+    // pot2val will never make a difference here
     if (pot2val >= potmin[1])
     {
         potnom = (FP_FROMINT(100) * (pot2val - potmin[1])) / (potmax[1] - potmin[1]);
@@ -113,7 +125,7 @@ s32fp Throttle::CalcThrottle(int potval, int pot2val, bool brkpedal)
     else
     {
         potnom = FP_FROMINT(potval - potmin[0]);
-        potnom = FP_MUL((FP_FROMINT(100) + brknom), potnom) / (potmax[0] - potmin[0]);
+        potnom = FP_DIV(FP_MUL((FP_FROMINT(100) + brknom), potnom),FP_FROMINT(potmax[0] - potmin[0]));
         potnom -= brknom;
 
         if (potnom < 0)
@@ -127,11 +139,15 @@ s32fp Throttle::CalcThrottle(int potval, int pot2val, bool brkpedal)
 
 s32fp Throttle::RampThrottle(s32fp potnom)
 {
+    // min(20, 100)
+    // max(20, -100)
     potnom = MIN(potnom, throtmax);
     potnom = MAX(potnom, throtmin);
-
+     // 20 >= 0
     if (potnom >= throttleRamped)
     {
+    //((potnom < throttleRamped || (throttleRamped + throttleRamp) > potnom) ? potnom : throttleRamped + throttleRamp)
+    // 20 < 0 || (0 + 100) > 20 ? 20 : 0 + 100
         throttleRamped = RAMPUP(throttleRamped, potnom, throttleRamp);
         potnom = throttleRamped;
     }

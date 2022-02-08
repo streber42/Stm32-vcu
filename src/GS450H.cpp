@@ -1,10 +1,14 @@
 #include "GS450H.h"
 #include "hwinit.h"
 #include "temp_meas.h"
+#ifndef UNIT_TEST
 #include <libopencm3/stm32/timer.h>
+#endif
 #include "anain.h"
 #include "my_math.h"
+#ifndef UNIT_TEST
 #include "utils.h"
+#endif
 
 #define  LOW_Gear  0
 #define  HIGH_Gear  1

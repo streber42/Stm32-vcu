@@ -62,7 +62,6 @@ public:
     static s32fp idcmax;
     static s32fp fmax;
 
-private:
     static int speedFiltered;
     static s32fp potnomFiltered;
     static s32fp brkRamped;

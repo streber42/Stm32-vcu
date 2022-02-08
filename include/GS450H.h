@@ -7,9 +7,11 @@
 
 #include <stdint.h>
 #include "my_fp.h"
+#ifndef UNIT_TEST
 #include <libopencm3/stm32/usart.h>
 #include <libopencm3/stm32/dma.h>
 #include "digio.h"
+#endif
 #include "params.h"
 
 #define MG2MAXSPEED 10000
@@ -37,7 +39,6 @@ public:
         scaledTorqueTarget = 0;
         timerIsRunning = false;
     }
-private:
 
     static void UpdateHTMParams(int8_t gear, int16_t torque);
     bool timerIsRunning;

@@ -22,6 +22,7 @@ void PostErrorIfRunning(ERROR_MESSAGE_NUM err)
     }
 }
 
+#ifndef UNIT_TEST
 void GetDigInputs(Can* can)
 {
     static bool canIoActive = false;
@@ -43,15 +44,20 @@ void GetDigInputs(Can* can)
     Param::SetInt(Param::din_reverse, DigIo::rev_in.Get() | ((canio & CAN_IO_REV) != 0));
     Param::SetInt(Param::din_bms, (canio & CAN_IO_BMS) != 0);
 }
-
+#endif
 int GetUserThrottleCommand()
 {
     int potval, pot2val;
     bool brake = Param::GetBool(Param::din_brake);
     int potmode = Param::GetInt(Param::potmode);
 
+#ifndef UNIT_TEST
         potval = AnaIn::throttle1.Get();
         pot2val = AnaIn::throttle2.Get();
+#else
+        potval = 1040;
+        pot2val = 520;
+#endif
         Param::SetInt(Param::pot, potval);
         Param::SetInt(Param::pot2, pot2val);
 
@@ -84,7 +90,7 @@ int GetUserThrottleCommand()
     return Throttle::CalcThrottle(potval, pot2val, brake);
 }
 
-
+#ifndef UNIT_TEST
 void SelectDirection(_vehmodes targetVehicle, BMW_E65Class E65Vehicle)
 {
     int8_t selectedDir = Param::GetInt(Param::dir);
@@ -226,6 +232,7 @@ s32fp ProcessUdc(uint32_t oldTime, int motorSpeed)
 
     return udcfp;
 }
+#endif
 
 s32fp ProcessThrottle(int speed)
 {
@@ -238,6 +245,8 @@ s32fp ProcessThrottle(int speed)
         Throttle::throttleRamp = Param::GetAttrib(Param::throtramp)->max;
 
     finalSpnt = utils::GetUserThrottleCommand();
+    // this should probably be a s23fp
+    finalSpnt = FP_FROMINT(utils::GetUserThrottleCommand());
 
 //   GetCruiseCreepCommand(finalSpnt, throtSpnt);
     finalSpnt = Throttle::RampThrottle(finalSpnt);
@@ -263,7 +272,7 @@ s32fp ProcessThrottle(int speed)
     return finalSpnt;
 }
 
-
+#ifndef UNIT_TEST
 void displayThrottle()
 {
 
@@ -274,6 +283,7 @@ void displayThrottle()
 
 }
 
+#endif
 
 void CalcSOC()
 {

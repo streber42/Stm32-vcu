@@ -6,8 +6,10 @@
 #include "my_math.h"
 #include "errormessage.h"
 #include "params.h"
+#ifndef UNIT_TEST
 #include "digio.h"
 #include <libopencm3/stm32/rtc.h>
+#endif
 #include "stm32_can.h"
 #include "anain.h"
 #include "throttle.h"
@@ -16,7 +18,7 @@
 namespace utils
 {
     int32_t change(int32_t, int32_t, int32_t, int32_t, int32_t);
-    int GetUserThrottleCommand(Can*);
+    int GetUserThrottleCommand();
     s32fp ProcessThrottle(int);
     s32fp ProcessUdc(uint32_t, int);
     void CalcSOC();

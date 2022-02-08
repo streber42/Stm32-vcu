@@ -19,7 +19,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "stm32_vcu.h"
+#ifndef UNIT_TEST
 #include <libopencm3/cm3/scb.h>
+ 
 
 #define RMS_SAMPLES 256
 #define SQRT2OV1 0.707106781187
@@ -39,6 +41,7 @@ static bool chargeModeDC = false;
 static bool ChgLck = false;
 static Can* can;
 static Can* can2;
+#endif
 static _invmodes targetInverter;
 static _vehmodes targetVehicle;
 static _chgmodes targetCharger;
@@ -64,6 +67,7 @@ static volatile unsigned
 	days=0,
 	hours=0, minutes=0, seconds=0,
 	alarm=0;			// != 0 when alarm is pending
+#ifndef UNIT_TEST
 
 // Instantiate Classes
 BMW_E65Class E65Vehicle;
@@ -712,7 +716,7 @@ static void Ms1Task(void)
         gs450Inverter.UpdateHTMState1Ms(Param::Get(Param::dir));
     }
 }
-
+#endif
 
 
 
@@ -722,7 +726,9 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
 {
     // This function is called when the user changes a parameter
     if (Param::canspeed == paramNum)
+    #ifndef UNIT_TEST
         can->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
+    #endif
 
     Throttle::potmin[0] = Param::GetInt(Param::potmin);
     Throttle::potmax[0] = Param::GetInt(Param::potmax);
@@ -759,7 +765,7 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
     ChgTicks = (GetInt(Param::Chg_Dur)*300);//number of 200ms ticks that equates to charge timer in minutes
 }
 
-
+#ifndef UNIT_TEST
 static void CanCallback(uint32_t id, uint32_t data[2]) //This is where we go when a defined CAN message is received.
 {
     switch (id)
@@ -981,3 +987,4 @@ extern "C" int main(void)
 
     return 0;
 }
+#endif
