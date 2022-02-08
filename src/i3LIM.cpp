@@ -2,37 +2,37 @@
 
 enum class ChargeStatus : uint8_t
 {
-    // no led
-    NotRdy = 0x0,
+   // no led
+   NotRdy = 0x0,
 
-    // dc ccs mode
-    Init = 0x1,
+   // dc ccs mode
+   Init = 0x1,
 
-    Rdy = 0x2
+   Rdy = 0x2
 };
 
 enum class ChargeRequest : uint8_t
 {
-    EndCharge = 0x0,
-    Charge = 0x1
+   EndCharge = 0x0,
+   Charge = 0x1
 };
 
 enum class ChargeReady : uint8_t
 {
-    NotRdy = 0x0,
-    Rdy = 0x1
+   NotRdy = 0x0,
+   Rdy = 0x1
 };
 
 enum class ChargePhase : uint8_t
 {
-    Standby = 0x0,
-    Initialisation = 0x1,
-    Subpoena = 0x2,
-    EnergyTransfer = 0x3,
-    Shutdown = 0x4,
-    CableTest = 0x9,
-    Reserved = 0xE,
-    InvalidSignal = 0xF
+   Standby = 0x0,
+   Initialisation = 0x1,
+   Subpoena = 0x2,
+   EnergyTransfer = 0x3,
+   Shutdown = 0x4,
+   CableTest = 0x9,
+   Reserved = 0xE,
+   InvalidSignal = 0xF
 };
 
 
@@ -62,11 +62,11 @@ static uint32_t sec_328=0;
 static uint16_t Cont_Volts=0;
 static uint16_t Bulk_SOCt=0;//Time to bulk soc target.
 static uint16_t Full_SOCt=0;//Time to full SOC target.
-static s32fp CHG_Pwr=0; //calculated charge power. 12 bit value scale x25. Values based on 50kw DC fc and 1kw and 3kw ac logs. From bms???
+static uint32_t CHG_Pwr=0; //calculated charge power. 12 bit value scale x25. Values based on 50kw DC fc and 1kw and 3kw ac logs. From bms???
 static int16_t  FC_Cur=0; //10 bit signed int with the ccs dc current command.scale of 1.
 static uint8_t  EOC_Time=0x00; //end of charge time in minutes.
 static ChargeStatus CHG_Status=ChargeStatus::NotRdy;  //observed values 0 when not charging , 1 and transition to 2 when commanded to charge. only 4 bits used.
-                    //seems to control led colour.
+//seems to control led colour.
 static ChargeRequest CHG_Req=ChargeRequest::EndCharge;  //observed values 0 when not charging , 1 when requested to charge. only 1 bit used in logs so far.
 static ChargeReady CHG_Ready=ChargeReady::NotRdy;  //indicator to the LIM that we are ready to charge. observed values 0 when not charging , 1 when commanded to charge. only 2 bits used.
 static uint8_t CONT_Ctrl=0;  //4 bits with DC ccs contactor command.
@@ -75,95 +75,95 @@ static uint8_t CCSI_Spnt=0;
 void i3LIMClass::handle3B4(uint32_t data[2])  //Lim data
 
 {
-    /*
-    0x3B4 D4 low nible: status pilot
-0=no pilot
-1=10-96%PWM not charge ready
-2=10-96%PWM charge ready
-3=error
-4=5% not charge ready
-5=5% charge ready
-6=pilot static
-    */
+   /*
+   0x3B4 D4 low nible: status pilot
+   0=no pilot
+   1=10-96%PWM not charge ready
+   2=10-96%PWM charge ready
+   3=error
+   4=5% not charge ready
+   5=5% charge ready
+   6=pilot static
+   */
 
-    uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
-    uint8_t CP_Amps=bytes[0];
-    Param::SetInt(Param::PilotLim,CP_Amps);
-    uint8_t PP_Amps=bytes[1];
-    Param::SetInt(Param::CableLim,PP_Amps);
-    bool PP=(bytes[2]&0x1);
-    Param::SetInt(Param::PlugDet,PP);
-    CP_Mode=(bytes[4]&0x7);
+   uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
+   uint8_t CP_Amps=bytes[0];
+   Param::SetInt(Param::PilotLim,CP_Amps);
+   uint8_t PP_Amps=bytes[1];
+   Param::SetInt(Param::CableLim,PP_Amps);
+   bool PP=(bytes[2]&0x1);
+   Param::SetInt(Param::PlugDet,PP);
+   CP_Mode=(bytes[4]&0x7);
 
-    Param::SetInt(Param::PilotTyp,CP_Mode);
+   Param::SetInt(Param::PilotTyp,CP_Mode);
 
-    Cont_Volts=bytes[7]*2;
+   Cont_Volts=bytes[7]*2;
    // Cont_Volts=FP_MUL(Cont_Volts,2);
-    Param::SetInt(Param::CCS_V_Con,Cont_Volts);//voltage measured on the charger side of the hv ccs contactors in the car
-    ChargeType=bytes[6];
+   Param::SetInt(Param::CCS_V_Con,Cont_Volts);//voltage measured on the charger side of the hv ccs contactors in the car
+   ChargeType=bytes[6];
 
 }
 
 void i3LIMClass::handle29E(uint32_t data[2])  //Lim data. Available current and voltage from the ccs charger
 
 {
-uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
-uint16_t V_Avail=((bytes[2]<<8)|(bytes[1]));
-V_Avail=FP_TOINT(FP_DIV(V_Avail,10));
-Param::SetInt(Param::CCS_V_Avail,V_Avail);//available voltage from ccs charger
+   uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
+   uint16_t V_Avail=((bytes[2]<<8)|(bytes[1]));
+   V_Avail=FP_TOINT(FP_DIV(V_Avail,10));
+   Param::SetInt(Param::CCS_V_Avail,V_Avail);//available voltage from ccs charger
 
-uint16_t I_Avail=((bytes[4]<<8)|(bytes[3]));
-I_Avail=FP_TOINT(FP_DIV(I_Avail,10));
-Param::SetInt(Param::CCS_I_Avail,I_Avail);//available current from ccs charger
+   uint16_t I_Avail=((bytes[4]<<8)|(bytes[3]));
+   I_Avail=FP_TOINT(FP_DIV(I_Avail,10));
+   Param::SetInt(Param::CCS_I_Avail,I_Avail);//available current from ccs charger
 
-CCS_Iso = (bytes[0]>>6)&0x03;
-CCS_IntStat = (bytes[0]>>2)&0x0f;
-Param::SetInt(Param::CCS_COND,CCS_IntStat);//update evse condition on webui
+   CCS_Iso = (bytes[0]>>6)&0x03;
+   CCS_IntStat = (bytes[0]>>2)&0x0f;
+   Param::SetInt(Param::CCS_COND,CCS_IntStat);//update evse condition on webui
 
 }
 
 void i3LIMClass::handle2B2(uint32_t data[2])  //Lim data. Current and Votage as measured by the ccs charger
 
 {
-uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
-uint16_t CCS_Vmeas=((bytes[1]<<8)|(bytes[0]));
-CCS_Vmeas=FP_TOINT(FP_DIV(CCS_Vmeas,10));
-Param::SetInt(Param::CCS_V,CCS_Vmeas);//Voltage measurement from ccs charger
+   uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
+   uint16_t CCS_Vmeas=((bytes[1]<<8)|(bytes[0]));
+   CCS_Vmeas=FP_TOINT(FP_DIV(CCS_Vmeas,10));
+   Param::SetInt(Param::CCS_V,CCS_Vmeas);//Voltage measurement from ccs charger
 
-uint16_t CCS_Imeas=((bytes[3]<<8)|(bytes[2]));
-CCS_Imeas=FP_TOINT(FP_DIV(CCS_Imeas,10));
-Param::SetInt(Param::CCS_I,CCS_Imeas);//Current measurement from ccs charger
-[[maybe_unused]] uint8_t Batt_Cmp=bytes[4]&0xc0;    //battrery compatability flag from charger? upper two bits of byte 4.
+   uint16_t CCS_Imeas=((bytes[3]<<8)|(bytes[2]));
+   CCS_Imeas=FP_TOINT(FP_DIV(CCS_Imeas,10));
+   Param::SetInt(Param::CCS_I,CCS_Imeas);//Current measurement from ccs charger
+   [[maybe_unused]] uint8_t Batt_Cmp=bytes[4]&0xc0;    //battrery compatability flag from charger? upper two bits of byte 4.
 
-CCS_Ilim = (bytes[5]>>4)&0x03;
-CCS_Vlim = (bytes[5]>>6)&0x03;
-CCS_Stat = bytes[4]&0x03;
-CCS_Malf = (bytes[4]>>2)&0x03;
-CCS_Bmalf = bytes[5]&0x03;
-CCS_Stop = (bytes[5]>>2)&0x03;
+   CCS_Ilim = (bytes[5]>>4)&0x03;
+   CCS_Vlim = (bytes[5]>>6)&0x03;
+   CCS_Stat = bytes[4]&0x03;
+   CCS_Malf = (bytes[4]>>2)&0x03;
+   CCS_Bmalf = bytes[5]&0x03;
+   CCS_Stop = (bytes[5]>>2)&0x03;
 }
 
 void i3LIMClass::handle2EF(uint32_t data[2])  //Lim data. Min available voltage from the ccs charger.
 
 {
-uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
-uint16_t minV_Avail=((bytes[1]<<8)|(bytes[0]));
-minV_Avail=FP_TOINT(FP_DIV(minV_Avail,10));
-Param::SetInt(Param::CCS_V_Min,minV_Avail);//minimum available voltage from ccs charger
+   uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
+   uint16_t minV_Avail=((bytes[1]<<8)|(bytes[0]));
+   minV_Avail=FP_TOINT(FP_DIV(minV_Avail,10));
+   Param::SetInt(Param::CCS_V_Min,minV_Avail);//minimum available voltage from ccs charger
 
-CCS_Plim = (bytes[6]>>4)&0x03;
+   CCS_Plim = (bytes[6]>>4)&0x03;
 
 }
 
 void i3LIMClass::handle272(uint32_t data[2])  //Lim data. CCS contactor state and charge flap open/close status.
 {
-uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
+   uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
 // Only the top 6-bits indicate the contactor state
-uint8_t Cont_stat=bytes[2] >> 2;
-Param::SetInt(Param::CCS_Contactor,Cont_stat);
+   uint8_t Cont_stat=bytes[2] >> 2;
+   Param::SetInt(Param::CCS_Contactor,Cont_stat);
 
-uint8_t drmodes=bytes[2]&0x03;
-Param::SetInt(Param::CP_DOOR,drmodes);
+   uint8_t drmodes=bytes[2]&0x03;
+   Param::SetInt(Param::CP_DOOR,drmodes);
 }
 
 
@@ -175,17 +175,17 @@ void i3LIMClass::Send10msMessages()
    //I_Batt=0xa0a0;
    //uint16_t SOC_Local=25*10;//(Param::GetInt(Param::SOC))*10;
    uint16_t SOC_Local=(Param::GetInt(Param::SOC))*10;
-uint8_t bytes[8]; //seems to be from i3 BMS.
-bytes[0] = I_Batt & 0xFF;  //Battery current LSB. Scale 0.1 offset 819.2. 16 bit unsigned int
-bytes[1] = I_Batt >> 8;  //Battery current MSB. Scale 0.1 offset 819.2.  16 bit unsigned int
-bytes[2] = V_Batt & 0xFF;  //Battery voltage LSB. Scale 0.1. 16 bit unsigned int.
-bytes[3] = V_Batt >> 8;  //Battery voltage MSB. Scale 0.1. 16 bit unsigned int.
-bytes[4] = SOC_Local & 0xFF;;  //Battery SOC LSB. 12 bit unsigned int. Scale 0.1. 0-100%
-bytes[5] = SOC_Local >> 8;  //Battery SOC MSB. 12 bit unsigned int. Scale 0.1. 0-100%
-bytes[6] = 0x65;  //Low nibble battery status. Seem to need to be 0x5.
-bytes[7] = V_Batt2;  //zwischenkreis. Battery voltage. Scale 4. 8 bit unsigned int.
+   uint8_t bytes[8]; //seems to be from i3 BMS.
+   bytes[0] = I_Batt & 0xFF;  //Battery current LSB. Scale 0.1 offset 819.2. 16 bit unsigned int
+   bytes[1] = I_Batt >> 8;  //Battery current MSB. Scale 0.1 offset 819.2.  16 bit unsigned int
+   bytes[2] = V_Batt & 0xFF;  //Battery voltage LSB. Scale 0.1. 16 bit unsigned int.
+   bytes[3] = V_Batt >> 8;  //Battery voltage MSB. Scale 0.1. 16 bit unsigned int.
+   bytes[4] = SOC_Local & 0xFF;;  //Battery SOC LSB. 12 bit unsigned int. Scale 0.1. 0-100%
+   bytes[5] = SOC_Local >> 8;  //Battery SOC MSB. 12 bit unsigned int. Scale 0.1. 0-100%
+   bytes[6] = 0x65;  //Low nibble battery status. Seem to need to be 0x5.
+   bytes[7] = V_Batt2;  //zwischenkreis. Battery voltage. Scale 4. 8 bit unsigned int.
 
-Can::GetInterface(0)->Send(0x112, (uint32_t*)bytes,8); //Send on CAN1
+   Can::GetInterface(0)->Send(0x112, (uint32_t*)bytes,8); //Send on CAN1
 
 ctr_20ms++;
 if(ctr_20ms==2)
@@ -384,13 +384,6 @@ Can::GetInterface(0)->Send(0x397, (uint32_t*)bytes,7); //Send on CAN1. not on 19
 }
 ////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
-
-
 void i3LIMClass::Send100msMessages()
 {
 uint8_t bytes[8];
@@ -484,41 +477,41 @@ vin_ctr++;
 
 i3LIMChargingState i3LIMClass::Control_Charge(bool RunCh)
 {
-    int opmode = Param::GetInt(Param::opmode);
-    if (opmode != MOD_RUN)  //only do this if we are not in run mode
-    {
-if (Param::GetBool(Param::PlugDet)&&(CP_Mode==0x1||CP_Mode==0x2))  //if we have an enable and a plug in and a std ac pilot lets go AC charge mode.
-{
-    lim_state=0;//return to state 0
-     Param::SetInt(Param::CCS_State,lim_state);
-    Chg_Phase=ChargePhase::Standby;
-    CONT_Ctrl=0x0; //dc contactor mode 0 in AC
-    FC_Cur=0;//ccs current request zero
-  EOC_Time=0xFE;
-  CHG_Status=ChargeStatus::Rdy;
-  CHG_Req=ChargeRequest::Charge;
-  CHG_Ready=ChargeReady::Rdy;
-  CHG_Pwr=6500/25;//approx 6.5kw ac
+   int opmode = Param::GetInt(Param::opmode);
+   if (opmode != MOD_RUN)  //only do this if we are not in run mode
+   {
+      if (Param::GetBool(Param::PlugDet)&&(CP_Mode==0x1||CP_Mode==0x2))  //if we have an enable and a plug in and a std ac pilot lets go AC charge mode.
+      {
+         lim_state=0;//return to state 0
+         Param::SetInt(Param::CCS_State,lim_state);
+         Chg_Phase=ChargePhase::Standby;
+         CONT_Ctrl=0x0; //dc contactor mode 0 in AC
+         FC_Cur=0;//ccs current request zero
+         EOC_Time=0xFE;
+         CHG_Status=ChargeStatus::Rdy;
+         CHG_Req=ChargeRequest::Charge;
+         CHG_Ready=ChargeReady::Rdy;
+         CHG_Pwr=6500/25;//approx 6.5kw ac
 
 
-    if(RunCh)return i3LIMChargingState::AC_Chg;//set ac charge mode if we are enabled on webui
+         if(RunCh)return i3LIMChargingState::AC_Chg;//set ac charge mode if we are enabled on webui
 
-if(!RunCh)
-{
-        lim_state=0;//return to state 0
-     Param::SetInt(Param::CCS_State,lim_state);
-    Chg_Phase=ChargePhase::Standby;
-    CONT_Ctrl=0x0; //dc contactor mode 0 in off
-    FC_Cur=0;//ccs current request zero
-  EOC_Time=0x00;
-  CHG_Status=ChargeStatus::NotRdy;
-  CHG_Req=ChargeRequest::EndCharge;
-  CHG_Ready=ChargeReady::NotRdy;
-  CHG_Pwr=0;
-    return i3LIMChargingState::No_Chg;//set no charge mode if we are disabled on webui and in state 9 of dc machine
-}
+         if(!RunCh)
+         {
+            lim_state=0;//return to state 0
+            Param::SetInt(Param::CCS_State,lim_state);
+            Chg_Phase=ChargePhase::Standby;
+            CONT_Ctrl=0x0; //dc contactor mode 0 in off
+            FC_Cur=0;//ccs current request zero
+            EOC_Time=0x00;
+            CHG_Status=ChargeStatus::NotRdy;
+            CHG_Req=ChargeRequest::EndCharge;
+            CHG_Ready=ChargeReady::NotRdy;
+            CHG_Pwr=0;
+            return i3LIMChargingState::No_Chg;//set no charge mode if we are disabled on webui and in state 9 of dc machine
+         }
 
-}
+      }
 
 
 if (Param::GetBool(Param::PlugDet)&&(CP_Mode==0x4||CP_Mode==0x5||CP_Mode==0x6))  //if we have an enable and a plug in and a 5% pilot or a static pilot lets go DC charge mode.
@@ -770,61 +763,61 @@ if((!RunCh)&&lim_state==9)return i3LIMChargingState::No_Chg;//set no charge mode
 
 
 
-if (!Param::GetBool(Param::PlugDet))  //if we  plug remove shut down
-{
-    lim_state=0;//return to state 0
-     Param::SetInt(Param::CCS_State,lim_state);
-    Chg_Phase=ChargePhase::Standby;
-    CONT_Ctrl=0x0; //dc contactor mode 0 in off
-    FC_Cur=0;//ccs current request zero
-  EOC_Time=0x00;
-  CHG_Status=ChargeStatus::NotRdy;
-  CHG_Req=ChargeRequest::EndCharge;
-  CHG_Ready=ChargeReady::NotRdy;
-  CHG_Pwr=0;
-    return i3LIMChargingState::No_Chg;
-}
-}
-    // If nothing matches then we aren't charging
-    return i3LIMChargingState::No_Chg;
+      if (!Param::GetBool(Param::PlugDet))  //if we  plug remove shut down
+      {
+         lim_state=0;//return to state 0
+         Param::SetInt(Param::CCS_State,lim_state);
+         Chg_Phase=ChargePhase::Standby;
+         CONT_Ctrl=0x0; //dc contactor mode 0 in off
+         FC_Cur=0;//ccs current request zero
+         EOC_Time=0x00;
+         CHG_Status=ChargeStatus::NotRdy;
+         CHG_Req=ChargeRequest::EndCharge;
+         CHG_Ready=ChargeReady::NotRdy;
+         CHG_Pwr=0;
+         return i3LIMChargingState::No_Chg;
+      }
+   }
+   // If nothing matches then we aren't charging
+   return i3LIMChargingState::No_Chg;
 }
 
 
 void i3LIMClass::CCS_Pwr_Con()    //here we control ccs charging during state 6.
 {
-uint16_t Tmp_Vbatt=Param::GetInt(Param::udc);//Actual measured battery voltage by isa shunt
-uint16_t Tmp_Vbatt_Spnt=Param::GetInt(Param::Voltspnt);
-uint16_t Tmp_ICCS_Lim=Param::GetInt(Param::CCS_ILim);
-uint16_t Tmp_ICCS_Avail=Param::GetInt(Param::CCS_I_Avail);
+   uint16_t Tmp_Vbatt=Param::GetInt(Param::udc);//Actual measured battery voltage by isa shunt
+   uint16_t Tmp_Vbatt_Spnt=Param::GetInt(Param::Voltspnt);
+   uint16_t Tmp_ICCS_Lim=Param::GetInt(Param::CCS_ILim);
+   uint16_t Tmp_ICCS_Avail=Param::GetInt(Param::CCS_I_Avail);
 //int16_t Tmp_Ibatt=Param::GetInt(Param::idc);
 
-if(CCSI_Spnt>Tmp_ICCS_Lim)CCSI_Spnt=Tmp_ICCS_Lim; //clamp setpoint to current lim paramater.
-if(CCSI_Spnt>150)CCSI_Spnt=150; //never exceed 150amps for now.
-if(CCSI_Spnt>=Tmp_ICCS_Avail)CCSI_Spnt=Tmp_ICCS_Avail; //never exceed available current
-if(CCSI_Spnt>250)CCSI_Spnt=0; //crude way to prevent rollover
-if((Tmp_Vbatt<Tmp_Vbatt_Spnt)&&(CCS_Ilim==0x0)&&(CCS_Plim==0x0))CCSI_Spnt++;//increment if voltage lower than setpoint and power and current limts not set from charger.
-if(Tmp_Vbatt>Tmp_Vbatt_Spnt)CCSI_Spnt--;//decrement if voltage equal to or greater than setpoint.
-if(CCS_Ilim==0x1)CCSI_Spnt--;//decrement if current limit flag is set
-if(CCS_Plim==0x1)CCSI_Spnt--;//decrement if Power limit flag is set
-Param::SetInt(Param::CCS_Ireq,CCSI_Spnt);
+   if(CCSI_Spnt>Tmp_ICCS_Lim)CCSI_Spnt=Tmp_ICCS_Lim; //clamp setpoint to current lim paramater.
+   if(CCSI_Spnt>150)CCSI_Spnt=150; //never exceed 150amps for now.
+   if(CCSI_Spnt>=Tmp_ICCS_Avail)CCSI_Spnt=Tmp_ICCS_Avail; //never exceed available current
+   if(CCSI_Spnt>250)CCSI_Spnt=0; //crude way to prevent rollover
+   if((Tmp_Vbatt<Tmp_Vbatt_Spnt)&&(CCS_Ilim==0x0)&&(CCS_Plim==0x0))CCSI_Spnt++;//increment if voltage lower than setpoint and power and current limts not set from charger.
+   if(Tmp_Vbatt>Tmp_Vbatt_Spnt)CCSI_Spnt--;//decrement if voltage equal to or greater than setpoint.
+   if(CCS_Ilim==0x1)CCSI_Spnt--;//decrement if current limit flag is set
+   if(CCS_Plim==0x1)CCSI_Spnt--;//decrement if Power limit flag is set
+   Param::SetInt(Param::CCS_Ireq,CCSI_Spnt);
 }
 
 void i3LIMClass::Chg_Timers()
 {
-    Timer_1Sec--;   //decrement the loop counter
+   Timer_1Sec--;   //decrement the loop counter
 
-    if(Timer_1Sec==0)   //1 second has elapsed
-    {
-        Timer_1Sec=5;
-        Bulk_SOCt--;    //Decrement timers. Just on time for now will be current based in final version
-        Full_SOCt--;
-        Timer_60Sec--;  //decrement the 1 minute counter
-        if(Timer_60Sec==0)
-        {
-            Timer_60Sec=60;
-             EOC_Time--;    //decrement end of charge minutes timer
-        }
+   if(Timer_1Sec==0)   //1 second has elapsed
+   {
+      Timer_1Sec=5;
+      Bulk_SOCt--;    //Decrement timers. Just on time for now will be current based in final version
+      Full_SOCt--;
+      Timer_60Sec--;  //decrement the 1 minute counter
+      if(Timer_60Sec==0)
+      {
+         Timer_60Sec=60;
+         EOC_Time--;    //decrement end of charge minutes timer
+      }
 
-    }
+   }
 }
 

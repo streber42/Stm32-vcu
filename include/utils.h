@@ -18,9 +18,9 @@
 namespace utils
 {
     int32_t change(int32_t, int32_t, int32_t, int32_t, int32_t);
-    s32fp GetUserThrottleCommand();
-    s32fp ProcessThrottle(int);
-    s32fp ProcessUdc(uint32_t, int);
+    float GetUserThrottleCommand();
+    float ProcessThrottle(int);
+    float ProcessUdc(uint32_t, int);
     void CalcSOC();
     void GetDigInputs(Can*);
     void PostErrorIfRunning(ERROR_MESSAGE_NUM);
