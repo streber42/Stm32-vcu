@@ -1,7 +1,7 @@
 #include "GS450H.h"
-#include "hwinit.h"
 #include "temp_meas.h"
 #ifndef UNIT_TEST
+#include "hwinit.h"
 #include <libopencm3/stm32/timer.h>
 #endif
 #include "anain.h"
@@ -54,12 +54,18 @@ void GS450HClass::SetTorque(float torquePercent)
 
 float GS450HClass::GetMotorTemperature()
 {
+    #ifndef UNIT_TEST
    int tmpmg1 = AnaIn::MG1_Temp.Get();//in the gs450h case we must read the analog temp values from sensors in the gearbox
    int tmpmg2 = AnaIn::MG2_Temp.Get();
 
    s32fp t1 = TempMeas::Lookup(tmpmg1, TempMeas::TEMP_TOYOTA);
    s32fp t2 = TempMeas::Lookup(tmpmg2, TempMeas::TEMP_TOYOTA);
    s32fp tmpm = MAX(t1, t2);//which ever is the hottest gets displayed
+   #else 
+   int tmpmg1 = 100;
+   int tmpmg2 = 100;
+   s32fp tmpm = 100;
+   #endif
 
    return FP_TOFLOAT(tmpm);
 }
@@ -71,19 +77,20 @@ void GS450HClass::Task100Ms()
 
    if (gear == 1)
    {
+#ifndef UNIT_TEST
       DigIo::SP_out.Clear();
       DigIo::SL1_out.Clear();
       DigIo::SL2_out.Clear();
-
+#endif
       Param::SetInt(Param::GearFB,HIGH_Gear);// set high gear
    }
+#ifndef UNIT_TEST
 
    if (gear == 0)
    {
       DigIo::SP_out.Clear();
       DigIo::SL1_out.Clear();
       DigIo::SL2_out.Clear();
-
       Param::SetInt(Param::GearFB,LOW_Gear);// set low gear
    }
    setTimerState(true);
@@ -94,6 +101,7 @@ void GS450HClass::Task100Ms()
    Param::SetInt(Param::Gear1,DigIo::gear1_in.Get());//update web interface with status of gearbox PB feedbacks for diag purposes.
    Param::SetInt(Param::Gear2,DigIo::gear2_in.Get());
    Param::SetInt(Param::Gear3,DigIo::gear3_in.Get());
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,11 +158,14 @@ void GS450HClass::Task1Ms()
    switch(htm_state)
    {
    case 0:
+#ifndef UNIT_TEST
       dma_read(mth_data,100);//read in mth data via dma. Probably need some kind of check dma complete flag here
       DigIo::req_out.Clear(); //HAL_GPIO_WritePin(HTM_SYNC_GPIO_Port, HTM_SYNC_Pin, 0);
+      #endif
       htm_state++;
       break;
    case 1:
+#ifndef UNIT_TEST
       DigIo::req_out.Set();  //HAL_GPIO_WritePin(HTM_SYNC_GPIO_Port, HTM_SYNC_Pin, 1);
 
       if(inv_status==0)
@@ -172,12 +183,14 @@ void GS450HClass::Task1Ms()
          if(mth_data[1]!=0)
             inv_status--;
       }
+#endif
       htm_state++;
       break;
    case 2:
       htm_state++;
       break;
    case 3:
+#ifndef UNIT_TEST
       if(VerifyMTHChecksum(100)==0 || dma_get_interrupt_flag(DMA1, DMA_CHANNEL6, DMA_TCIF)==0)
       {
          statusInv=0;
@@ -193,7 +206,7 @@ void GS450HClass::Task1Ms()
          mg1_speed=mth_data[6]|mth_data[7]<<8;
          mg2_speed=mth_data[31]|mth_data[32]<<8;
       }
-
+#endif
       mth_data[98]=0;
       mth_data[99]=0;
 
@@ -259,11 +272,14 @@ void GS450HClass::Task1Ms()
 
    /***** Demo code for Gen3 Prius/Auris direct communications! */
    case 5:
+#ifndef UNIT_TEST
       dma_read(mth_data,120);//read in mth data via dma. Probably need some kind of check dma complete flag here
       DigIo::req_out.Clear(); //HAL_GPIO_WritePin(HTM_SYNC_GPIO_Port, HTM_SYNC_Pin, 0);
+#endif
       htm_state++;
       break;
    case 6:
+#ifndef UNIT_TEST
       DigIo::req_out.Set();  //HAL_GPIO_WritePin(HTM_SYNC_GPIO_Port, HTM_SYNC_Pin, 1);
 
       if(inv_status>5)
@@ -284,12 +300,14 @@ void GS450HClass::Task1Ms()
             //memcpy(htm_data, &htm_data_init[ inv_status ][0], 100);
          }
       }
+      #endif
       htm_state++;
       break;
    case 7:
       htm_state++;
       break;
    case 8:
+#ifndef UNIT_TEST
       if(VerifyMTHChecksum(120)==0 || dma_get_interrupt_flag(DMA1, DMA_CHANNEL6, DMA_TCIF)==0)
       {
 
@@ -307,6 +325,7 @@ void GS450HClass::Task1Ms()
          mg1_speed=mth_data[6]|mth_data[7]<<8;
          mg2_speed=mth_data[38]|mth_data[39]<<8;
       }
+#endif
 
       mth_data[98]=0;
       mth_data[99]=0;
@@ -387,6 +406,7 @@ void GS450HClass::Task1Ms()
 
 void GS450HClass::setTimerState(bool desiredTimerState)
 {
+#ifndef UNIT_TEST
    if (desiredTimerState != this->timerIsRunning)
    {
       if (desiredTimerState)
@@ -403,6 +423,7 @@ void GS450HClass::setTimerState(bool desiredTimerState)
          this->timerIsRunning=false; //timers are now stopped
       }
    }
+#endif
 }
 
 int GS450HClass::GetInverterState()
@@ -416,6 +437,7 @@ int GS450HClass::GetInverterState()
 
 static void dma_write(uint8_t *data, int size)
 {
+#ifndef UNIT_TEST
    /*
     * Using channel 7 for USART2_TX
     */
@@ -435,10 +457,12 @@ static void dma_write(uint8_t *data, int size)
    dma_enable_channel(DMA1, DMA_CHANNEL7);
 
    usart_enable_tx_dma(USART2);
+#endif
 }
 
 static void dma_read(uint8_t *data, int size)
 {
+#ifndef UNIT_TEST
    /*
     * Using channel 6 for USART2_RX
     */
@@ -458,5 +482,6 @@ static void dma_read(uint8_t *data, int size)
    dma_enable_channel(DMA1, DMA_CHANNEL6);
 
    usart_enable_rx_dma(USART2);
+#endif
 }
 

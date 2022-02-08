@@ -18,14 +18,7 @@
 #include "my_math.h"
 #include "printf.h"
 #include "stm32scheduler.h"
-#include "leafinv.h"
 #include "isa_shunt.h"
-#include "Can_E39.h"
-#include "Can_E46.h"
-#include "BMW_E65.h"
-#include "Can_OI.h"
-#include "Can_VAG.h"
-#include "GS450H.h"
 #include "utils.h"
 #include "charger.h"
 #include "i3LIM.h"
@@ -33,6 +26,13 @@
 #include "chademo.h"
 #include "heater.h"
 #endif
+#include "leafinv.h"
+#include "Can_E39.h"
+#include "Can_E46.h"
+#include "BMW_E65.h"
+#include "Can_OI.h"
+#include "Can_VAG.h"
+#include "GS450H.h"
 #include "params.h"
 #include "throttle.h"
 #include "errormessage.h"
@@ -55,7 +55,7 @@ typedef union {
     uint8_t array[14];
 } CAN3_Msg;
 */
-
+#ifndef UNIT_TEST
 typedef union {
     struct {
         uint32_t data[2];
@@ -64,3 +64,4 @@ typedef union {
     } frame;
     //uint8_t array[14];
 } CAN3_Msg;
+#endif

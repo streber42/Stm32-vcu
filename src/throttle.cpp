@@ -48,9 +48,6 @@ float Throttle::idcmin;
 float Throttle::idcmax;
 int Throttle::speedLimit;
 
-int Throttle::speedFiltered;
-s32fp Throttle::potnomFiltered;
-s32fp Throttle::throttleRamped;
 
 bool Throttle::CheckAndLimitRange(int* potval, int potIdx)
 {

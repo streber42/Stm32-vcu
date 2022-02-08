@@ -53,7 +53,7 @@ void GetDigInputs(Can* can)
    Param::SetInt(Param::din_bms, (canio & CAN_IO_BMS) != 0);
    #endif
 }
-
+#endif
 float GetUserThrottleCommand()
 {
    int potval, pot2val;
@@ -64,8 +64,8 @@ float GetUserThrottleCommand()
    potval = AnaIn::throttle1.Get();
    pot2val = AnaIn::throttle2.Get();
 #else
-   potval = 1040;
-   pot2val = 520;
+   potval = 2048;
+   pot2val = 1024;
 #endif
    Param::SetInt(Param::pot, potval);
    Param::SetInt(Param::pot2, pot2val);

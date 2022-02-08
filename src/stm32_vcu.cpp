@@ -30,6 +30,7 @@ static bool chargeModeDC = false;
 static bool ChgLck = false;
 static Can* can;
 static Can* can2;
+static uCAN_MSG rxMessage;
 #endif
 static InvModes targetInverter;
 static _vehmodes targetVehicle;
@@ -51,15 +52,14 @@ static volatile uint32_t
 days=0,
 hours=0, minutes=0, seconds=0,
 alarm=0;			// != 0 when alarm is pending
-#ifndef UNIT_TEST
 
 // Instantiate Classes
 static BMW_E65Class E65Vehicle;
 static GS450HClass gs450Inverter;
-static uCAN_MSG rxMessage;
 static LeafINV leafInv;
 static Can_OI openInv;
 static Inverter* selectedInverter = &openInv;
+#ifndef UNIT_TEST
 
 static void RunChaDeMo()
 {
@@ -656,8 +656,9 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
    {
       gs450Inverter.SetOil(Param::GetInt(Param::OilPump));
    }
-
+   #ifndef UNIT_TEST
    selectedInverter->SetCanInterface(can);
+   #endif
    Throttle::potmin[0] = Param::GetInt(Param::potmin);
    Throttle::potmax[0] = Param::GetInt(Param::potmax);
    Throttle::potmin[1] = Param::GetInt(Param::pot2min);
@@ -666,7 +667,7 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
    Throttle::regenmax = Param::GetFloat(Param::regenmax);
    Throttle::throtmax = Param::GetFloat(Param::throtmax);
    Throttle::throtmin = Param::GetFloat(Param::throtmin);
-   Throttle::throttleRamp = Param::Get(Param::throtramp);
+   Throttle::throttleRamp = Param::GetFloat(Param::throtramp);
    Throttle::idcmin = Param::GetFloat(Param::idcmin);
    Throttle::idcmax = Param::GetFloat(Param::idcmax);
    Throttle::udcmin = Param::GetFloat(Param::udcmin); //Leave some room for the notification light

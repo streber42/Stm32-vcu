@@ -3,6 +3,8 @@
 #include "../include/utils.h"
 #include "../libopeninv/include/params.h"
 
+extern void parm_Change(Param::PARAM_NUM paramNum);
+
 void setUp(void) {
     Param::SetInt(Param::potmax,3600);
     Param::SetInt(Param::potmin,400);
@@ -61,13 +63,13 @@ void test_CheckDualThrottle(void) {
 //s32fp Throttle::CalcThrottle(int potval, int pot2val, bool brkpedal)
 void test_CalcThrottle(void) {
     // potnom is 0 with potmin and no brake
-    TEST_ASSERT_EQUAL_INT32(0,FP_TOINT(Throttle::CalcThrottle(Throttle::potmin[0],Throttle::potmin[1],false)));
+    TEST_ASSERT_EQUAL_FLOAT(-0.1f,Throttle::CalcThrottle(Throttle::potmin[0],Throttle::potmin[1],false));
     // potnom is 100 with potmax and no brake
-    TEST_ASSERT_EQUAL_INT32(100,FP_TOINT(Throttle::CalcThrottle(Throttle::potmax[0],Throttle::potmin[1],false)));
+    TEST_ASSERT_EQUAL_FLOAT(100.0f,Throttle::CalcThrottle(Throttle::potmax[0],Throttle::potmin[1],false));
     // potnom is -1 with brake on
-    TEST_ASSERT_EQUAL_INT32(-1,FP_TOINT(Throttle::CalcThrottle(Throttle::potmax[0],Throttle::potmin[1],true)));
+    TEST_ASSERT_EQUAL_FLOAT(-0.1f,Throttle::CalcThrottle(Throttle::potmax[0],Throttle::potmin[1],true));
     // potnom is 50 with half throttle
-    TEST_ASSERT_EQUAL_INT32(50,FP_TOINT(Throttle::CalcThrottle(((Throttle::potmax[0]-Throttle::potmin[0])/2)+Throttle::potmin[0],Throttle::potmin[1],false)));
+    TEST_ASSERT_EQUAL_FLOAT(35.0f,Throttle::CalcThrottle(((Throttle::potmax[0]-Throttle::potmin[0])/2)+Throttle::potmin[0],Throttle::potmin[1],false));
 }
 
 void test_RampThrottle(void) {
@@ -82,33 +84,33 @@ void test_utils_change(void){
 
 void test_utils_GetUserThrottleCommand(void) {
     Param::SetInt(Param::dir,1);
-    TEST_ASSERT_EQUAL_INT(FP_FROMINT(20),utils::GetUserThrottleCommand());
+    TEST_ASSERT_EQUAL_FLOAT(36.95f,utils::GetUserThrottleCommand());
 }
 
 void test_utils_ProcessThrottle(void) {
     TEST_ASSERT_EQUAL_INT(20000,Param::GetInt(Param::throtramprpm));
-    TEST_ASSERT_EQUAL_INT32(FP_FROMINT(100),Param::Get(Param::throtramp));
-    TEST_ASSERT_EQUAL_INT32(FP_FROMINT(100),Throttle::throttleRamp);
-    TEST_ASSERT_EQUAL_INT32(FP_FROMINT(100),Param::Get(Param::throtmax));
-    TEST_ASSERT_EQUAL_INT32(FP_FROMINT(100),Throttle::throtmax);
-    TEST_ASSERT_EQUAL_INT32(FP_FROMINT(-100),Param::Get(Param::throtmin));
-    TEST_ASSERT_EQUAL_INT32(FP_FROMINT(-100),Throttle::throtmin);
-    TEST_ASSERT_EQUAL_INT32(0,Throttle::throttleRamped);
+    TEST_ASSERT_EQUAL_FLOAT(100.0f,Param::GetFloat(Param::throtramp));
+    TEST_ASSERT_EQUAL_FLOAT(100.0f,Throttle::throttleRamp);
+    TEST_ASSERT_EQUAL_FLOAT(100.0f,Param::GetFloat(Param::throtmax));
+    TEST_ASSERT_EQUAL_FLOAT(100.0f,Throttle::throtmax);
+    TEST_ASSERT_EQUAL_FLOAT(-100.0f,Param::GetFloat(Param::throtmin));
+    TEST_ASSERT_EQUAL_FLOAT(-100.0f,Throttle::throtmin);
+    TEST_ASSERT_EQUAL_FLOAT(0.0f,Throttle::throttleRamped);
     // TEST_ASSERT_EQUAL_INT(0,RAMPUP(0,640,3200));
     // TEST_ASSERT_EQUAL_INT32(0,FP_FROMINT(-100));
     Throttle::throttleRamped = FP_FROMINT(0);
-    TEST_ASSERT_EQUAL_INT32(1600,Throttle::RampThrottle(FP_FROMINT(50)));
-    TEST_ASSERT_EQUAL_INT32(1600,Throttle::throttleRamped);
-    TEST_ASSERT_EQUAL_INT32(FP_FROMINT(20),Throttle::RampThrottle(FP_FROMINT(20)));
+    TEST_ASSERT_EQUAL_FLOAT(50.0f,Throttle::RampThrottle(50.0f));
+    TEST_ASSERT_EQUAL_FLOAT(50.0f,Throttle::throttleRamped);
+    TEST_ASSERT_EQUAL_FLOAT(20.0f,Throttle::RampThrottle(20.0f));
     // Param::SetFlt(Param::idcmax,FP_FROMINT(10));
-    Param::SetFlt(Param::idc,1);
-    Param::SetFlt(Param::udc,FP_FROMINT(500));
+    Param::SetFloat(Param::idc,1.0f);
+    Param::SetFloat(Param::udc,500.0f);
     parm_Change(Param::PARAM_LAST);
     Throttle::idcmax = FP_FROMINT(10);
     // TEST_ASSERT_EQUAL()
     // Throttle::udcmin = 
-    TEST_ASSERT_EQUAL(1,Param::Get(Param::idc));
-    TEST_ASSERT_EQUAL(FP_FROMINT(20),utils::ProcessThrottle(100));
+    TEST_ASSERT_EQUAL(1,Param::GetFloat(Param::idc));
+    TEST_ASSERT_EQUAL_FLOAT(36.95f,utils::ProcessThrottle(100));
     TEST_ASSERT_EQUAL_INT(20,FP_TOINT(FP_FROMINT(20)));
 }
 
