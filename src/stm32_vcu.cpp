@@ -37,6 +37,7 @@ static bool chargeMode = false;
 static bool chargeModeDC = false;
 static bool ChgLck = false;
 static Can* can;
+static Can* can2;
 static _invmodes targetInverter;
 static _vehmodes targetVehicle;
 static _chgmodes targetCharger;
@@ -71,6 +72,7 @@ chargerClass chgtype;
 uCAN_MSG rxMessage;
 CAN3_Msg CAN3;
 
+void setCanFilters();
 
 static void RunChaDeMo()
 {
@@ -716,8 +718,20 @@ static void Ms1Task(void)
 extern void parm_Change(Param::PARAM_NUM paramNum)
 {
     // This function is called when the user changes a parameter
-    if (Param::canspeed == paramNum)
-        can->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
+    switch (paramNum) {
+        case Param::Inverter_CAN:
+        case Param::Vehicle_CAN:
+        case Param::Shunt_CAN:
+        case Param::LIM_CAN:
+        case Param::Charger_CAN:
+          setCanFilters();
+          break;
+        case Param::canspeed:
+          can->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
+          can2->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
+        default:
+          break;
+    }
 
     Throttle::potmin[0] = Param::GetInt(Param::potmin);
     Throttle::potmax[0] = Param::GetInt(Param::potmax);
@@ -897,38 +911,12 @@ extern "C" void rtc_isr(void)
         }
 }
 
-
-
-extern "C" int main(void)
-{
-    clock_setup();
-    rtc_setup();
-    ConfigureVariantIO();
-   // gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON,AFIO_MAPR_USART3_REMAP_PARTIAL_REMAP);//remap usart 3 to PC10 and PC11 for VCU HW
-    gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, AFIO_MAPR_CAN2_REMAP | AFIO_MAPR_TIM1_REMAP_FULL_REMAP);//32f107
-    usart_setup();
-    usart2_setup();//TOYOTA HYBRID INVERTER INTERFACE
-    nvic_setup();
-    term_Init();
-    parm_load();
-    spi2_setup();
-    spi3_setup();
-    parm_Change(Param::PARAM_LAST);
-    DigIo::inv_out.Clear();//inverter power off during bootup
-    DigIo::mcp_sby.Clear();//enable can3
-
-
-    Can c(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));
-    Can c2(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed));
-
+void setCanFilters() {
     Can* inverter_can = Can::GetInterface(Param::GetInt(Param::inv_can));
     Can* vehicle_can = Can::GetInterface(Param::GetInt(Param::veh_can));
     Can* shunt_can = Can::GetInterface(Param::GetInt(Param::shunt_can));
     Can* lim_can = Can::GetInterface(Param::GetInt(Param::lim_can));
     Can* charger_can = Can::GetInterface(Param::GetInt(Param::charger_can));
-    // Set up CAN 1 callback and messages to listen for
-    c.SetReceiveCallback(CanCallback);
-    c2.SetReceiveCallback(CanCallback);
     inverter_can->RegisterUserMessage(0x1DA);//Leaf inv msg
     inverter_can->RegisterUserMessage(0x55A);//Leaf inv msg
     inverter_can->RegisterUserMessage(0x679);//Leaf obc msg
@@ -954,9 +942,39 @@ extern "C" int main(void)
     vehicle_can->RegisterUserMessage(0x130);//E65 CAS
     vehicle_can->RegisterUserMessage(0x192);//E65 Shifter
     charger_can->RegisterUserMessage(0x108);//Charger HV request
-    vehicle_can->RegisterUserMessage(0x153);//E39/E46 ASC1 message
+    vehicle_can->RegisterUserMessage(0x153);//E39/E46 ASC1 message    
+}
 
-    can = &c; // FIXME: What about CAN2?
+extern "C" int main(void)
+{
+    clock_setup();
+    rtc_setup();
+    ConfigureVariantIO();
+   // gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON,AFIO_MAPR_USART3_REMAP_PARTIAL_REMAP);//remap usart 3 to PC10 and PC11 for VCU HW
+    gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, AFIO_MAPR_CAN2_REMAP | AFIO_MAPR_TIM1_REMAP_FULL_REMAP);//32f107
+    usart_setup();
+    usart2_setup();//TOYOTA HYBRID INVERTER INTERFACE
+    nvic_setup();
+    term_Init();
+    parm_load();
+    spi2_setup();
+    spi3_setup();
+    parm_Change(Param::PARAM_LAST);
+    DigIo::inv_out.Clear();//inverter power off during bootup
+    DigIo::mcp_sby.Clear();//enable can3
+
+
+    Can c(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));
+    Can c2(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed));
+
+    // Set up CAN 1 callback and messages to listen for
+    c.SetReceiveCallback(CanCallback);
+    c2.SetReceiveCallback(CanCallback);
+    setCanFilters();
+
+
+    can = &c;
+    can2 = &c2;
 
     CANSPI_Initialize();// init the MCP25625 on CAN3
     CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
