@@ -47,7 +47,7 @@ void Can_E46::Msg316(uint16_t speed_input)
     // Byte 7 - Torque with internal interventions only
     bytes[7]=0x00;
 
-    Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x316, (uint32_t*)bytes,8); //Send on CAN2
+    Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x316, (uint32_t*)bytes,8);
 }
 
 
@@ -112,7 +112,7 @@ void Can_E46::Msg329(uint16_t tempValue)
     if(counter_329==8) ABSMsg=0x86;
     if(counter_329==15) ABSMsg=0xd9;
 
-    Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x329, (uint32_t*)bytes,8); //Send on CAN2
+    Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x329, (uint32_t*)bytes,8);
 }
 
 void Can_E46::Msg43F(int8_t gear)
@@ -172,7 +172,7 @@ void Can_E46::Msg43F(int8_t gear)
     // byte 7 = 0x00 //doesn't do anything to the ike
     bytes[7] = 0xFF;
 
-    Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x43F, (uint32_t*)bytes,8); //Send on CAN2
+    Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x43F, (uint32_t*)bytes,8);
 }
 
 void Can_E46::Msg545()
@@ -203,6 +203,6 @@ void Can_E46::Msg545()
     // Byte 7 - 0x80 Oil Pressure (Red Oil light), Idle set speed
     bytes[7]=0x18;
 
-    Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x545, (uint32_t*)bytes,8); //Send on CAN2
+    Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x545, (uint32_t*)bytes,8);
 }
 

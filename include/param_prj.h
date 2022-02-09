@@ -29,11 +29,11 @@
 #define PARAM_LIST \
     PARAM_ENTRY(CAT_SETUP,Inverter,     INVMODES    ,  0,      5,      0,      5  ) \
     PARAM_ENTRY(CAT_SETUP,Vehicle,      VEHMODES    ,  0,      6,      0,      6  ) \
-    PARAM_ENTRY(CAT_SETUP,Inverter_CAN, CAN_DEV,       1,      2,      1,      60 ) \
-    PARAM_ENTRY(CAT_SETUP,Vehicle_CAN,  CAN_DEV,       1,      2,      1,      61 ) \
-    PARAM_ENTRY(CAT_SETUP,Shunt_CAN,    CAN_DEV,       1,      2,      1,      62 ) \
-    PARAM_ENTRY(CAT_SETUP,LIM_CAN,      CAN_DEV,       1,      2,      1,      63 ) \
-    PARAM_ENTRY(CAT_SETUP,Charger_CAN,  CAN_DEV,       1,      2,      1,      64 ) \
+    PARAM_ENTRY(CAT_SETUP,Inverter_CAN, CAN_DEV,       0,      1,      0,      60 ) \
+    PARAM_ENTRY(CAT_SETUP,Vehicle_CAN,  CAN_DEV,       0,      1,      1,      61 ) \
+    PARAM_ENTRY(CAT_SETUP,Shunt_CAN,    CAN_DEV,       0,      1,      0,      62 ) \
+    PARAM_ENTRY(CAT_SETUP,LIM_CAN,      CAN_DEV,       0,      1,      0,      63 ) \
+    PARAM_ENTRY(CAT_SETUP,Charger_CAN,  CAN_DEV,       0,      1,      1,      64 ) \
     PARAM_ENTRY(CAT_THROTTLE,potmin,      "dig",     0,      4095,   0,      7  ) \
     PARAM_ENTRY(CAT_THROTTLE,potmax,      "dig",     0,      4095,   4095,   8  ) \
     PARAM_ENTRY(CAT_THROTTLE,pot2min,     "dig",     0,      4095,   4095,   9  ) \
@@ -211,7 +211,7 @@
 #define CHGint   "0=Unused, 1=i3LIM, 2=Chademo, 3=Leaf_PDM"
 #define CAN_PERIOD_100MS    0
 #define CAN_PERIOD_10MS     1
-#define CAN_DEV "1=CAN1, 2=CAN2"
+#define CAN_DEV "0=CAN1, 1=CAN2"
 
 
 enum modes
@@ -351,8 +351,8 @@ enum ccs_status
 
 enum can_devices 
 {
-    CAN_DEV1 = 1,
-    CAN_DEV2 = 2
+    CAN_DEV1 = 0,
+    CAN_DEV2 = 1
 };
 
 

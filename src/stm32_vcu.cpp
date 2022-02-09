@@ -918,13 +918,14 @@ extern "C" int main(void)
     DigIo::mcp_sby.Clear();//enable can3
 
 
-    Can c(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));//can1 Inverter / isa shunt/LIM.
-    Can c2(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed));//can2 vehicle side.
+    Can c(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));
+    Can c2(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed));
 
     Can* inverter_can = Can::GetInterface(Param::GetInt(Param::inv_can));
     Can* vehicle_can = Can::GetInterface(Param::GetInt(Param::veh_can));
     Can* shunt_can = Can::GetInterface(Param::GetInt(Param::shunt_can));
     Can* lim_can = Can::GetInterface(Param::GetInt(Param::lim_can));
+    Can* charger_can = Can::GetInterface(Param::GetInt(Param::charger_can));
     // Set up CAN 1 callback and messages to listen for
     c.SetReceiveCallback(CanCallback);
     c2.SetReceiveCallback(CanCallback);
@@ -952,7 +953,7 @@ extern "C" int main(void)
     // Set up CAN 2 (Vehicle CAN) callback and messages to listen for.
     vehicle_can->RegisterUserMessage(0x130);//E65 CAS
     vehicle_can->RegisterUserMessage(0x192);//E65 Shifter
-    vehicle_can->RegisterUserMessage(0x108);//Charger HV request
+    charger_can->RegisterUserMessage(0x108);//Charger HV request
     vehicle_can->RegisterUserMessage(0x153);//E39/E46 ASC1 message
 
     can = &c; // FIXME: What about CAN2?
