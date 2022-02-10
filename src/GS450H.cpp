@@ -435,7 +435,7 @@ void GS450HClass::UpdateHTMState1Ms(int8_t gear)
         // -3500 (reverse) to 3500 (forward)
         if (gear == 0) mg2_torque = 0;//Neutral
         if (gear == 32) mg2_torque = this->scaledTorqueTarget;//Drive
-        if (gear == -32) mg2_torque = this->scaledTorqueTarget * -1;//Reverse
+        if (gear == -32) mg2_torque = this->scaledTorqueTarget;//Reverse
 
         mg1_torque = ((mg2_torque * 5) / 4);
         if (gear == -32) mg1_torque = 0; //no mg1 torque in reverse.
