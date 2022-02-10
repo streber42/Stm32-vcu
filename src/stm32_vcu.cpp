@@ -422,9 +422,9 @@ static void Ms100Task(void)
     }
     int16_t IsaTemp=ISA::Temperature;
     Param::SetInt(Param::tmpaux,IsaTemp);
-
-    chargerClass::Send100msMessages(RunChg);
-
+    if (Param::GetInt(Param::chargemodes) != _chgmodes::Off)  {
+        chargerClass::Send100msMessages(RunChg);
+    }
     if(targetChgint == _interface::Chademo) //Chademo on CAN3
     {
         if(!DigIo::gp_12Vin.Get()) RunChaDeMo(); //if we detect chademo plug inserted off we go ...
