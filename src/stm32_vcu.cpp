@@ -732,6 +732,11 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
         default:
           break;
     }
+    Param::SetInt(Param::inv_can,Param::GetInt(Param::Inverter_CAN));
+    Param::SetInt(Param::veh_can,Param::GetInt(Param::Vehicle_CAN));
+    Param::SetInt(Param::shunt_can,Param::GetInt(Param::Shunt_CAN));
+    Param::SetInt(Param::lim_can,Param::GetInt(Param::LIM_CAN));
+    Param::SetInt(Param::charger_can,Param::GetInt(Param::Charger_CAN));
 
     Throttle::potmin[0] = Param::GetInt(Param::potmin);
     Throttle::potmax[0] = Param::GetInt(Param::potmax);
