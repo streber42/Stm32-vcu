@@ -44,7 +44,7 @@ void GetDigInputs(Can* can)
     Param::SetInt(Param::din_bms, (canio & CAN_IO_BMS) != 0);
 }
 
-int GetUserThrottleCommand()
+s32fp GetUserThrottleCommand()
 {
     int potval, pot2val;
     bool brake = Param::GetBool(Param::din_brake);
@@ -232,15 +232,15 @@ s32fp ProcessThrottle(int speed)
     // s32fp throtSpnt;
     s32fp finalSpnt;
 
-    if (speed < Param::GetInt(Param::throtramprpm))
-        Throttle::throttleRamp = Param::Get(Param::throtramp);
-    else
-        Throttle::throttleRamp = Param::GetAttrib(Param::throtramp)->max;
+    // if (speed < Param::GetInt(Param::throtramprpm))
+    //     Throttle::throttleRamp = Param::Get(Param::throtramp);
+    // else
+    //     Throttle::throttleRamp = Param::GetAttrib(Param::throtramp)->max;
 
     finalSpnt = utils::GetUserThrottleCommand();
 
 //   GetCruiseCreepCommand(finalSpnt, throtSpnt);
-    finalSpnt = Throttle::RampThrottle(finalSpnt);
+    // finalSpnt = Throttle::RampThrottle(finalSpnt);
 
 
     Throttle::UdcLimitCommand(finalSpnt, Param::Get(Param::udc));
