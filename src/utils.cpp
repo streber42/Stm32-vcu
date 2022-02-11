@@ -232,10 +232,10 @@ s32fp ProcessThrottle(int speed)
     // s32fp throtSpnt;
     s32fp finalSpnt;
 
-    // if (speed < Param::GetInt(Param::throtramprpm))
-    //     Throttle::throttleRamp = Param::Get(Param::throtramp);
-    // else
-    //     Throttle::throttleRamp = Param::GetAttrib(Param::throtramp)->max;
+    if (speed < Param::GetInt(Param::throtramprpm))
+        Throttle::throttleRamp = Param::Get(Param::throtramp);
+    else
+        Throttle::throttleRamp = Param::GetAttrib(Param::throtramp)->max;
 
     finalSpnt = utils::GetUserThrottleCommand();
 

@@ -159,6 +159,7 @@ void GS450HClass::setTimerState(bool desiredTimerState)
 void GS450HClass::setTorqueTarget(int16_t torquePercent)
 {
     // this->scaledTorqueTarget = utils::change(torquePercent, 0, 3040, 0, 3500);//map throttle for GS450HClass inverter
+    torquePercent = torquePercent;
     this->scaledTorqueTarget = get_torque();
 }
 
