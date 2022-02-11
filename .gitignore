@@ -49,3 +49,4 @@ stm32_vcu.bin
 # hex output - only keep for releases
 stm32_vcu.hex
 workspace.code-workspace
+test/test_runners/test_temp_meas_Runner.c

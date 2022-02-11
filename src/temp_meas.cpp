@@ -120,7 +120,7 @@ s32fp TempMeas::Lookup(int digit, Sensors sensorId)
         {
             s32fp a = FP_FROMINT(sensor->coeff == NTC?cur - digit:digit - cur);
             s32fp b = FP_FROMINT(sensor->coeff == NTC?cur - last:last - cur);
-            return MIN(MAX(FP_FROMINT(sensor->step * i + sensor->tempMin) - sensor->step * FP_DIV(a, b),FP_FROMINT(sensor->tempMin)),sensor->tempMax);
+            return MIN(MAX(FP_FROMINT(sensor->step * i + sensor->tempMin) - sensor->step * FP_DIV(a, b),FP_FROMINT(sensor->tempMin)),FP_FROMINT(sensor->tempMax));
         }
         last = cur;
     }

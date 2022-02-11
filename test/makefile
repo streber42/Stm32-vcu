@@ -46,10 +46,13 @@ CFLAGS +=-DUNIT_TEST
 
 TARGET_BASE1=test1
 TARGET_BASE2=test2
+TARGET_BASE3=test3
 TARGET1 = $(TARGET_BASE1)$(TARGET_EXTENSION)
 TARGET2 = $(TARGET_BASE2)$(TARGET_EXTENSION)
+TARGET3 = $(TARGET_BASE3)$(TARGET_EXTENSION)
 SRC_FILES1=$(UNITY_ROOT)/src/unity.c ../src/throttle.cpp ../src/stm32_vcu.cpp ../src/utils.cpp test_throttle.cpp  ../libopeninv/src/params.cpp ../libopeninv/src/my_string.c ../libopeninv/src/errormessage.cpp test_runners/test_throttle_Runner.c
 SRC_FILES2=$(UNITY_ROOT)/src/unity.c ../src/GS450H.cpp test_GS450H.cpp test_runners/test_GS450H_Runner.c
+SRC_FILES3=$(UNITY_ROOT)/src/unity.c ../src/temp_meas.cpp ../src/stm32_vcu.cpp test_temp_meas.cpp test_runners/test_temp_meas_Runner.c ../libopeninv/src/params.cpp ../libopeninv/src/my_string.c ../libopeninv/src/errormessage.cpp ../src/throttle.cpp
 INC_DIRS=-Isrc -I$(UNITY_ROOT)/src -I../include -I../libopeninv/include
 SYMBOLS=
 
@@ -58,16 +61,22 @@ all: clean default
 default: $(SRC_FILES1) $(SRC_FILES2)
 	$(C_COMPILER) $(CFLAGS) $(INC_DIRS) $(SYMBOLS) $(SRC_FILES1) -o $(TARGET1)
 	- ./$(TARGET1)
-	# $(C_COMPILER) $(CFLAGS) $(INC_DIRS) $(SYMBOLS) $(SRC_FILES2) -o $(TARGET2)
-	# - ./$(TARGET2)
+	$(C_COMPILER) $(CFLAGS) $(INC_DIRS) $(SYMBOLS) $(SRC_FILES3) -o $(TARGET3)
+	- ./$(TARGET3)
 
 test_runners/test_throttle_Runner.c: test_throttle.cpp
 	ruby $(UNITY_ROOT)/auto/generate_test_runner.rb test_throttle.cpp  test_runners/test_throttle_Runner.c
-test/test_runners/test_GS450H_Runner.c: test_GS450H.cpp
+test_runners/test_GS450H_Runner.c: test_GS450H.cpp
 	ruby $(UNITY_ROOT)/auto/generate_test_runner.rb test_GS450H.cpp test_runners/test_GS450H_Runner.c
+test_runners/test_temp_meas_Runner.c: test_temp_meas.cpp
+	ruby $(UNITY_ROOT)/auto/generate_test_runner.rb test_temp_meas.cpp test_runners/test_temp_meas_Runner.c
 
 clean:
 	$(CLEANUP) $(TARGET1)
+	$(CLEANUP) $(TARGET3)
 
 ci: CFLAGS += -Werror
 ci: default
+
+	# $(C_COMPILER) $(CFLAGS) $(INC_DIRS) $(SYMBOLS) $(SRC_FILES2) -o $(TARGET2)
+	# - ./$(TARGET2)
