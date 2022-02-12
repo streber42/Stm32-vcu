@@ -47,6 +47,7 @@ public:
     };
 
     static s32fp Lookup(int digit, Sensors sensorId);
+    static float readThermistor(int adc);
 };
 
 
