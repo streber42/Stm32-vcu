@@ -30,11 +30,13 @@ void test_Lookup(void) {
 //test_temp_meas.cpp:30:test_Lookup:FAIL: Expected 2589 Was 2580  3556
 //test_temp_meas.cpp:28:test_Lookup:FAIL: Expected 2589 Was 2570. 3560
 //test_temp_meas.cpp:25:test_Lookup:FAIL: Expected 2589 Was 2465  3600
+    // TEST_ASSERT_EQUAL_INT32(FP_FROMFLT(160.0f),TempMeas::Lookup(2050, TempMeas::Sensors::TEMP_TOYOTA));
     // TEST_ASSERT_EQUAL_INT32(FP_FROMFLT(81.0f),TempMeas::Lookup(3550, TempMeas::Sensors::TEMP_TOYOTA));
     // TEST_ASSERT_EQUAL_INT32(2594, FP_FROMINT(82));
     // TEST_ASSERT_EQUAL_INT32(FP_FROMINT(81),TempMeas::Lookup(3550, TempMeas::Sensors::TEMP_TOYOTA));
     TEST_ASSERT_EQUAL_INT32(FP_FROMFLT(-20.0f),TempMeas::Lookup(4010, TempMeas::Sensors::TEMP_TOYOTA));
     // static const uint16_t Toyota[] = { TOYOTA_M };
     TEST_ASSERT_EQUAL_INT32(4009, Toyota[0]);
+    TEST_ASSERT_EQUAL_FLOAT(31.20024f,TempMeas::readThermistor(2050));
     TEST_ASSERT_EQUAL_FLOAT(9.4f,TempMeas::readThermistor(3550));
 }
