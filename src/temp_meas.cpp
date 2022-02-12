@@ -22,107 +22,131 @@
 #include "temp_meas.h"
 #include "my_math.h"
 #include <stdint.h>
+#include <math.h>
 
 #define TABLEN(a) sizeof(a) / sizeof(a[0])
 
 enum coeff { PTC, NTC };
 
-typedef struct TempSensor
-{
-    int tempMin;
-    int tempMax;
-    uint8_t step;
-    uint8_t tabSize;
-    enum coeff coeff;
-    const uint16_t *lookup;
+typedef struct TempSensor {
+  int tempMin;
+  int tempMax;
+  uint8_t step;
+  uint8_t tabSize;
+  enum coeff coeff;
+  const uint16_t *lookup;
 } TEMP_SENSOR;
 
 /* Temp sensor with JCurve */
-static const uint16_t JCurve[] = { JCURVE };
+static const uint16_t JCurve[] = {JCURVE};
 
 /* Temp sensor in Semikron Skiip82 module */
-static const uint16_t Semikron[] = { SEMIKRON };
+static const uint16_t Semikron[] = {SEMIKRON};
 
 /* Temp sensor in MBB600 IGBT module */
-static const uint16_t mbb600[] = { MBB600 };
+static const uint16_t mbb600[] = {MBB600};
 
 /* Temp sensor KTY83-110 */
-static const uint16_t Kty83[] = { KTY83 };
+static const uint16_t Kty83[] = {KTY83};
 
 /* Temp sensor KTY84-130 */
-static const uint16_t Kty84[] = { KTY84 };
+static const uint16_t Kty84[] = {KTY84};
 
 /* Temp sensor in Nissan Leaf motor */
-static const uint16_t leaf[] = { LEAF };
+static const uint16_t leaf[] = {LEAF};
 
 /* Temp sensor in Nissan Leaf Gen 2 inverter heat sink */
-static const uint16_t leafhs[] = { LEAFHS };
+static const uint16_t leafhs[] = {LEAFHS};
 
-static const uint16_t kty81m[] = { KTY81_M };
+static const uint16_t kty81m[] = {KTY81_M};
 
 /* Temp sensor embedded in Tesla rear motor */
-static const uint16_t Tesla100k[] = { TESLA_100K };
+static const uint16_t Tesla100k[] = {TESLA_100K};
 
 /* Temp sensor embedded in Tesla rear heatsink */
-static const uint16_t Tesla52k[] = { TESLA_52K };
+static const uint16_t Tesla52k[] = {TESLA_52K};
 
 /* Coolant fluid sensor in Tesla LDU */
-static const uint16_t TeslaFluid[] = { TESLA_LDU_FLUID };
+static const uint16_t TeslaFluid[] = {TESLA_LDU_FLUID};
 
 /* Temp sensor embedded in Tesla rear heatsink */
-static const uint16_t Tesla10k[] = { TESLA_10K };
+static const uint16_t Tesla10k[] = {TESLA_10K};
 
 /* Temp sensor embedded in many Toyota motors */
-static const uint16_t Toyota[] = { TOYOTA_M };
+static const uint16_t Toyota[] = {TOYOTA_M};
 
 /* contributed by Fabian Brauss */
 /* Temp sensor KTY81-121 */
-static const uint16_t Kty81hs[] = { KTY81_HS };
+static const uint16_t Kty81hs[] = {KTY81_HS};
 
 /* Temp sensor PT1000 */
-static const uint16_t Pt1000[] = { PT1000 };
+static const uint16_t Pt1000[] = {PT1000};
 
 /* Temp sensor NTC K45 2k2 (with parallel 2k!) */
-static const uint16_t NtcK45[] = { NTCK45 };
+static const uint16_t NtcK45[] = {NTCK45};
 
-static const TEMP_SENSOR sensors[] =
-{
-    { -25, 105, 5,  TABLEN(JCurve),    NTC, JCurve     },
-    { 0,   100, 5,  TABLEN(Semikron),  PTC, Semikron   },
-    { -5,  100, 5,  TABLEN(mbb600),    PTC, mbb600     },
-    { -50, 150, 10, TABLEN(Kty81hs),   NTC, Kty81hs    },
-    { -50, 150, 10, TABLEN(Pt1000),    PTC, Pt1000     },
-    { -50, 150, 5,  TABLEN(NtcK45),    NTC, NtcK45     },
-    { -10, 100, 10, TABLEN(leafhs),    NTC, leafhs     },
-    { -50, 170, 10, TABLEN(Kty83),     PTC, Kty83      },
-    { -40, 300, 10, TABLEN(Kty84),     PTC, Kty84      },
-    { -20, 150, 10, TABLEN(leaf),      NTC, leaf       },
-    { -50, 150, 10, TABLEN(kty81m),    PTC, kty81m     },
-    { -20, 200, 5,  TABLEN(Toyota),    PTC, Toyota     },
-    { -20, 190, 5,  TABLEN(Tesla100k), PTC, Tesla100k  },
-    { 0,   100, 10, TABLEN(Tesla52k),  PTC, Tesla52k   },
-    { 5,   100,  5, TABLEN(TeslaFluid),PTC, TeslaFluid },
-    { -20, 190, 5,  TABLEN(Tesla10k),  PTC, Tesla10k   },
+static const TEMP_SENSOR sensors[] = {
+    {-25, 105, 5, TABLEN(JCurve), NTC, JCurve},
+    {0, 100, 5, TABLEN(Semikron), PTC, Semikron},
+    {-5, 100, 5, TABLEN(mbb600), PTC, mbb600},
+    {-50, 150, 10, TABLEN(Kty81hs), NTC, Kty81hs},
+    {-50, 150, 10, TABLEN(Pt1000), PTC, Pt1000},
+    {-50, 150, 5, TABLEN(NtcK45), NTC, NtcK45},
+    {-10, 100, 10, TABLEN(leafhs), NTC, leafhs},
+    {-50, 170, 10, TABLEN(Kty83), PTC, Kty83},
+    {-40, 300, 10, TABLEN(Kty84), PTC, Kty84},
+    {-20, 150, 10, TABLEN(leaf), NTC, leaf},
+    {-50, 150, 10, TABLEN(kty81m), PTC, kty81m},
+    {-20, 200, 5, TABLEN(Toyota), PTC, Toyota},
+    {-20, 190, 5, TABLEN(Tesla100k), PTC, Tesla100k},
+    {0, 100, 10, TABLEN(Tesla52k), PTC, Tesla52k},
+    {5, 100, 5, TABLEN(TeslaFluid), PTC, TeslaFluid},
+    {-20, 190, 5, TABLEN(Tesla10k), PTC, Tesla10k},
 };
 
-s32fp TempMeas::Lookup(int digit, Sensors sensorId)
-{
-    if (sensorId >= TEMP_LAST) return 0;
-    int index = sensorId >= TEMP_KTY83 ? sensorId - TEMP_KTY83 + NUM_HS_SENSORS : sensorId;
+s32fp TempMeas::Lookup(int digit, Sensors sensorId) {
+  if (sensorId >= TEMP_LAST)
+    return 0;
+  int index = sensorId >= TEMP_KTY83 ? sensorId - TEMP_KTY83 + NUM_HS_SENSORS
+                                     : sensorId;
 
-    const TEMP_SENSOR * sensor = &sensors[index];
-    uint16_t last = sensor->lookup[0] + (sensor->coeff == NTC?-1:+1);
+  const TEMP_SENSOR *sensor = &sensors[index];
+  uint16_t last = sensor->lookup[0] + (sensor->coeff == NTC ? -1 : +1);
 
-    for (uint32_t i = 0; i < sensor->tabSize; i++)
-    {
-        uint16_t cur = sensor->lookup[i];
-        if ((sensor->coeff == NTC && cur >= digit) || (sensor->coeff == PTC && cur <= digit))
-        {
-            s32fp a = FP_FROMINT(sensor->coeff == NTC?cur - digit:digit - cur);
-            s32fp b = FP_FROMINT(sensor->coeff == NTC?cur - last:last - cur);
-            return MIN(MAX(FP_FROMINT(sensor->step * i + sensor->tempMin) - sensor->step * FP_DIV(a, b),FP_FROMINT(sensor->tempMin)),FP_FROMINT(sensor->tempMax));
-        }
-        last = cur;
+  for (uint32_t i = 0; i < sensor->tabSize; i++) {
+    uint16_t cur = sensor->lookup[i];
+    if ((sensor->coeff == NTC && cur >= digit) ||
+        (sensor->coeff == PTC && cur <= digit)) {
+      s32fp a = FP_FROMINT(sensor->coeff == NTC ? cur - digit : digit - cur);
+      s32fp b = FP_FROMINT(sensor->coeff == NTC ? cur - last : last - cur);
+      return MIN(MAX(FP_FROMINT(sensor->step * i + sensor->tempMin) -
+                         FP_MUL(FP_FROMINT(sensor->step), FP_DIV(a, b)),
+                     FP_FROMINT(sensor->tempMin)),
+                 FP_FROMINT(sensor->tempMax));
     }
-    return FP_FROMINT(sensor->tempMax);
+    last = cur;
+  }
+  return FP_FROMINT(sensor->tempMax);
+}
+
+/////////////temp sensor data////////////////////
+float vcc = 5.0;
+float adc_step = 3.3 / 4096.0;
+float Rtop = 75000.0;
+float Ro = 47000.0;
+float To = 25 + 273;
+float B = 3500;
+float mg1_stat = 0;
+float mg2_stat = 0;
+
+float TempMeas::readThermistor(int adc) {
+
+  float raw = adc;
+  float voltage = raw * adc_step;
+
+  float Rt = (voltage * Rtop) / (vcc - voltage);
+
+  float temp = (1 / (1.0 / To + (1.0 / B) * log(Rt / Ro))) - 273;
+
+  return temp;
 }
