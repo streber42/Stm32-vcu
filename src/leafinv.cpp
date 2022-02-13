@@ -61,6 +61,7 @@ PDM sends:
 
 void LeafINV::DecodeCAN(int id, uint32_t data[2])
 {
+
    uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
 
    if (id == 0x1DA)// THIS MSG CONTAINS INV VOLTAGE, MOTOR SPEED AND ERROR STATE
@@ -116,12 +117,19 @@ bool LeafINV::ControlCharge(bool RunCh)
 return false;
 }
 
+
+
+
 void LeafINV::SetTorque(float torquePercent)
 {
    final_torque_request = (torquePercent * 2047) / 100.0f;
 
    Param::SetInt(Param::torque,final_torque_request);//post processed final torque value sent to inv to web interface
 }
+
+
+
+
 
 void LeafINV::Task10Ms()
 {
@@ -192,7 +200,7 @@ void LeafINV::Task10Ms()
 
 
 
-   can->Send(0x11A, (uint32_t*)bytes,8);//send 0x11a
+   Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x11A, (uint32_t*)bytes,8);
    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    //Send target motor torque signal
    ////////////////////////////////////////////////////
@@ -213,13 +221,11 @@ void LeafINV::Task10Ms()
    // Requested torque (signed 12-bit value + always 0x0 in low nibble)
    if (opmode != MOD_RUN) final_torque_request=0;//override any torque commands if not in run mode.
    static int16_t last_logged_final_torque_request = 0;
-
    if(final_torque_request != last_logged_final_torque_request)
    {
       last_logged_final_torque_request = final_torque_request;
 
    }
-
    if(final_torque_request >= -2048 && final_torque_request <= 2047)
    {
       bytes[2] = ((final_torque_request < 0) ? 0x80 : 0) |((final_torque_request >> 4) & 0x7f);
@@ -339,7 +345,7 @@ void LeafINV::Task10Ms()
    // Extra CRC
    nissan_crc(bytes, 0x85);
 
-   can->Send(0x1D4, (uint32_t*)bytes,8);//send on can1
+   Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x1D4, (uint32_t*)bytes,8);
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //We need to send 0x1db here with voltage measured by inverter
 //Zero seems to work also on my gen1
@@ -371,7 +377,7 @@ void LeafINV::Task10Ms()
    counter_1db++;
    if(counter_1db >= 4) counter_1db = 0;
 
-   can->Send(0x1DB, (uint32_t*)bytes,8);
+    Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x1DB, (uint32_t*)bytes,8);
 //////////////////////////////////////////////////////////////////////////////////////////
    // Statistics from 2016 capture:
    //     10 00000000000000
@@ -390,7 +396,7 @@ void LeafINV::Task10Ms()
    bytes[5]=0x00;
    bytes[6]=0x00;
 
-   can->Send(0x50B, (uint32_t*)bytes,7);//possible problem here as 0x50B is DLC 7....
+    Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x50B, (uint32_t*)bytes,7);//possible problem here as 0x50B is DLC 7....
 
 
    if (opmode == MOD_CHARGE)
@@ -415,11 +421,8 @@ void LeafINV::Task10Ms()
       counter_1dc++;
       if(counter_1dc >= 4) counter_1dc = 0;
 
-      can->Send(0x1DC, (uint32_t*)bytes,8);
-////////////////////////////////////////////////////////////////////////////////////////////////
-      OBCpwrSP=(Param::GetInt(Param::Pwrspnt)/100)+0x64;//grab setpoint power from webui and convert to pdm format
+    Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x1DC, (uint32_t*)bytes,8);
       Vbatt=Param::GetInt(Param::udc);//Actual measured battery voltage by isa shunt
-      VbattSP=Param::GetInt(Param::Voltspnt);
       if(!Param::GetBool(Param::Chgctrl))
       {
          if(OBCpwrSP>160) OBCpwrSP=160;//clamp max value
@@ -455,11 +458,16 @@ void LeafINV::Task10Ms()
       counter_1f2++;
       if(counter_1f2 >= 4) counter_1f2 = 0;
 
-      can->Send(0x1F2, (uint32_t*)bytes,8);
-   }
+    Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x1F2, (uint32_t*)bytes,8);
+
+
+
+
+    /////////////////////////////////////////////
 
 }
 
+}
 void LeafINV::Task100Ms()
 {
    //MSGS for charging with pdm
@@ -478,32 +486,13 @@ void LeafINV::Task100Ms()
    counter_55b++;
    if(counter_55b >= 4) counter_55b = 0;
 
-   can->Send(0x55b, (uint32_t*)bytes,8);
+    Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x55b, (uint32_t*)bytes,8);
 
-   bytes[0]=0x00;//Static msg works fine here
-   bytes[1]=0x00;//Batt capacity for chg and qc.
-   bytes[2]=0x0c;
-   bytes[3]=0x76;
-   bytes[4]=0x18;
-   bytes[5]=0x00;
-   bytes[6]=0x00;
-   bytes[7]=0x00;
+    Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x59e, (uint32_t*)bytes,8);
 
-   can->Send(0x59e, (uint32_t*)bytes,8);
+    Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x5bc, (uint32_t*)bytes,8);
 
-   //muxed msg with info for gids etc. Will try static for a test.
-   bytes[0]=0x3D;//Static msg works fine here
-   bytes[1]=0x80;
-   bytes[2]=0xF0;
-   bytes[3]=0x64;
-   bytes[4]=0xB0;
-   bytes[5]=0x01;
-   bytes[6]=0x00;
-   bytes[7]=0x32;
-
-   can->Send(0x5bc, (uint32_t*)bytes,8);
-
-   run100ms = (run100ms + 1) & 3;
+    run100ms = (run100ms + 1) & 3;
 }
 
 
