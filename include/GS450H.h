@@ -30,6 +30,7 @@ public:
     void UpdateHTMState1Ms(int8_t gear);
 	void SetPrius();
 	void SetGS450H();
+    short get_torque();
 
 
     GS450HClass()

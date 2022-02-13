@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define VER 1.00.A
+#define VER GIT_HASH
 
 
 /* Entries must be ordered as follows:
@@ -122,6 +122,10 @@
     VALUE_ENTRY(tmphs,        "°C",    2028 ) \
     VALUE_ENTRY(tmpm,         "°C",    2029 ) \
     VALUE_ENTRY(tmpaux,       "°C",    2030 ) \
+    VALUE_ENTRY(tmpmg1,       "°C",    2076 ) \
+    VALUE_ENTRY(tmpmg2,       "°C",    2077 ) \
+    VALUE_ENTRY(tmpmg1fp,       "°C",    2078 ) \
+    VALUE_ENTRY(tmpmg2fp,       "°C",    2079 ) \
     VALUE_ENTRY(uaux,         "V",     2031 ) \
     VALUE_ENTRY(canio,        CANIOS,  2032 ) \
     VALUE_ENTRY(cruisespeed,  "rpm",   2033 ) \
@@ -165,7 +169,7 @@
     VALUE_ENTRY(cpuload,      "%",     2063 ) \
 
 
-//Next value Id: 2076
+//Next value Id: 2080
 
 #define VERSTR STRINGIFY(4=VER)
 #define dmodes     "0=CLOSED, 1=OPEN, 2=ERROR, 3=INVALID"

@@ -44,7 +44,7 @@ void GetDigInputs(Can* can)
     Param::SetInt(Param::din_bms, (canio & CAN_IO_BMS) != 0);
 }
 
-int GetUserThrottleCommand()
+s32fp GetUserThrottleCommand()
 {
     int potval, pot2val;
     bool brake = Param::GetBool(Param::din_brake);
@@ -154,6 +154,12 @@ void SelectDirection(_vehmodes targetVehicle, BMW_E65Class E65Vehicle)
             selectedDir = 0;
     }
 
+    if (selectedDir == -1) {
+        DigIo::gp_out2.Set(); // Turn on reverse lights
+    } else {
+        DigIo::gp_out2.Clear(); // Turn off reverse lights
+    }
+
     Param::SetInt(Param::dir, selectedDir);
 }
 
@@ -234,7 +240,7 @@ s32fp ProcessThrottle(int speed)
     finalSpnt = utils::GetUserThrottleCommand();
 
 //   GetCruiseCreepCommand(finalSpnt, throtSpnt);
-    finalSpnt = Throttle::RampThrottle(finalSpnt);
+    // finalSpnt = Throttle::RampThrottle(finalSpnt);
 
 
     Throttle::UdcLimitCommand(finalSpnt, Param::Get(Param::udc));
