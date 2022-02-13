@@ -204,9 +204,15 @@ void GS450HClass::run100msTask(uint8_t Lexus_Gear, uint16_t Lexus_Oil)
 
     int tmpmg1 = AnaIn::MG1_Temp.Get();//in the gs450h case we must read the analog temp values from sensors in the gearbox
     int tmpmg2 = AnaIn::MG2_Temp.Get();
+    Param::SetInt(Param::tmpmg1,tmpmg1);
+    Param::SetInt(Param::tmpmg2,tmpmg2);
+    float temp_1 = TempMeas::readThermistor(tmpmg1);
+    Param::SetFlt(Param::tmpmg1fp,FP_FROMFLT(temp_1));
+    float temp_2 = TempMeas::readThermistor(tmpmg2);
+    Param::SetFlt(Param::tmpmg2fp,FP_FROMFLT(temp_2));
 
-    mTemps[0] = TempMeas::Lookup(tmpmg1, TempMeas::TEMP_TOYOTA);
-    mTemps[1] = TempMeas::Lookup(tmpmg2, TempMeas::TEMP_TOYOTA);
+    mTemps[0] = FP_FROMFLT(temp_1);
+    mTemps[1] = FP_FROMFLT(temp_2);
 
     tmpm = MAX(mTemps[0], mTemps[1]);//which ever is the hottest gets displayed
     Param::SetFlt(Param::tmpm, tmpm);
