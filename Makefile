@@ -33,10 +33,10 @@ COMPILE_TIME=$(shell date -u +'%Y-%m-%d %H:%M:%S UTC')
 GIT_BRANCH=$(shell git branch | grep "^\*" | sed 's/^..//')
 export VERSION_FLAGS=-DGIT_HASH=$(GIT_HASH) -DCOMPILE_TIME="\"$(COMPILE_TIME)\"" -DGIT_BRANCH="\"$(GIT_BRANCH)\""
 
-CFLAGS		= -Os -Wall -Wextra -Werror -Ilibopeninv/include -Iinclude/ -Ilibopencm3/include \
+CFLAGS		= -Os -Wall -Wextra -Ilibopeninv/include -Iinclude/ -Ilibopencm3/include \
              -fno-common -fno-builtin -pedantic -DSTM32F1 -DT_DEBUG=$(TERMINAL_DEBUG)  $(VERSION_FLAGS) \
 				 -mcpu=cortex-m3 -mthumb -std=gnu99 -ffunction-sections -fdata-sections -ggdb3
-CPPFLAGS    = -Os -Wall -Wextra -Werror -Ilibopeninv/include -Iinclude/ -Ilibopencm3/include \
+CPPFLAGS    = -Os -Wall -Wextra -Ilibopeninv/include -Iinclude/ -Ilibopencm3/include \
             -fno-common -std=c++17 -pedantic -DSTM32F1 -DT_DEBUG=$(TERMINAL_DEBUG) $(VERSION_FLAGS) \
 		 -ffunction-sections -fdata-sections -fno-builtin -fno-rtti -fno-exceptions \
 		 -fno-unwind-tables -mcpu=cortex-m3 -mthumb -ggdb3
@@ -112,7 +112,7 @@ flash: images
 		       -c "init" -c "reset halt" \
 		       -c "flash write_image erase $(BINARY).hex" \
 		       -c "reset" \
-		       -c "shutdown" $(NULL)
+		       -c "shutdown"
 
 .PHONY: directories get-deps images clean
 

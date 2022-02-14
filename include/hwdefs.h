@@ -11,7 +11,7 @@
 #define MIN_PWM_DIGITS 11
 #define PERIPH_CLK      ((uint32_t)36000000)
 
-#define RCC_CLOCK_SETUP rcc_clock_setup_in_hse_8mhz_out_72mhz
+#define RCC_CLOCK_SETUP rcc_clock_setup_in_hse_25mhz_out_72mhz
 
 #define PWM_TIMER     TIM1
 #define PWM_TIMRST    RST_TIM1
@@ -25,7 +25,7 @@
 #define FUELGAUGE_TIMER TIM4
 
 #define TERM_USART         USART3
-#define TERM_USART_TXPIN   GPIO_USART3_PR_TX
+#define TERM_USART_TXPIN   GPIO_USART3_TX
 //#define TERM_USART_TXPORT  GPIOC
 #define TERM_USART_TXPORT  GPIOB    //gpio B for usart 3 on 32F107 Zombie
 #define TERM_USART_DMARX   DMA_CHANNEL3

@@ -150,9 +150,9 @@ static void Ms200Task(void)
     Param::SetInt(Param::Min,minutes);
     Param::SetInt(Param::Sec,seconds);
     Param::SetInt(Param::ChgT,ChgDur_tmp);
-    if (DigIo::gp_12Vin.Get()) {
-        scb_reset_system();
-    }
+   //  if (DigIo::gp_12Vin.Get()) {
+   //      scb_reset_system();
+   //  }
     if(ChgSet==2 && !ChgLck){ //if in timer mode and not locked out from a previous full charge.
         if(opmode!=MOD_CHARGE)
             {
@@ -280,18 +280,18 @@ static void Ms200Task(void)
        // if(opmode==MOD_CHARGE) DigIo::gp_out3.Set();//Chademo relay on for testing
        // if(opmode!=MOD_CHARGE) DigIo::gp_out3.Clear();//Chademo relay off for testing
 
-    count_one++;
-if(count_one==1)    //just a dummy routine that sweeps the pots for testing.
-{
-    pot_test++;
-    DigIo::pot1_cs.Clear();
-    DigIo::pot2_cs.Clear();
-    uint8_t dummy=spi_xfer(SPI3,pot_test);//test
-    dummy=dummy;
-    DigIo::pot1_cs.Set();
-    DigIo::pot2_cs.Set();
-    count_one=0;
-}
+//     count_one++;
+// if(count_one==1)    //just a dummy routine that sweeps the pots for testing.
+// {
+//     pot_test++;
+//     DigIo::pot1_cs.Clear();
+//     DigIo::pot2_cs.Clear();
+//     uint8_t dummy=spi_xfer(SPI3,pot_test);//test
+//     dummy=dummy;
+//     DigIo::pot1_cs.Set();
+//     DigIo::pot2_cs.Set();
+//     count_one=0;
+// }
 
 
 
@@ -960,7 +960,7 @@ extern "C" int main(void)
     rtc_setup();
     ConfigureVariantIO();
    // gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON,AFIO_MAPR_USART3_REMAP_PARTIAL_REMAP);//remap usart 3 to PC10 and PC11 for VCU HW
-    gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, AFIO_MAPR_CAN2_REMAP | AFIO_MAPR_TIM1_REMAP_FULL_REMAP);//32f107
+   //  gpio_primary_remap(AFIO_MAPR_SWJ_CFG_FULL_SWJ, AFIO_MAPR_CAN2_REMAP | AFIO_MAPR_TIM1_REMAP_FULL_REMAP);//32f107
     usart_setup();
     usart2_setup();//TOYOTA HYBRID INVERTER INTERFACE
     nvic_setup();
@@ -985,8 +985,8 @@ extern "C" int main(void)
     can = &c;
     can2 = &c2;
 
-    CANSPI_Initialize();// init the MCP25625 on CAN3
-    CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
+   //  CANSPI_Initialize();// init the MCP25625 on CAN3
+   //  CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
 
     Stm32Scheduler s(TIM3); //We never exit main so it's ok to put it on stack
     scheduler = &s;
