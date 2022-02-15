@@ -19,6 +19,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "stm32_vcu.h"
+#include <FreeRTOS.h>
+#include <task.h>
 #include <libopencm3/cm3/scb.h>
 
 #define RMS_SAMPLES 256
@@ -181,6 +183,7 @@ static void RunChaDeMo()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void Ms200Task(void)
 {
+    DigIo::led2_out.Toggle();
     if(chargerClass::HVreq==true) Param::SetInt(Param::hvChg,1);
     if(chargerClass::HVreq==false) Param::SetInt(Param::hvChg,0);
     int opmode = Param::GetInt(Param::opmode);
@@ -1018,8 +1021,60 @@ void setCanFilters() {
     vehicle_can->RegisterUserMessage(0x192);//E65 Shifter
     charger_can->RegisterUserMessage(0x108);//Charger HV request
     vehicle_can->RegisterUserMessage(0x153);//E39/E46 ASC1 message    
-    vehicle_can->RegisterUserMessage(0x615);//E39/E46 IKE message    
 }
+/*
+ * Handler in case our application overflows the stack
+ */
+void vApplicationStackOverflowHook(
+	TaskHandle_t xTask __attribute__((unused)),
+    char *pcTaskName __attribute__((unused))) {
+
+	for (;;);
+}
+
+static void rtos_Ms1Task(void* args __attribute__((unused))) {
+    TickType_t xLastWakeTime;
+    const TickType_t xFrequency = pdMS_TO_TICKS(1);
+    xLastWakeTime = xTaskGetTickCount();
+    for (;;) {
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+        Ms1Task();
+    }
+}
+static void rtos_Ms10Task(void *args __attribute__((unused))) {
+    TickType_t xLastWakeTime;
+    const TickType_t xFrequency = pdMS_TO_TICKS(10);
+    xLastWakeTime = xTaskGetTickCount();
+    for (;;) {
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+        Ms10Task();
+    }
+}
+static void rtos_Ms100Task(void *args __attribute__((unused))) {
+    TickType_t xLastWakeTime;
+    const TickType_t xFrequency = pdMS_TO_TICKS(100);
+    xLastWakeTime = xTaskGetTickCount();
+    for (;;) {
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+        Ms100Task();
+    }
+}
+static void rtos_Ms200Task(void *args __attribute__((unused))) {
+    TickType_t xLastWakeTime;
+    const TickType_t xFrequency = pdMS_TO_TICKS(200);
+    xLastWakeTime = xTaskGetTickCount();
+    for (;;) {
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+        Ms200Task();
+    }
+}
+
+static void rtos_term_Run(void *args __attribute__((unused))) {
+  term_Run();
+}
+
+
+
 
 extern "C" int main(void)
 {
@@ -1053,23 +1108,23 @@ extern "C" int main(void)
     can = &c;
     can2 = &c2;
 
-    CANSPI_Initialize();// init the MCP25625 on CAN3
-    CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
+   //  CANSPI_Initialize();// init the MCP25625 on CAN3
+   //  CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
 
-    Stm32Scheduler s(TIM4); //We never exit main so it's ok to put it on stack
-    scheduler = &s;
-
-    s.AddTask(Ms1Task, 1);
-    s.AddTask(Ms10Task, 10);
-    s.AddTask(Ms100Task, 100);
-    s.AddTask(Ms200Task, 200);
+    xTaskCreate(rtos_Ms1Task, "Ms1Task",100,NULL,configMAX_PRIORITIES-1,NULL);
+    xTaskCreate(rtos_Ms10Task, "Ms10Task",100,NULL,configMAX_PRIORITIES-2,NULL);
+    xTaskCreate(rtos_Ms100Task, "Ms100Task",100,NULL,configMAX_PRIORITIES-3,NULL);
+    xTaskCreate(rtos_Ms200Task, "Ms200Task",100,NULL,configMAX_PRIORITIES-4,NULL);
+    xTaskCreate(rtos_term_Run, "TermTask",200,NULL,configMAX_PRIORITIES-5,NULL);
 
 
     // ISA::initialize();//only call this once if a new sensor is fitted. Might put an option on web interface to call this....
     //  DigIo::prec_out.Set();//commence precharge
     Param::SetInt(Param::version, 4); //backward compatibility
 
-    term_Run();
+    // Start RTOS Task scheduler
+	vTaskStartScheduler();
 
+	for (;;);
     return 0;
 }
