@@ -11,6 +11,7 @@
     DIG_IO_ENTRY(rev_in,      GPIOA, GPIO6,  PinMode::INPUT_FLT)   \
     DIG_IO_ENTRY(dcsw_out,    GPIOE, GPIO13, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(led_out,     GPIOC, GPIO7, PinMode::OUTPUT)      \
+    DIG_IO_ENTRY(led2_out,     GPIOC, GPIO6, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(gp_out1,     GPIOD, GPIO15, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(gp_out2,     GPIOD, GPIO14, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(gp_out3,     GPIOD, GPIO13, PinMode::OUTPUT)      \
