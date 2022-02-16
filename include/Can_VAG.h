@@ -18,7 +18,7 @@ public:
    void SetRevCounter(int s) { rpm = s; }
    void SetTemperatureGauge(float temp) { } //TODO
    bool Ready() { return true; }
-   bool Start();
+   // bool Start();
 
 private:
    uint16_t rpm;

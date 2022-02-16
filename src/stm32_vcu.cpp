@@ -272,6 +272,7 @@ static void Ms200Task(void)
 //     DigIo::pot2_cs.Set();
 //     count_one=0;
 // }
+}
 
 static void SendInverter100MsMessages(int opmode)
 {
@@ -617,7 +618,7 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
         break;
     }
     selectedInverter->SetCanInterface(Can::GetInterface(Param::GetInt(Param::Inverter_CAN)));
-    selectedVehicle->SetCanInterface(Can::GetIterface(Param::GetInt(Param::VehicleCAN)));
+    selectedVehicle->SetCanInterface(Can::GetInterface(Param::GetInt(Param::Vehicle_CAN)));
     Param::SetInt(Param::inv_can, Param::GetInt(Param::Inverter_CAN));
     Param::SetInt(Param::veh_can, Param::GetInt(Param::Vehicle_CAN));
     Param::SetInt(Param::shunt_can, Param::GetInt(Param::Shunt_CAN));
@@ -858,13 +859,16 @@ static void rtos_Ms200Task(void *args __attribute__((unused))) {
 }
 
 static void rtos_term_Run(void *args __attribute__((unused))) {
-   while(true)
+   extern const TERM_CMD TermCmds[];
+    Terminal t(USART3, TermCmds, false);
+    for (;;) {
       t.Run();
+      vTaskDelay(1);
+    }
 }
 
 extern "C" int main(void)
 {
-   extern const TERM_CMD TermCmds[];
    bool remapCan1 = false;
 
     clock_setup();
@@ -876,6 +880,7 @@ extern "C" int main(void)
    #else
    // gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON,AFIO_MAPR_USART3_REMAP_PARTIAL_REMAP);//remap usart 3 to PC10 and PC11 for VCU HW
    //  gpio_primary_remap(AFIO_MAPR_SWJ_CFG_FULL_SWJ, AFIO_MAPR_CAN2_REMAP | AFIO_MAPR_TIM1_REMAP_FULL_REMAP);//32f107
+   #endif
     usart2_setup();//TOYOTA HYBRID INVERTER INTERFACE
     nvic_setup();
     parm_load();
@@ -884,7 +889,6 @@ extern "C" int main(void)
     DigIo::inv_out.Clear();//inverter power off during bootup
     DigIo::mcp_sby.Clear();//enable can3
 
-    Terminal t(USART3, TermCmds, false);
     Can c(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));
     Can c2(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed));
 
@@ -907,7 +911,7 @@ extern "C" int main(void)
     xTaskCreate(rtos_Ms10Task, "Ms10Task",100,NULL,configMAX_PRIORITIES-2,NULL);
     xTaskCreate(rtos_Ms100Task, "Ms100Task",100,NULL,configMAX_PRIORITIES-3,NULL);
     xTaskCreate(rtos_Ms200Task, "Ms200Task",100,NULL,configMAX_PRIORITIES-4,NULL);
-    xTaskCreate(rtos_term_Run, "TermTask",200,NULL,configMAX_PRIORITIES-5,NULL);
+    xTaskCreate(rtos_term_Run, "TermTask",300,NULL,configMAX_PRIORITIES-5,NULL);
 
 
     // ISA::initialize();//only call this once if a new sensor is fitted. Might put an option on web interface to call this....

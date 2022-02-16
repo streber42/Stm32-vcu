@@ -79,7 +79,7 @@ int16_t speedrange_reverse[5] = //rpm
 
 short GS450HClass::get_torque()
 {
-    s32fp ThrotVal = utils::GetUserThrottleCommand(); // GetUserThrottleCommand
+    s32fp ThrotVal = FP_FROMFLT(utils::GetUserThrottleCommand()); // GetUserThrottleCommand
     // int ThrotRange = parameters.Max_throttleVal - parameters.Min_throttleVal; //full range of min-max throttle params
     int16_t torque = 0, map_x, map_y;
     uint8_t pedal_index, speed_index;

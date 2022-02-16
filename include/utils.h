@@ -17,7 +17,7 @@
 namespace utils
 {
     int32_t change(int32_t, int32_t, int32_t, int32_t, int32_t);
-    float GetUserThrottleCommand(Can*);
+    float GetUserThrottleCommand();
     float ProcessThrottle(int);
     float ProcessUdc(uint32_t, int);
     void CalcSOC();
