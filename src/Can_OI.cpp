@@ -23,10 +23,7 @@
 #include "my_math.h"
 #include "stm32_can.h"
 #include "params.h"
-
-
-
-
+#include "utils.h"
 
 uint8_t Can_OI::run100ms = 0;
 uint32_t Can_OI::lastRecv = 0;
@@ -37,62 +34,48 @@ int16_t Can_OI::inv_temp;
 int16_t Can_OI::motor_temp;
 int16_t Can_OI::final_torque_request;
 
-
-
 void Can_OI::DecodeCAN(int id, uint32_t data[2])
 {
 //0x1A4 bits 0-15 inverter voltage x10
 //0x190 bits 0-15 motor rpm x1
 //0x19A bits 0-15 heatsink temp x10
 
-    uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
+   uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
 
-    if (id == 0x1A4)// THIS MSG CONTAINS INV VOLTAGE
-    {
-        voltage=((bytes[1]<<8)|(bytes[0]))/10;
-    }
-    else if (id == 0x190)// THIS MSG CONTAINS MOTOR RPM
-    {
-    speed=((bytes[1]<<8)|(bytes[0]));
-    }
-        else if (id == 0x19A)// THIS MSG CONTAINS INVERTER HEATSINK TEMP
-    {
-        inv_temp = ((bytes[1]<<8)|(bytes[0]))/10;//INVERTER TEMP
-        motor_temp = 0;//MOTOR TEMP
-    }
-
-}
-
-
-
-void Can_OI::SetThrottle(int8_t gear, int16_t torque)
-{
-    uint8_t bytes[8];
-    if(gear==0) final_torque_request=0;//Neutral
-    if(gear==32) final_torque_request=torque;//Drive
-    if(gear==-32) final_torque_request=torque;//Reverse
-
-//Here we send the CAN throttle message
-bytes[0]=final_torque_request & 0xFF;//throttle lsb
-bytes[1]=final_torque_request >> 8;//throttle msb
-
-Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x64, (uint32_t*)bytes,2);//send 0x64 (100 decimal)
-
-
-    Param::SetInt(Param::torque,final_torque_request);//post processed final torue value sent to inv to web interface
+   if (id == 0x1A4)// THIS MSG CONTAINS INV VOLTAGE
+   {
+      voltage=((bytes[1]<<8)|(bytes[0]))/10;
+   }
+   else if (id == 0x190)// THIS MSG CONTAINS MOTOR RPM
+   {
+      speed=((bytes[1]<<8)|(bytes[0]));
+   }
+   else if (id == 0x19A)// THIS MSG CONTAINS INVERTER HEATSINK TEMP
+   {
+      inv_temp = ((bytes[1]<<8)|(bytes[0]))/10;//INVERTER TEMP
+      motor_temp = 0;//MOTOR TEMP
+   }
 
 }
 
-
-
-
-
-
-
-void Can_OI::Send100msMessages()
+void Can_OI::SetTorque(float torquePercent)
 {
-    uint8_t bytes[8];
-    uint8_t tempIO=0;
+   uint8_t bytes[8];
+   final_torque_request = torquePercent * 10;
+
+   //Here we send the CAN throttle message
+   bytes[0]=final_torque_request & 0xFF;//throttle lsb
+   bytes[1]=final_torque_request >> 8;//throttle msb
+
+   Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x64, (uint32_t*)bytes,2);//send 0x64 (100 decimal)
+
+   Param::SetInt(Param::torque,final_torque_request);//post processed final torue value sent to inv to web interface
+}
+
+void Can_OI::Task100Ms()
+{
+   uint8_t bytes[8];
+   uint8_t tempIO=0;
 //Here we send the CANIO message to the OI comprising of :
    // Bit 0: cruise
    // Bit 1: start
@@ -101,17 +84,14 @@ void Can_OI::Send100msMessages()
    // Bit 4: reverse
    // Bit 5: bms
    //1=Cruise, 2=Start, 4=Brake, 8=Fwd, 16=Rev, 32=Bms
-if(Param::GetBool(Param::din_forward))tempIO+=8;
-if(Param::GetBool(Param::din_reverse))tempIO+=16;
-if(Param::GetBool(Param::din_brake))tempIO+=4;
-if(Param::GetBool(Param::din_start))tempIO+=2;
-bytes[0] = tempIO;
+   if(Param::GetBool(Param::din_forward)) tempIO+=8;
+   if(Param::GetBool(Param::din_reverse)) tempIO+=16;
+   if(Param::GetBool(Param::din_brake)) tempIO+=4;
+   if(Param::GetBool(Param::din_start)) tempIO+=2;
+   bytes[0] = tempIO;
 
-Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x12C, (uint32_t*)bytes,1);//send 0x12C (300 decimal)
-    run100ms = (run100ms + 1) & 3;
-
-
-
+   Can::GetInterface(Param::GetInt(Param::inv_can))->Send(0x12C, (uint32_t*)bytes,1);//send 0x12C (300 decimal)
+   run100ms = (run100ms + 1) & 3;
 }
 
 
