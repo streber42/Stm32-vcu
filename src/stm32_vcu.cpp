@@ -357,7 +357,7 @@ static void Ms100Task(void)
    if (!chargeMode && rtc_get_counter_val() > 100)
    {
       if (Param::GetInt(Param::canperiod) == CAN_PERIOD_100MS)
-        can->SendAll();
+         Can::GetInterface(0)->SendAll();
    }
    int16_t IsaTemp=ISA::Temperature;
    Param::SetInt(Param::tmpaux,IsaTemp);
@@ -620,8 +620,8 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
     default:
         break;
     }
-    selectedInverter->SetCanInterface(can);
-    selectedVehicle->SetCanInterface(can);
+   //  selectedInverter->SetCanInterface(Can::GetInterface(Param::GetInt(Param::Inverter_CAN)));
+    selectedVehicle->SetCanInterface(Can::GetInterface(Param::GetInt(Param::Vehicle_CAN)));
     Param::SetInt(Param::inv_can, Param::GetInt(Param::Inverter_CAN));
     Param::SetInt(Param::veh_can, Param::GetInt(Param::Vehicle_CAN));
     Param::SetInt(Param::shunt_can, Param::GetInt(Param::Shunt_CAN));
@@ -863,7 +863,7 @@ static void rtos_Ms200Task(void *args __attribute__((unused))) {
 
 static void rtos_term_Run(void *args __attribute__((unused))) {
    extern const TERM_CMD TermCmds[];
-    Terminal t(USART3, TermCmds, false);
+    Terminal t(USART3, TermCmds, true);
     for (;;) {
       t.Run();
       vTaskDelay(1);
@@ -906,7 +906,7 @@ extern "C" int main(void)
     rtc_setup();
     ConfigureVariantIO();
    #ifdef TEST_P107
-   gpio_primary_remap(AFIO_MAPR_SWJ_CFG_FULL_SWJ,AFIO_MAPR_CAN1_REMAP_PORTB|AFIO_MAPR_CAN2_REMAP);//32f107
+   gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON,AFIO_MAPR_CAN1_REMAP_PORTD|AFIO_MAPR_CAN2_REMAP|AFIO_MAPR_USART3_REMAP_FULL_REMAP);//32f107
    remapCan1 = true;
    #else
    // gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON,AFIO_MAPR_USART3_REMAP_PARTIAL_REMAP);//remap usart 3 to PC10 and PC11 for VCU HW
@@ -932,6 +932,7 @@ extern "C" int main(void)
 
    parm_Change(Param::PARAM_LAST);
    parm_Change(Param::Inverter); //Set loaded inverter
+   setCanFilters();
 
    //  CANSPI_Initialize();// init the MCP25625 on CAN3
    //  CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ

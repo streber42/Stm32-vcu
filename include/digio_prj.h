@@ -14,12 +14,12 @@
     DIG_IO_ENTRY(gp_out1,     GPIOD, GPIO15, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(gp_out2,     GPIOD, GPIO14, PinMode::OUTPUT)      \
     DIG_IO_ENTRY(gp_out3,     GPIOD, GPIO13, PinMode::OUTPUT)      \
-    DIG_IO_ENTRY(sw_mode0,     GPIOD, GPIO9, PinMode::OUTPUT)      \
-    DIG_IO_ENTRY(sw_mode1,     GPIOD, GPIO8, PinMode::OUTPUT)      \
-    DIG_IO_ENTRY(lin_wake,     GPIOD, GPIO10, PinMode::OUTPUT)      \
-    DIG_IO_ENTRY(lin_nslp,     GPIOD, GPIO11, PinMode::OUTPUT)      \
-    DIG_IO_ENTRY(prec_out,     GPIOC, GPIO6,  PinMode::OUTPUT)      \
-    DIG_IO_ENTRY(inv_out,     GPIOA, GPIO8,  PinMode::OUTPUT)      \
+    DIG_IO_ENTRY(sw_mode0,     GPIOB, GPIO5, PinMode::OUTPUT)      \
+    DIG_IO_ENTRY(sw_mode1,     GPIOB, GPIO4, PinMode::OUTPUT)      \
+    DIG_IO_ENTRY(lin_wake,     GPIOA, GPIO5, PinMode::OUTPUT)      \
+    DIG_IO_ENTRY(lin_nslp,     GPIOA, GPIO7, PinMode::OUTPUT)      \
+    DIG_IO_ENTRY(prec_out,     GPIOB, GPIO0,  PinMode::OUTPUT)      \
+    DIG_IO_ENTRY(inv_out,     GPIOD, GPIO10,  PinMode::OUTPUT)      \
     DIG_IO_ENTRY(SL1_out,     GPIOC, GPIO9,  PinMode::OUTPUT)      \
     DIG_IO_ENTRY(SL2_out,     GPIOC, GPIO8,  PinMode::OUTPUT)      \
     DIG_IO_ENTRY(SP_out,     GPIOD, GPIO12,  PinMode::OUTPUT)      \
