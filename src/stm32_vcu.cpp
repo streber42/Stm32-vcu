@@ -30,6 +30,8 @@ static bool chargeModeDC = false;
 static bool ChgLck = false;
 static Can* can;
 static Can* can2;
+static Can c = Can(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed),true);
+static Can c2 = Can(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed));
 static InvModes targetInverter;
 static VehicleModes targetVehicle;
 static _chgmodes targetCharger;
@@ -354,7 +356,7 @@ static void Ms100Task(void)
    if (!chargeMode && rtc_get_counter_val() > 100)
    {
       if (Param::GetInt(Param::canperiod) == CAN_PERIOD_100MS)
-         Can::GetInterface(0)->SendAll();
+        can->SendAll();
    }
    int16_t IsaTemp=ISA::Temperature;
    Param::SetInt(Param::tmpaux,IsaTemp);
@@ -617,7 +619,7 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
     default:
         break;
     }
-   //  selectedInverter->SetCanInterface(Can::GetInterface(Param::GetInt(Param::Inverter_CAN)));
+    selectedInverter->SetCanInterface(Can::GetInterface(Param::GetInt(Param::Inverter_CAN)));
     selectedVehicle->SetCanInterface(Can::GetInterface(Param::GetInt(Param::Vehicle_CAN)));
     Param::SetInt(Param::inv_can, Param::GetInt(Param::Inverter_CAN));
     Param::SetInt(Param::veh_can, Param::GetInt(Param::Vehicle_CAN));
@@ -889,16 +891,12 @@ extern "C" int main(void)
     DigIo::inv_out.Clear();//inverter power off during bootup
     DigIo::mcp_sby.Clear();//enable can3
 
-    Can c(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed),remapCan1);
-    Can c2(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed));
-
-    // Set up CAN 1 callback and messages to listen for
-    c.SetReceiveCallback(CanCallback);
-    c2.SetReceiveCallback(CanCallback);
-
-
     can = &c;
     can2 = &c2;
+
+    // Set up CAN 1 callback and messages to listen for
+    can->SetReceiveCallback(CanCallback);
+    can2->SetReceiveCallback(CanCallback);
 
    parm_Change(Param::PARAM_LAST);
    parm_Change(Param::Inverter); //Set loaded inverter
