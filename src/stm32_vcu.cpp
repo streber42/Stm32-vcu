@@ -20,6 +20,7 @@
  */
 #include "stm32_vcu.h"
 #include <libopencm3/cm3/scb.h>
+#include <libopencm3/cm3/systick.h>
 
 #define RMS_SAMPLES 256
 #define SQRT2OV1 0.707106781187
@@ -58,6 +59,11 @@ uint16_t ChgDur_tmp;
 uint8_t RTC_1Sec=0;
 uint32_t ChgTicks=0,ChgTicks_1Min=0;
 uint8_t CabHeater,CabHeater_ctrl;
+uint32_t looptime_1ms = 0;
+uint32_t looptime_10ms = 0;
+uint32_t looptime_100ms = 0;
+uint32_t looptime_200ms = 0;
+static volatile uint32_t system_micros = 0;
 
 
 static volatile unsigned
@@ -142,6 +148,11 @@ static void RunChaDeMo()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void Ms200Task(void)
 {
+    if ((system_micros - looptime_200ms) > 200000) {
+        ErrorMessage::SetTime(system_micros);
+        ErrorMessage::Post(ERR_SLOWLOOP200);
+    }
+    looptime_200ms = system_micros;
     if(chargerClass::HVreq==true) Param::SetInt(Param::hvChg,1);
     if(chargerClass::HVreq==false) Param::SetInt(Param::hvChg,0);
     int opmode = Param::GetInt(Param::opmode);
@@ -304,6 +315,11 @@ static void Ms200Task(void)
 
 static void Ms100Task(void)
 {
+    if ((system_micros - looptime_100ms) > 100000) {
+        ErrorMessage::SetTime(system_micros);
+        ErrorMessage::Post(ERR_SLOWLOOP100);
+    }
+    looptime_100ms = system_micros;
     DigIo::led_out.Toggle();
     iwdg_reset();
     s32fp cpuLoad = FP_FROMINT(scheduler->GetCpuLoad());
@@ -446,13 +462,18 @@ if(targetChgint != _interface::Chademo) //If we are not using Chademo then gp in
 
 static void Ms10Task(void)
 {
+    if ((system_micros - looptime_10ms) > 10000) {
+        ErrorMessage::SetTime(system_micros);
+        ErrorMessage::Post(ERR_SLOWLOOP10);
+    }
+    looptime_10ms = system_micros;
     int16_t previousSpeed=Param::GetInt(Param::speed);
     int16_t speed = 0;
     s32fp torquePercent;
     int opmode = Param::GetInt(Param::opmode);
     int newMode = MOD_OFF;
     int stt = STAT_NONE;
-    ErrorMessage::SetTime(rtc_get_counter_val());
+    // ErrorMessage::SetTime(rtc_get_counter_val());
 
 
         if(targetChgint == _interface::Leaf_PDM) //Leaf Gen2 PDM charger/DCDC/Chademo
@@ -698,6 +719,11 @@ static void Ms10Task(void)
 
 static void Ms1Task(void)
 {
+    if ((system_micros - looptime_1ms) > 1000) {
+        ErrorMessage::SetTime(system_micros);
+        ErrorMessage::Post(ERR_SLOWLOOP1);
+    }
+    looptime_1ms = system_micros;
 //gpio_toggle(GPIOB,GPIO12);
     if(targetInverter == _invmodes::GS450H)
     {
@@ -954,9 +980,26 @@ void setCanFilters() {
     vehicle_can->RegisterUserMessage(0x153);//E39/E46 ASC1 message    
 }
 
+
+/* Called when systick fires */
+void sys_tick_handler(void)
+{
+    system_micros++;
+}
+
+/* Set up a timer to create 1us ticks. */
+void systick_init(void)
+{
+    systick_set_frequency(1000000, 72000000);
+    systick_counter_enable();
+    systick_interrupt_enable();
+}
+
+
 extern "C" int main(void)
 {
     clock_setup();
+    systick_init();
     rtc_setup();
     ConfigureVariantIO();
     #ifdef TEST_P107
