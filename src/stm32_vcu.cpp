@@ -148,7 +148,7 @@ static void RunChaDeMo()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void Ms200Task(void)
 {
-    if ((system_micros - looptime_200ms) > 200000) {
+    if ((system_micros - looptime_200ms) > 220000) {
         ErrorMessage::SetTime(system_micros);
         ErrorMessage::Post(ERR_SLOWLOOP200);
     }
@@ -315,7 +315,7 @@ static void Ms200Task(void)
 
 static void Ms100Task(void)
 {
-    if ((system_micros - looptime_100ms) > 100000) {
+    if ((system_micros - looptime_100ms) > 110000) {
         ErrorMessage::SetTime(system_micros);
         ErrorMessage::Post(ERR_SLOWLOOP100);
     }
@@ -462,7 +462,7 @@ if(targetChgint != _interface::Chademo) //If we are not using Chademo then gp in
 
 static void Ms10Task(void)
 {
-    if ((system_micros - looptime_10ms) > 10000) {
+    if ((system_micros - looptime_10ms) > 11000) {
         ErrorMessage::SetTime(system_micros);
         ErrorMessage::Post(ERR_SLOWLOOP10);
     }
@@ -719,7 +719,7 @@ static void Ms10Task(void)
 
 static void Ms1Task(void)
 {
-    if ((system_micros - looptime_1ms) > 1000) {
+    if ((system_micros - looptime_1ms) > 1100) {
         ErrorMessage::SetTime(system_micros);
         ErrorMessage::Post(ERR_SLOWLOOP1);
     }
