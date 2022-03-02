@@ -125,7 +125,7 @@ static void RunChaDeMo()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void Ms200Task(void)
 {
-   DigIo::led2_out.Toggle();
+//    DigIo::led2_out.Toggle();
    if(chargerClass::HVreq==true) Param::SetInt(Param::hvChg,1);
    if(chargerClass::HVreq==false) Param::SetInt(Param::hvChg,0);
    int opmode = Param::GetInt(Param::opmode);
@@ -134,9 +134,9 @@ static void Ms200Task(void)
    Param::SetInt(Param::Min,minutes);
    Param::SetInt(Param::Sec,seconds);
    Param::SetInt(Param::ChgT,ChgDur_tmp);
-   //  if (DigIo::gp_12Vin.Get()) {
-   //      scb_reset_system();
-   //  }
+    // if (DigIo::gp_12Vin.Get()) {
+    //     scb_reset_system();
+    // }
    if(ChgSet == 2 && !ChgLck)
    {
       //if in timer mode and not locked out from a previous full charge.
@@ -879,7 +879,7 @@ extern "C" int main(void)
    remapCan1 = true;
    #else
    // gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON,AFIO_MAPR_USART3_REMAP_PARTIAL_REMAP);//remap usart 3 to PC10 and PC11 for VCU HW
-   //  gpio_primary_remap(AFIO_MAPR_SWJ_CFG_FULL_SWJ, AFIO_MAPR_CAN2_REMAP | AFIO_MAPR_TIM1_REMAP_FULL_REMAP);//32f107
+    gpio_primary_remap(AFIO_MAPR_SWJ_CFG_FULL_SWJ, AFIO_MAPR_CAN2_REMAP | AFIO_MAPR_TIM1_REMAP_FULL_REMAP);//32f107
    #endif
     usart2_setup();//TOYOTA HYBRID INVERTER INTERFACE
     nvic_setup();
