@@ -111,7 +111,7 @@ short GS450HClass::get_torque()
         torque = utils::change(mg2_speed_temp, speedrange_drive[speed_index], speedrange_drive[speed_index + 1], map_x, map_y);
         //SerialDEBUG.print("Torque "); SerialDEBUG.print(torque), SerialDEBUG.print(", Throttle "); SerialDEBUG.print(ThrotVal), SerialDEBUG.print(", Speed "); SerialDEBUG.println(mg2_speed);
 
-	// FULL TORQUE!!!
+        // FULL TORQUE!!!
         //torque = (long)torque * 1750 / 3500;
     }
 
@@ -129,7 +129,8 @@ short GS450HClass::get_torque()
 
         torque = utils::change(mg2_speed_temp, speedrange_reverse[speed_index], speedrange_reverse[speed_index + 1], map_x, map_y);
 
-        torque = (long)torque * 1750 / 3500;
+        // Scaling already happening in map
+        // torque = (long)torque * 1750 / 3500;
     }
 
     if (Param::GetInt(Param::dir) == 0) torque = 0;//no torque in neutral
