@@ -91,7 +91,7 @@ void Can_E39::Msg316()  //DME1
    // Byte 7 - Torque with internal interventions only
    bytes[7]=0x00;
 
-    Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x316, (uint32_t*)bytes,8);
+   can->Send(0x316, (uint32_t*)bytes,8);
 }
 
 
@@ -309,7 +309,7 @@ void Can_E39::Msg545()  //DME4
     // Byte 7 - 0x80 Oil Pressure (Red Oil light), Idle set speed
     bytes[7]=0x18;
 
-    Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x545, (uint32_t*)bytes,8);
+    can->Send(0x545, (uint32_t*)bytes,8);
 }
 
 void Can_E39::DecodeCAN(int id, uint32_t* data)

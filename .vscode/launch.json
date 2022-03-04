@@ -5,16 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "cwd": "${workspaceRoot}",
+            "executable": "${workspaceFolder}/stm32_vcu",
+            "name": "Debug Microcontroller",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "configFiles": [
+                "/usr/share/openocd/scripts/interface/stlink-v2.cfg",
+                "/usr/share/openocd/scripts/board/olimex_stm32_p107.cfg"
+            ],
+            "svdFile": "/home/murphy/.platformio/platforms/ststm32/misc/svd/STM32F107xx.svd",
+        },
+        {
             "name": "Debug VCU",
             "type": "cppdbg",
             "request": "launch",
             "miDebuggerPath": "arm-none-eabi-gdb",
             "targetArchitecture": "arm",
             "program": "${workspaceFolder}/stm32_vcu",
+            "showDevDebugOutput": true,
             "setupCommands": [
-                {
-                    "text": "set target-async off"
-                },
                 {
                     "text": "file ${workspaceFolder}/stm32_vcu"
                 },
@@ -27,12 +38,6 @@
                 {
                     "text": "target extended-remote localhost:3333"
                 },
-                {
-                    "text": "monitor arm semihosting enable"
-                },
-                {
-                    "text": "load ${workspaceFolder}/stm32_vcu"
-                }
             ],
             "externalConsole": false,
             "cwd": "${workspaceFolder}"

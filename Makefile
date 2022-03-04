@@ -44,7 +44,7 @@ LDSCRIPT	= $(BINARY).ld
 LDFLAGS  = -Llibopencm3/lib -T$(LDSCRIPT) -march=armv7 -nostartfiles -Wl,--gc-sections,-Map,linker.map
 OBJSL		= $(BINARY).o hwinit.o stm32scheduler.o params.o terminal.o terminal_prj.o \
            my_string.o digio.o my_fp.o printf.o anain.o throttle.o isa_shunt.o BMW_E65.o GS450H.o temp_meas.o Can_E39.o Can_VAG.o Can_OI.o MCP2515.o CANSPI.o \
-           param_save.o errormessage.o stm32_can.o leafinv.o utils.o terminalcommands.o charger.o i3LIM.o chademo.o heater.o tasks.o port.o list.o heap_4.o
+           param_save.o errormessage.o stm32_can.o leafinv.o utils.o terminalcommands.o charger.o i3LIM.o chademo.o heater.o tasks.o port.o list.o heap_4.o queue.o
 OBJS     = $(patsubst %.o,$(OUT_DIR)/%.o, $(OBJSL))
 vpath %.c src/ libopeninv/src/ rtos/
 vpath %.cpp src/ libopeninv/src/
@@ -53,7 +53,7 @@ OPENOCD_BASE	= /usr
 OPENOCD		= $(OPENOCD_BASE)/bin/openocd
 OPENOCD_SCRIPTS	= $(OPENOCD_BASE)/share/openocd/scripts
 OPENOCD_FLASHER	= $(OPENOCD_SCRIPTS)/interface/stlink-v2.cfg
-OPENOCD_BOARD	= $(OPENOCD_SCRIPTS)/board/olimex_stm32_h103.cfg
+OPENOCD_BOARD	= $(OPENOCD_SCRIPTS)/board/olimex_stm32_p107.cfg
 
 # Be silent per default, but 'make V=1' will show all compiler calls.
 ifneq ($(V),1)

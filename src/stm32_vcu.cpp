@@ -21,17 +21,18 @@
 #include "stm32_vcu.h"
 #include <FreeRTOS.h>
 #include <task.h>
+#include <queue.h>
 #include <libopencm3/cm3/scb.h>
 
 HWREV hwRev; // Hardware variant of board we are running on
-static Stm32Scheduler* scheduler;
+// static Stm32Scheduler* scheduler;
 static bool chargeMode = false;
 static bool chargeModeDC = false;
 static bool ChgLck = false;
 static Can* can;
 static Can* can2;
-static Can c = Can(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed),true);
-static Can c2 = Can(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed));
+// static Can c = Can(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));
+// static Can c2 = Can(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed),true);
 static InvModes targetInverter;
 static VehicleModes targetVehicle;
 static _chgmodes targetCharger;
@@ -341,8 +342,8 @@ static void Ms100Task(void)
 {
    DigIo::led_out.Toggle();
    iwdg_reset();
-   float cpuLoad = scheduler->GetCpuLoad();
-   Param::SetFloat(Param::cpuload, cpuLoad / 10);
+   // float cpuLoad = scheduler->GetCpuLoad();
+   // Param::SetFloat(Param::cpuload, cpuLoad / 10);
    Param::SetInt(Param::lasterr, ErrorMessage::GetLastError());
    int opmode = Param::GetInt(Param::opmode);
    utils::SelectDirection(selectedVehicle); 
@@ -619,8 +620,8 @@ extern void parm_Change(Param::PARAM_NUM paramNum)
     default:
         break;
     }
-    selectedInverter->SetCanInterface(Can::GetInterface(Param::GetInt(Param::Inverter_CAN)));
-    selectedVehicle->SetCanInterface(Can::GetInterface(Param::GetInt(Param::Vehicle_CAN)));
+    selectedInverter->SetCanInterface(can);
+    selectedVehicle->SetCanInterface(can);
     Param::SetInt(Param::inv_can, Param::GetInt(Param::Inverter_CAN));
     Param::SetInt(Param::veh_can, Param::GetInt(Param::Vehicle_CAN));
     Param::SetInt(Param::shunt_can, Param::GetInt(Param::Shunt_CAN));
@@ -733,10 +734,10 @@ static void ConfigureVariantIO()
 }
 
 
-extern "C" void tim3_isr(void)
-{
-   scheduler->Run();
-}
+// extern "C" void tim3_isr(void)
+// {
+//    scheduler->Run();
+// }
 
 
 extern "C" void exti15_10_isr(void)    //CAN3 MCP25625 interruppt
@@ -781,11 +782,11 @@ extern "C" void rtc_isr(void)
 }
 
 void setCanFilters() {
-    Can* inverter_can = Can::GetInterface(Param::GetInt(Param::inv_can));
-    Can* vehicle_can = Can::GetInterface(Param::GetInt(Param::veh_can));
-    Can* shunt_can = Can::GetInterface(Param::GetInt(Param::shunt_can));
-    Can* lim_can = Can::GetInterface(Param::GetInt(Param::lim_can));
-    Can* charger_can = Can::GetInterface(Param::GetInt(Param::charger_can));
+    Can* inverter_can = can;
+    Can* vehicle_can = can;
+    Can* shunt_can = can;
+    Can* lim_can = can;
+    Can* charger_can = can;
     inverter_can->RegisterUserMessage(0x1DA);//Leaf inv msg
     inverter_can->RegisterUserMessage(0x55A);//Leaf inv msg
     inverter_can->RegisterUserMessage(0x679);//Leaf obc msg
@@ -869,6 +870,34 @@ static void rtos_term_Run(void *args __attribute__((unused))) {
     }
 }
 
+static void rtos_can1_tx(void *args __attribute__((unused)))
+{
+   Can c = Can(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));
+   can = &c;
+   can->SetReceiveCallback(CanCallback);
+   can->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
+   setCanFilters();
+   parm_Change(Param::PARAM_LAST);
+   for (;;)
+   {
+      c.HandleTx();
+   }
+}
+
+static void rtos_can2_tx(void *args __attribute__((unused)))
+{
+   Can c2 = Can(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed),true);
+   can2 = &c2;
+   can2->SetReceiveCallback(CanCallback);
+   can2->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
+   setCanFilters();
+   parm_Change(Param::PARAM_LAST);
+   for (;;)
+   {
+      c2.HandleTx();
+   }
+}
+
 extern "C" int main(void)
 {
    bool remapCan1 = false;
@@ -877,11 +906,11 @@ extern "C" int main(void)
     rtc_setup();
     ConfigureVariantIO();
    #ifdef TEST_P107
-   gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON,AFIO_MAPR_CAN1_REMAP_PORTB|AFIO_MAPR_CAN2_REMAP);//32f107
+   gpio_primary_remap(AFIO_MAPR_SWJ_CFG_FULL_SWJ,AFIO_MAPR_CAN1_REMAP_PORTB|AFIO_MAPR_CAN2_REMAP);//32f107
    remapCan1 = true;
    #else
    // gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON,AFIO_MAPR_USART3_REMAP_PARTIAL_REMAP);//remap usart 3 to PC10 and PC11 for VCU HW
-    gpio_primary_remap(AFIO_MAPR_SWJ_CFG_FULL_SWJ, AFIO_MAPR_CAN2_REMAP | AFIO_MAPR_TIM1_REMAP_FULL_REMAP);//32f107
+    gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, AFIO_MAPR_CAN2_REMAP | AFIO_MAPR_TIM1_REMAP_FULL_REMAP);//32f107
    #endif
     usart2_setup();//TOYOTA HYBRID INVERTER INTERFACE
     nvic_setup();
@@ -891,12 +920,15 @@ extern "C" int main(void)
     DigIo::inv_out.Clear();//inverter power off during bootup
     DigIo::mcp_sby.Clear();//enable can3
 
-    can = &c;
-    can2 = &c2;
+   //  c = Can(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));
+   //  c2 = Can(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed),true);
+
+   //  can = &c;
+   //  can2 = &c2;
 
     // Set up CAN 1 callback and messages to listen for
-    can->SetReceiveCallback(CanCallback);
-    can2->SetReceiveCallback(CanCallback);
+   //  can->SetReceiveCallback(CanCallback);
+   //  can2->SetReceiveCallback(CanCallback);
 
    parm_Change(Param::PARAM_LAST);
    parm_Change(Param::Inverter); //Set loaded inverter
@@ -904,11 +936,13 @@ extern "C" int main(void)
    //  CANSPI_Initialize();// init the MCP25625 on CAN3
    //  CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
 
-    xTaskCreate(rtos_Ms1Task, "Ms1Task",100,NULL,configMAX_PRIORITIES-1,NULL);
-    xTaskCreate(rtos_Ms10Task, "Ms10Task",100,NULL,configMAX_PRIORITIES-2,NULL);
-    xTaskCreate(rtos_Ms100Task, "Ms100Task",100,NULL,configMAX_PRIORITIES-3,NULL);
-    xTaskCreate(rtos_Ms200Task, "Ms200Task",100,NULL,configMAX_PRIORITIES-4,NULL);
-    xTaskCreate(rtos_term_Run, "TermTask",300,NULL,configMAX_PRIORITIES-5,NULL);
+    xTaskCreate(rtos_can1_tx, "Can1TxTask",512,NULL,configMAX_PRIORITIES,NULL);
+    xTaskCreate(rtos_can2_tx, "Can2TxTask",512,NULL,configMAX_PRIORITIES,NULL);
+    xTaskCreate(rtos_Ms1Task, "Ms1Task",128,NULL,configMAX_PRIORITIES-1,NULL);
+    xTaskCreate(rtos_Ms10Task, "Ms10Task",128,NULL,configMAX_PRIORITIES-2,NULL);
+    xTaskCreate(rtos_Ms100Task, "Ms100Task",128,NULL,configMAX_PRIORITIES-3,NULL);
+    xTaskCreate(rtos_Ms200Task, "Ms200Task",128,NULL,configMAX_PRIORITIES-4,NULL);
+    xTaskCreate(rtos_term_Run, "TermTask",1024,NULL,configMAX_PRIORITIES-5,NULL);
 
 
     // ISA::initialize();//only call this once if a new sensor is fitted. Might put an option on web interface to call this....
