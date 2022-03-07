@@ -5,6 +5,7 @@
 
 static uint8_t counter_329 = 0;
 static uint8_t ABSMsg = 0;
+static uint16_t consumption = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -175,9 +176,10 @@ void Can_E46::Msg43F(int8_t gear)
     Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x43F, (uint32_t*)bytes,8);
 }
 
-void Can_E46::Msg545()
+void Can_E46::Msg545(int32_t vspeed)
 {
     // int z = 0x60; // + y;  higher value lower MPG
+    consumption = (consumption + (vspeed/2)) % 65536;
 
     // Data sent to instrument cluster. Status and slow moving data.
     // Fuel consumption is fuel usage (since start) in uL % 65536.
@@ -189,9 +191,9 @@ void Can_E46::Msg545()
     // Byte 0 - 2 Check Engine, 8 Cruise Enabled , 0x10 EML, 0x40 Gas Cap
     bytes[0]=0x00;
     // Byte 1 - Fuel consumption LSB
-    bytes[1]=0x00;
+    bytes[1]=consumption & 0xFF;
     // Byte 2 - Fuel consumption MSB
-    bytes[2]=0x00;
+    bytes[2]=consumption >> 8;
     // Byte 3 - 0x08 Overheat, Yellow Oil Level 0x02, M3 cluster shift lights
     bytes[3]=0x00;
     // Byte 4 - Oil Temperature
@@ -206,3 +208,71 @@ void Can_E46::Msg545()
     Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x545, (uint32_t*)bytes,8);
 }
 
+void Can_E46::DecodeCAN(int id, uint32_t data[2])
+{
+    //ASC1 message data 0x153
+    /*
+        Byte 0 - Bitfield
+        Bit 0 - LV_ASC_REQ
+        Bit 1 - LV_MSR_REQ
+        Bit 2 - LV_ASC_PASV
+        Bit 3 - LV_ASC_SW_INT
+        Bit 4 - LV_BLS
+        Bit 5 - LV_
+        Bit 6 - LV_
+        Bit 7 - LV_ABS_LED
+    Byte 1 - VSS [LSB]
+        Bit 0 - LV_ASC_REQ
+        Bit 1 - LV_MSR_REQ
+        Bit 2 - LV_ASC_PASV
+        Bit 3 - VSS [0]
+        Bit 4 - VSS [1]
+        Bit 5 - VSS [2]
+        Bit 6 - VSS [3]
+        Bit 7 - VSS [4]
+    Byte 2 - VSS [MSB]
+
+        Vehicle speed signal in Km/h
+        Calculation = ( (HEX[MSB] * 256) + HEX[LSB]) * 0.0625
+        Min: 0x160 (0 Km/h)
+
+    Byte 3 - MD_IND_ASC
+
+        Torque intervention for ASC function
+        Calculation = HEX * 0.390625
+        Min: 0x00 (0.0%) max. reductiuon
+        Max: 0xFF (99.6094%) no reduction
+
+    Byte 4 - MD_IND_MSR
+
+        Torque intervention for MSR function
+        Calculation = HEX * 0.390625
+        Min: 0x00 (0.0%) no engine torque increase
+        Max: 0xFF (99.6094%) max engine torque increase
+
+    Byte 5 - Unused
+    Byte 6 - MD_IND_ASC_LM
+
+        Torque intervention for MSR function
+        Calculation = HEX * 0.390625
+        Min: 0x00 (0.0%) max. reductiuon
+        Max: 0xFF (99.6094%) no reduction
+
+    Byte 7 - ASC ALIVE
+    */
+
+    uint8_t* bytes = (uint8_t*)data;// arrgghhh this converts the two 32bit array into bytes. See comments are useful:)
+
+    if (id == 0x153)// ASC1 contains road speed signal.
+    {
+        //Vehicle speed signal in Km/h
+        //Calculation = ( (HEX[MSB] * 256) + HEX[LSB]) * 0.0625
+        //Min: 0x160 (0 Km/h)
+
+
+        uint16_t road_speed=(((bytes[2]<<8)+(bytes[1])) >> 8);//*0.0625
+
+        Param::SetInt(Param::Veh_Speed,road_speed);
+    }
+
+}

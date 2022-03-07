@@ -24,7 +24,7 @@
 #define RMS_SAMPLES 256
 #define SQRT2OV1 0.707106781187
 #define  UserCAN  2
-#define  BMW_E46  0
+// #define  BMW_E46  0
 #define  User  2
 #define  None  4
 //#define  BMW_E39  5
@@ -452,6 +452,7 @@ static void Ms10Task(void)
     int opmode = Param::GetInt(Param::opmode);
     int newMode = MOD_OFF;
     int stt = STAT_NONE;
+    int32_t vspeed = Param::GetInt(Param::Veh_Speed);
     ErrorMessage::SetTime(rtc_get_counter_val());
 
 
@@ -527,14 +528,14 @@ static void Ms10Task(void)
         Can_E39::Msg329(tempGauge);//send heatsink temp to E39 dash temp gauge
         Can_E39::Msg545();
     }
-    else if (targetVehicle == BMW_E46)
+    else if (targetVehicle == _vehmodes::BMW_E46)
     {
         uint16_t tempGauge = utils::change(Param::GetInt(Param::tmphs),15,80,88,254); //Map to e46 temp gauge
         //Messages required for E46
         Can_E46::Msg316(speed);//send rpm to e46 dash
         Can_E46::Msg329(tempGauge);//send heatsink temp to E64 dash temp gauge
         Can_E46::Msg43F(Param::GetInt(Param::dir));//set the gear indicator on the dash
-        Can_E46::Msg545();
+        Can_E46::Msg545(vspeed);
     }
     else if (targetVehicle == _vehmodes::BMW_E65)
     {
@@ -853,6 +854,11 @@ static void CanCallback(uint32_t id, uint32_t data[2]) //This is where we go whe
         if(targetVehicle == _vehmodes::BMW_E39)
         {
             Can_E39::DecodeCAN(id, data);
+        }
+
+        if(targetVehicle == _vehmodes::BMW_E46)
+        {
+            Can_E46::DecodeCAN(id, data);
         }
 
         break;
