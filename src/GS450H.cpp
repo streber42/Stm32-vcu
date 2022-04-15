@@ -6,9 +6,9 @@
 #include "my_math.h"
 #include "utils.h"
 
-#define  LOW_Gear  0
-#define  HIGH_Gear  1
-#define  AUTO_Gear  2
+#define  LOWGear  0
+#define  HIGHGear  1
+#define  AUTOGear  2
 
 
 static uint8_t htm_state = 0;
@@ -76,7 +76,7 @@ int16_t speedrange_reverse[5] = //rpm
 
 short GS450HClass::get_torque()
 {
-    s32fp ThrotVal = utils::GetUserThrottleCommand(); // GetUserThrottleCommand
+    s32fp ThrotVal = FP_FROMFLT(utils::GetUserThrottleCommand()); // GetUserThrottleCommand
     // int ThrotRange = parameters.Max_throttleVal - parameters.Min_throttleVal; //full range of min-max throttle params
     int16_t torque = 0, map_x, map_y;
     uint8_t pedal_index, speed_index;
@@ -168,27 +168,27 @@ void GS450HClass::setTorqueTarget(int16_t torquePercent)
 
 
 // 100 ms code
-void GS450HClass::run100msTask(uint8_t Lexus_Gear, uint16_t Lexus_Oil)
+void GS450HClass::run100msTask(uint8_t LexusGear, uint16_t Lexus_Oil)
 {
 
    Param::SetInt(Param::InvStat, GS450HClass::statusFB()); //update inverter status on web interface
 
-   if (Lexus_Gear == 1)
+   if (LexusGear == 1)
    {
       DigIo::SP_out.Clear();
       DigIo::SL1_out.Clear();
       DigIo::SL2_out.Clear();
 
-      Param::SetInt(Param::GearFB,HIGH_Gear);// set high gear
+      Param::SetInt(Param::GearFB,HIGHGear);// set high gear
    }
 
-   if (Lexus_Gear == 0)
+   if (LexusGear == 0)
    {
       DigIo::SP_out.Clear();
       DigIo::SL1_out.Clear();
       DigIo::SL2_out.Clear();
 
-      Param::SetInt(Param::GearFB,LOW_Gear);// set low gear
+      Param::SetInt(Param::GearFB,LOWGear);// set low gear
    }
    setTimerState(true);
 
@@ -201,8 +201,8 @@ void GS450HClass::run100msTask(uint8_t Lexus_Gear, uint16_t Lexus_Oil)
 
    Param::SetInt(Param::tmphs,GS450HClass::temp_inv_water);//send GS450H inverter temp to web interface
 
-   static s32fp mTemps[2];
-   static s32fp tmpm;
+   static float mTemps[2];
+   static float tmpm;
 
     int tmpmg1 = AnaIn::MG1_Temp.Get();//in the gs450h case we must read the analog temp values from sensors in the gearbox
     int tmpmg2 = AnaIn::MG2_Temp.Get();
@@ -217,7 +217,7 @@ void GS450HClass::run100msTask(uint8_t Lexus_Gear, uint16_t Lexus_Oil)
     mTemps[1] = FP_FROMFLT(temp_2);
 
    tmpm = MAX(mTemps[0], mTemps[1]);//which ever is the hottest gets displayed
-   Param::SetFixed(Param::tmpm,tmpm);
+   Param::SetFloat(Param::tmpm,tmpm);
 }
 
 
@@ -445,12 +445,12 @@ void GS450HClass::UpdateHTMState1Ms(int8_t gear)
    {
 
       // -3500 (reverse) to 3500 (forward)
-      if(gear==0) mg2_torque=0;//Neutral
-      if(gear==32) mg2_torque=this->scaledTorqueTarget;//Drive
-      if(gear==-32) mg2_torque=this->scaledTorqueTarget;//Reverse
+      if(gear == 0) mg2_torque = 0;//Neutral
+      if(gear > 0) mg2_torque = this->scaledTorqueTarget;//Drive
+      if(gear < 0) mg2_torque = this->scaledTorqueTarget;//Reverse
 
       mg1_torque=((mg2_torque*5)/4);
-      if(gear==-32) mg1_torque=0; //no mg1 torque in reverse.
+      if(gear < 0) mg1_torque=0; //no mg1 torque in reverse.
       Param::SetInt(Param::torque,mg2_torque);//post processed final torue value sent to inv to web interface
 
       //speed feedback
@@ -572,12 +572,12 @@ void GS450HClass::UpdateHTMState1Ms(int8_t gear)
    {
 
       // -3500 (reverse) to 3500 (forward)
-      if(gear==0) mg2_torque=0;//Neutral
-      if(gear==32) mg2_torque=this->scaledTorqueTarget;//Drive
-      if(gear==-32) mg2_torque=this->scaledTorqueTarget*-1;//Reverse
+      if(gear == 0) mg2_torque=0;//Neutral
+      if(gear > 0) mg2_torque = this->scaledTorqueTarget;//Drive
+      if(gear < 0) mg2_torque = -this->scaledTorqueTarget;//Reverse
 
       mg1_torque=((mg2_torque*5)/4);
-      if(gear==-32) mg1_torque=0; //no mg1 torque in reverse.
+      if(gear < 0) mg1_torque = 0; //no mg1 torque in reverse.
       Param::SetInt(Param::torque,mg2_torque);//post processed final torue value sent to inv to web interface
 
       //speed feedback
