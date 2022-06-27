@@ -121,21 +121,17 @@ static void RunChaDeMo()
    static uint32_t startTime = 0;
    static int32_t controlledCurrent = 0;
 
-   if (startTime == 0)
+   if (startTime == 0 && Param::GetInt(Param::opmode) != MOD_CHARGE)
    {
       startTime = rtc_get_counter_val();
+      ChaDeMo::SetChargeCurrent(0);
    }
 
    if ((rtc_get_counter_val() - startTime) > 100 && (rtc_get_counter_val() - startTime) < 150)
    {
       ChaDeMo::SetEnabled(true);
       CloseChademoRelay();
-   }
-
-   /* 1s after entering charge mode, enable charge permission */
-   if (Param::GetInt(Param::opmode) == MOD_CHARGE)
-   {
-      ChaDeMo::SetEnabled(true);
+      startTime = 0; //for next round
    }
 
    if (Param::GetInt(Param::opmode) == MOD_CHARGE && ChaDeMo::ConnectorLocked())
@@ -175,6 +171,7 @@ static void RunChaDeMo()
    Param::SetInt(Param::CCS_V, ChaDeMo::GetChargerOutputVoltage());
    Param::SetInt(Param::CCS_I, ChaDeMo::GetChargerOutputCurrent());
    Param::SetInt(Param::CCS_State, ChaDeMo::GetChargerStatus());
+   Param::SetInt(Param::CCS_I_Avail, ChaDeMo::GetChargerMaxCurrent());
    ChaDeMo::SendMessages();
 }
 
@@ -441,6 +438,12 @@ static void Ms100Task(void)
    {
       if (DigIo::gp_12Vin.Get())
          RunChaDeMo(); //if we detect chademo plug inserted off we go ...
+      else
+      {
+         chargeModeDC = false;   //DC charge mode
+         Param::SetInt(Param::chgtyp,0);
+         DigIo::gp_out3.Clear();//Chademo charge allow off
+      }
    }
 
     if(targetChgint != ChargeInterfaces::Chademo) //If we are not using Chademo then gp in can be used as a cabin heater request from the vehicle
@@ -676,7 +679,8 @@ static void Ms10Task(void)
    //Cabin heat control
    if((CabHeater_ctrl==1)&& (CabHeater==1)&&(opmode==MOD_RUN))//If we have selected an ampera heater are in run mode and heater not diabled...
    {
-      // DigIo::gp_out3.Set();//Heater enable and coolant pump on
+      //TODO: multiplex with chademo
+      //DigIo::gp_out3.Set();//Heater enable and coolant pump on
 
       if(Ampera_Not_Awake)
       {
@@ -690,7 +694,8 @@ static void Ms10Task(void)
 
    if(CabHeater_ctrl==0 || opmode!=MOD_RUN)
    {
-      // DigIo::gp_out3.Clear();//Heater enable and coolant pump off
+      //TODO: multiplex with chademo
+      //DigIo::gp_out3.Clear();//Heater enable and coolant pump off
       Ampera_Not_Awake=true;
    }
 }
