@@ -24,7 +24,7 @@
    2. Temporary parameters (id = 0)
    3. Display values
  */
-//Next param id (increase when adding new parameter!): 70
+//Next param id (increase when adding new parameter!): 72
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
     PARAM_ENTRY(CAT_SETUP,     Inverter,     INVMODES, 0,      5,      0,      5  ) \
@@ -34,15 +34,15 @@
     PARAM_ENTRY(CAT_SETUP,     Shunt_CAN,    CAN_DEV,  0,      1,      0,      62 ) \
     PARAM_ENTRY(CAT_SETUP,     LIM_CAN,      CAN_DEV,  0,      1,      0,      63 ) \
     PARAM_ENTRY(CAT_SETUP,     Charger_CAN,  CAN_DEV,  0,      1,      1,      64 ) \
-    PARAM_ENTRY(CAT_SETUP,     gp_out1_role, GPOUT_ROLES,   0,      5,      1,      65 ) \
-    PARAM_ENTRY(CAT_SETUP,     gp_out2_role, GPOUT_ROLES,   0,      5,      2,      66 ) \
-    PARAM_ENTRY(CAT_SETUP,     gp_out3_role, GPOUT_ROLES,   0,      5,      0,      67 ) \
+    PARAM_ENTRY(CAT_SETUP,     gp_out1_role, GPOUT_ROLES, 0,   5,      1,      65 ) \
+    PARAM_ENTRY(CAT_SETUP,     gp_out2_role, GPOUT_ROLES, 0,   5,      2,      66 ) \
+    PARAM_ENTRY(CAT_SETUP,     gp_out3_role, GPOUT_ROLES, 0,   5,      0,      67 ) \
     PARAM_ENTRY(CAT_THROTTLE,  potmin,      "dig",     0,      4095,   0,      7  ) \
     PARAM_ENTRY(CAT_THROTTLE,  potmax,      "dig",     0,      4095,   4095,   8  ) \
     PARAM_ENTRY(CAT_THROTTLE,  pot2min,     "dig",     0,      4095,   4095,   9  ) \
     PARAM_ENTRY(CAT_THROTTLE,  pot2max,     "dig",     0,      4095,   4095,   10 ) \
-    PARAM_ENTRY(CAT_THROTTLE,  regentravel, "%",       0,      100,    30,     60  ) \
-    PARAM_ENTRY(CAT_THROTTLE,  regenmax,    "%",       -100,   0,     -30,     61  ) \
+    PARAM_ENTRY(CAT_THROTTLE,  regentravel, "%",       0,      100,    30,     70 ) \
+    PARAM_ENTRY(CAT_THROTTLE,  regenmax,    "%",       -100,   0,     -30,     71 ) \
     PARAM_ENTRY(CAT_THROTTLE,  potmode,     POTMODES,  0,      1,      0,      11 ) \
     PARAM_ENTRY(CAT_THROTTLE,  dirmode,     DIRMODES,  0,      4,      1,      12 ) \
     PARAM_ENTRY(CAT_THROTTLE,  throtramp,   "%/10ms",  0.1,    100,    100,    13 ) \
@@ -74,25 +74,25 @@
     PARAM_ENTRY(CAT_CHARGER,   Voltspnt,    "V",       0,      1000,   395,    40 ) \
     PARAM_ENTRY(CAT_CHARGER,   Pwrspnt,     "W",       0,      12000,  1500,   41 ) \
     PARAM_ENTRY(CAT_CHARGER,   IdcTerm,     "A",       0,      150,    0,      56 ) \
-    PARAM_ENTRY(CAT_CHARGER,   CCS_ICmd,    "A",       0,      150,    0,      42  ) \
-    PARAM_ENTRY(CAT_CHARGER,   CCS_ILim,    "A",       0,      350,    100,    43  ) \
-    PARAM_ENTRY(CAT_CHARGER,   CCS_SOCLim,  "%",       0,      100,    80,     44  ) \
-    PARAM_ENTRY(CAT_CHARGER,   Chgctrl,     CHGCTRL,   0,      2,      0,      45  ) \
-    PARAM_ENTRY(CAT_Heater,    Heater,      HTTYPE,    0,      2,      0,      57  ) \
-    PARAM_ENTRY(CAT_Heater,    Control,     HTCTRL,    0,      2,      0,      58  ) \
-    PARAM_ENTRY(CAT_Heater,    HeatPwr,     "W",       0,      6500,   0,      59  ) \
-    PARAM_ENTRY(CAT_Heater,    HeatTempMax, "°C",      0,      4096,   0,      68  ) \
-    PARAM_ENTRY(CAT_Heater,    HeatTempMin, "°C",      0,      4096,   2048,   69  ) \
-    PARAM_ENTRY(CAT_CLOCK,     Set_Day,     DOW,       0,      6,      0,      46  ) \
-    PARAM_ENTRY(CAT_CLOCK,     Set_Hour,    "Hours",   0,      23,     0,      47  ) \
-    PARAM_ENTRY(CAT_CLOCK,     Set_Min,     "Mins",    0,      59,     0,      48  ) \
-    PARAM_ENTRY(CAT_CLOCK,     Set_Sec,     "Secs",    0,      59,     0,      49  ) \
-    PARAM_ENTRY(CAT_CLOCK,     Chg_Hrs,     "Hours",   0,      23,     0,      50  ) \
-    PARAM_ENTRY(CAT_CLOCK,     Chg_Min,     "Mins",    0,      59,     0,      51  ) \
-    PARAM_ENTRY(CAT_CLOCK,     Chg_Dur,     "Mins",    0,      300,    0,      52  ) \
-    PARAM_ENTRY(CAT_CLOCK,     Pre_Hrs,     "Hours",   0,      59,     0,      53  ) \
-    PARAM_ENTRY(CAT_CLOCK,     Pre_Min,     "Mins",    0,      59,     0,      54  ) \
-    PARAM_ENTRY(CAT_CLOCK,     Pre_Dur,     "Mins",    0,      60,     0,      55  ) \
+    PARAM_ENTRY(CAT_CHARGER,   CCS_ICmd,    "A",       0,      150,    0,      42 ) \
+    PARAM_ENTRY(CAT_CHARGER,   CCS_ILim,    "A",       0,      350,    100,    43 ) \
+    PARAM_ENTRY(CAT_CHARGER,   CCS_SOCLim,  "%",       0,      100,    80,     44 ) \
+    PARAM_ENTRY(CAT_CHARGER,   Chgctrl,     CHGCTRL,   0,      2,      0,      45 ) \
+    PARAM_ENTRY(CAT_Heater,    Heater,      HTTYPE,    0,      2,      0,      57 ) \
+    PARAM_ENTRY(CAT_Heater,    Control,     HTCTRL,    0,      2,      0,      58 ) \
+    PARAM_ENTRY(CAT_Heater,    HeatPwr,     "W",       0,      6500,   0,      59 ) \
+    PARAM_ENTRY(CAT_Heater,    HeatTempMax, "°C",      0,      4096,   0,      68 ) \
+    PARAM_ENTRY(CAT_Heater,    HeatTempMin, "°C",      0,      4096,   2048,   69 ) \
+    PARAM_ENTRY(CAT_CLOCK,     Set_Day,     DOW,       0,      6,      0,      46 ) \
+    PARAM_ENTRY(CAT_CLOCK,     Set_Hour,    "Hours",   0,      23,     0,      47 ) \
+    PARAM_ENTRY(CAT_CLOCK,     Set_Min,     "Mins",    0,      59,     0,      48 ) \
+    PARAM_ENTRY(CAT_CLOCK,     Set_Sec,     "Secs",    0,      59,     0,      49 ) \
+    PARAM_ENTRY(CAT_CLOCK,     Chg_Hrs,     "Hours",   0,      23,     0,      50 ) \
+    PARAM_ENTRY(CAT_CLOCK,     Chg_Min,     "Mins",    0,      59,     0,      51 ) \
+    PARAM_ENTRY(CAT_CLOCK,     Chg_Dur,     "Mins",    0,      300,    0,      52 ) \
+    PARAM_ENTRY(CAT_CLOCK,     Pre_Hrs,     "Hours",   0,      59,     0,      53 ) \
+    PARAM_ENTRY(CAT_CLOCK,     Pre_Min,     "Mins",    0,      59,     0,      54 ) \
+    PARAM_ENTRY(CAT_CLOCK,     Pre_Dur,     "Mins",    0,      60,     0,      55 ) \
     VALUE_ENTRY(version,       VERSTR,  2000 ) \
     VALUE_ENTRY(opmode,        OPMODES, 2002 ) \
     VALUE_ENTRY(chgtyp,        CHGTYPS, 2003 ) \
@@ -142,6 +142,7 @@
     VALUE_ENTRY(din_forward,   ONOFF,   2038 ) \
     VALUE_ENTRY(din_reverse,   ONOFF,   2039 ) \
     VALUE_ENTRY(din_bms,       ONOFF,   2040 ) \
+    VALUE_ENTRY(din_12Vgp,     ONOFF,   2084 ) \
     VALUE_ENTRY(handbrk,       ONOFF,   2041 ) \
     VALUE_ENTRY(Gear1,         ONOFF,   2042 ) \
     VALUE_ENTRY(Gear2,         ONOFF,   2043 ) \
@@ -156,7 +157,7 @@
     VALUE_ENTRY(CCS_I_Avail,   "A",     2052 ) \
     VALUE_ENTRY(CCS_V_Avail,   "V",     2053 ) \
     VALUE_ENTRY(CCS_I,         "A",     2054 ) \
-    VALUE_ENTRY(CCS_Ireq,      "A",     2068 ) \
+    VALUE_ENTRY(CCS_Ireq,      "A",     2085 ) \
     VALUE_ENTRY(CCS_V,         "V",     2055 ) \
     VALUE_ENTRY(CCS_V_Min,     "V",     2056 ) \
     VALUE_ENTRY(CCS_V_Con,     "V",     2057 ) \
@@ -179,7 +180,7 @@
     VALUE_ENTRY(WaterTemp,     "°C",    2083 ) \
 
 
-//Next value Id: 2084
+//Next value Id: 2086
 
 #define VERSTR STRINGIFY(4=VER)
 #define DMODES       "0=CLOSED, 1=OPEN, 2=ERROR, 3=INVALID"
