@@ -8,7 +8,7 @@
 #include "params.h"
 #include "digio.h"
 #include <libopencm3/stm32/rtc.h>
-#include "stm32_can.h"
+#include "canhardware.h"
 #include "anain.h"
 #include "throttle.h"
 #include "isa_shunt.h"
@@ -20,7 +20,7 @@ namespace utils
     float ProcessThrottle(int);
     float ProcessUdc(uint32_t, int);
     void CalcSOC();
-    void GetDigInputs(Can*);
+    void GetDigInputs(CanHardware*);
     void PostErrorIfRunning(ERROR_MESSAGE_NUM);
     void SelectDirection(vehicles, BMW_E65Class);
     void displayThrottle();

@@ -25,8 +25,7 @@ static Stm32Scheduler* scheduler;
 static bool chargeMode = false;
 static bool chargeModeDC = false;
 static bool ChgLck = false;
-static Can* can;
-static Can* can2;
+static CanHardware* canInterface[3];
 static InvModes targetInverter;
 static vehicles targetVehicle;
 static ChargeModes targetCharger;
@@ -62,8 +61,6 @@ static Can_OI openInv;
 static OutlanderInverter outlanderInv;
 static Inverter* selectedInverter = &openInv;
 static Vehicle* selectedVehicle = 0;
-
-static void SetCanFilters();
 
 static void StartCoolantPump(void)
 {
@@ -216,7 +213,7 @@ static void Ms200Task(void)
    }
    if(ChgSet==0 && !ChgLck) RunChg=true;//enable from webui if we are not locked out from an auto termination
    if(ChgSet==1) RunChg=false;//disable from webui
-   if(targetVehicle == vehicles::BMW_E65) BMW_E65Class::GDis();//needs to be every 200ms
+   if(targetVehicle == vehicles::BMW_E65) BMW_E65Class::GDis(canInterface[Param::GetInt(Param::veh_can)]);//needs to be every 200ms
    if(targetCharger == ChargeModes::Volt_Ampera)
    {
       //to be done
@@ -253,7 +250,7 @@ static void Ms200Task(void)
 
    if(targetChgint == ChargeInterfaces::i3LIM) //BMW i3 LIM
    {
-      i3LIMClass::Send200msMessages();
+      i3LIMClass::Send200msMessages(canInterface[Param::GetInt(Param::lim_can)]);
 
    }
 
@@ -356,7 +353,7 @@ static void Ms100Task(void)
 
    if(targetChgint == ChargeInterfaces::i3LIM) //BMW i3 LIM
    {
-      i3LIMClass::Send100msMessages();
+      i3LIMClass::Send100msMessages(canInterface[Param::GetInt(Param::lim_can)]);
 
       auto LIMmode=i3LIMClass::Control_Charge(RunChg);
 
@@ -391,7 +388,7 @@ static void Ms100Task(void)
    {
       if (E65Vehicle.getTerminal15())
       {
-         E65Vehicle.DashOn();
+         E65Vehicle.DashOn(canInterface[Param::GetInt(Param::veh_can)]);
          Param::SetInt(Param::T15Stat,1);
       }
       else
@@ -409,16 +406,16 @@ static void Ms100Task(void)
       Param::SetInt(Param::T15Stat,DigIo::t15_digi.Get());
    }
 
-   if(targetVehicle==VAG) Can_VAG::SendVAG100msMessage();
+   if(targetVehicle==VAG) Can_VAG::SendVAG100msMessage(canInterface[Param::GetInt(Param::veh_can)]);
 
-
-   if (Param::GetInt(Param::canperiod) == CAN_PERIOD_100MS)
-      Can::GetInterface(Param::GetInt(Param::inv_can))->SendAll();
+   //TODO:
+   //if (Param::GetInt(Param::canperiod) == CAN_PERIOD_100MS)
+     // Can::GetInterface(Param::GetInt(Param::inv_can))->SendAll();
 
    int16_t IsaTemp=ISA::Temperature;
    Param::SetInt(Param::tmpaux,IsaTemp);
    if (Param::GetInt(Param::chargemodes) != ChargeModes::Off)  {
-     chargerClass::Send100msMessages(RunChg);
+     chargerClass::Send100msMessages(RunChg, canInterface[Param::GetInt(Param::charger_can)]);
    }
    if(targetChgint == ChargeInterfaces::Chademo) //Chademo on CAN3
    {
@@ -472,7 +469,7 @@ static void Ms10Task(void)
 
    if(targetChgint == ChargeInterfaces::i3LIM) //BMW i3 LIM
    {
-      i3LIMClass::Send10msMessages();
+      i3LIMClass::Send10msMessages(canInterface[Param::GetInt(Param::lim_can)]);
    }
 
    if (Param::GetInt(Param::opmode) == MOD_RUN)
@@ -509,40 +506,40 @@ static void Ms10Task(void)
    speed = ABS(selectedInverter->GetMotorSpeed());//set motor rpm on interface
 
    Param::SetInt(Param::speed, speed);
-   utils::GetDigInputs(Can::GetInterface(Param::GetInt(Param::inv_can)));
+   utils::GetDigInputs(canInterface[Param::GetInt(Param::inv_can)]);
 
    // Send CAN 2 (Vehicle CAN) messages if necessary for vehicle integration.
    if (targetVehicle == BMW_E39)
    {
       uint16_t tempGauge = utils::change(Param::GetInt(Param::tmphs),15,80,88,254); //Map to e39 temp gauge
       //Messages required for E39
-      Can_E39::Msg316(speed);//send rpm to e39 dash
-      Can_E39::Msg329(tempGauge);//send heatsink temp to E39 dash temp gauge
-      Can_E39::Msg545();
+      Can_E39::Msg316(speed, canInterface[Param::GetInt(Param::veh_can)]);//send rpm to e39 dash
+      Can_E39::Msg329(tempGauge, canInterface[Param::GetInt(Param::veh_can)]);//send heatsink temp to E39 dash temp gauge
+      Can_E39::Msg545(canInterface[Param::GetInt(Param::veh_can)]);
    }
    else if (targetVehicle == vehicles::BMW_E46)
    {
       uint16_t tempGauge = utils::change(Param::GetInt(Param::tmphs),15,80,88,254); //Map to e46 temp gauge
       //Messages required for E46
-      Can_E46::Msg316(speed);//send rpm to e46 dash
-      Can_E46::Msg329(tempGauge);//send heatsink temp to E64 dash temp gauge
-      Can_E46::Msg43F(Param::GetInt(Param::dir));//set the gear indicator on the dash
-      Can_E46::Msg545(vspeed);
+      Can_E46::Msg316(speed, canInterface[Param::GetInt(Param::veh_can)]);//send rpm to e46 dash
+      Can_E46::Msg329(tempGauge, canInterface[Param::GetInt(Param::veh_can)]);//send heatsink temp to E64 dash temp gauge
+      Can_E46::Msg43F(Param::GetInt(Param::dir), canInterface[Param::GetInt(Param::veh_can)]);//set the gear indicator on the dash
+      Can_E46::Msg545(vspeed, canInterface[Param::GetInt(Param::veh_can)]);
    }
    else if (targetVehicle == vehicles::BMW_E65)
    {
-      BMW_E65Class::absdsc(Param::GetBool(Param::din_brake));
+      BMW_E65Class::absdsc(Param::GetBool(Param::din_brake), canInterface[Param::GetInt(Param::veh_can)]);
       if(E65Vehicle.getTerminal15())
-         BMW_E65Class::Tacho(Param::GetInt(Param::speed));//only send tach message if we are starting
+         BMW_E65Class::Tacho(Param::GetInt(Param::speed), canInterface[Param::GetInt(Param::veh_can)]);//only send tach message if we are starting
    }
    else if (targetVehicle == VAG)
    {
-      Can_VAG::SendVAG10msMessage(Param::GetInt(Param::speed));
+      Can_VAG::SendVAG10msMessage(Param::GetInt(Param::speed), canInterface[Param::GetInt(Param::veh_can)]);
    }
 
    else if (targetVehicle == VAG)
    {
-      Can_VAG::SendVAG10msMessage(Param::GetInt(Param::speed));
+      Can_VAG::SendVAG10msMessage(Param::GetInt(Param::speed), canInterface[Param::GetInt(Param::veh_can)]);
    }
 
    //////////////////////////////////////////////////
@@ -728,18 +725,22 @@ void Param::Change(Param::PARAM_NUM paramNum)
             selectedInverter = &openInv;
             break;
       }
-      SetCanFilters();
+      //This will call SetCanFilters() via the Clear Callback
+      canInterface[0]->ClearUserMessages();
+      canInterface[1]->ClearUserMessages();
       break;
    case Param::Inverter_CAN:
    case Param::Vehicle_CAN:
    case Param::Shunt_CAN:
    case Param::LIM_CAN:
    case Param::Charger_CAN:
-      SetCanFilters();
+      canInterface[0]->ClearUserMessages();
+      canInterface[1]->ClearUserMessages();
       break;
    case Param::canspeed:
-      can->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
-      can2->SetBaudrate((Can::baudrates)Param::GetInt(Param::canspeed));
+      canInterface[0]->SetBaudrate((CanHardware::baudrates)Param::GetInt(Param::canspeed));
+      canInterface[1]->SetBaudrate((CanHardware::baudrates)Param::GetInt(Param::canspeed));
+      break;
    default:
       break;
    }
@@ -786,34 +787,10 @@ void Param::Change(Param::PARAM_NUM paramNum)
 }
 
 
-static void CanCallback(uint32_t id, uint32_t data[2]) //This is where we go when a defined CAN message is received.
+static bool CanCallback(uint32_t id, uint32_t data[2]) //This is where we go when a defined CAN message is received.
 {
    switch (id)
    {
-   case 0x521:
-      ISA::handle521(data);//ISA CAN MESSAGE
-      break;
-   case 0x522:
-      ISA::handle522(data);//ISA CAN MESSAGE
-      break;
-   case 0x523:
-      ISA::handle523(data);//ISA CAN MESSAGE
-      break;
-   case 0x524:
-      ISA::handle524(data);//ISA CAN MESSAGE
-      break;
-   case 0x525:
-      ISA::handle525(data);//ISA CAN MESSAGE
-      break;
-   case 0x526:
-      ISA::handle526(data);//ISA CAN MESSAGE
-      break;
-   case 0x527:
-      ISA::handle527(data);//ISA CAN MESSAGE
-      break;
-   case 0x528:
-      ISA::handle528(data);//ISA CAN MESSAGE
-      break;
    case 0x108:
       chargerClass::handle108(data);// HV request from an external charger
       break;
@@ -834,6 +811,7 @@ static void CanCallback(uint32_t id, uint32_t data[2]) //This is where we go whe
       break;
 
    default:
+      ISA::DecodeCAN(id, data);
       selectedInverter->DecodeCAN(id, data);
 
       if(targetVehicle == vehicles::BMW_E65)
@@ -855,6 +833,7 @@ static void CanCallback(uint32_t id, uint32_t data[2]) //This is where we go whe
 
       break;
    }
+   return false;
 }
 
 
@@ -914,53 +893,33 @@ extern "C" void rtc_isr(void)
          ++days;
          hours -= 24;
       }
-
    }
 }
 
+//Whenever the user clears mapped can messages or changes the
+//CAN interface of a device, this will be called by the CanHardware module
 static void SetCanFilters()
 {
-   Can* inverter_can = Can::GetInterface(Param::GetInt(Param::inv_can));
-   Can* vehicle_can = Can::GetInterface(Param::GetInt(Param::veh_can));
-   Can* shunt_can = Can::GetInterface(Param::GetInt(Param::shunt_can));
-   Can* lim_can = Can::GetInterface(Param::GetInt(Param::lim_can));
-   Can* charger_can = Can::GetInterface(Param::GetInt(Param::charger_can));
+   CanHardware* inverter_can = canInterface[Param::GetInt(Param::inv_can)];
+   CanHardware* vehicle_can = canInterface[Param::GetInt(Param::veh_can)];
+   CanHardware* shunt_can = canInterface[Param::GetInt(Param::shunt_can)];
+   CanHardware* lim_can = canInterface[Param::GetInt(Param::lim_can)];
+   CanHardware* charger_can = canInterface[Param::GetInt(Param::charger_can)];
 
-   can->ClearUserMessages();
-   can2->ClearUserMessages();
-
-   inverter_can->RegisterUserMessage(0x1DA);//Leaf inv msg
-   inverter_can->RegisterUserMessage(0x55A);//Leaf inv msg
-   inverter_can->RegisterUserMessage(0x679);//Leaf obc msg
-   inverter_can->RegisterUserMessage(0x390);//Leaf obc msg
-   inverter_can->RegisterUserMessage(0x190);//Open Inv Msg
-   inverter_can->RegisterUserMessage(0x19A);//Open Inv Msg
-   inverter_can->RegisterUserMessage(0x1A4);//Open Inv Msg
-   inverter_can->RegisterUserMessage(0x289);//Outlander Inv Msg
-   inverter_can->RegisterUserMessage(0x299);//Outlander Inv Msg
-   inverter_can->RegisterUserMessage(0x733);//Outlander Inv Msg
-   shunt_can->RegisterUserMessage(0x521);//ISA MSG
-   shunt_can->RegisterUserMessage(0x522);//ISA MSG
-   shunt_can->RegisterUserMessage(0x523);//ISA MSG
-   shunt_can->RegisterUserMessage(0x524);//ISA MSG
-   shunt_can->RegisterUserMessage(0x525);//ISA MSG
-   shunt_can->RegisterUserMessage(0x526);//ISA MSG
-   shunt_can->RegisterUserMessage(0x527);//ISA MSG
-   shunt_can->RegisterUserMessage(0x528);//ISA MSG
+   selectedInverter->SetCanInterface(inverter_can);
+   ISA::RegisterCanMessages(shunt_can);
    lim_can->RegisterUserMessage(0x3b4);//LIM MSG
    lim_can->RegisterUserMessage(0x29e);//LIM MSG
    lim_can->RegisterUserMessage(0x2b2);//LIM MSG
    lim_can->RegisterUserMessage(0x2ef);//LIM MSG
    lim_can->RegisterUserMessage(0x272);//LIM MSG
 
-    // Set up CAN 2 (Vehicle CAN) callback and messages to listen for.
-    vehicle_can->RegisterUserMessage(0x130);//E65 CAS
-    vehicle_can->RegisterUserMessage(0x192);//E65 Shifter
-    charger_can->RegisterUserMessage(0x108);//Charger HV request
-     vehicle_can->RegisterUserMessage(0x153);//E39/E46 ASC1 message    
-    vehicle_can->RegisterUserMessage(0x615);//E39/E46 IKE message    
-
-   selectedInverter->SetCanInterface(inverter_can);
+   // Set up CAN 2 (Vehicle CAN) callback and messages to listen for.
+   vehicle_can->RegisterUserMessage(0x130);//E65 CAS
+   vehicle_can->RegisterUserMessage(0x192);//E65 Shifter
+   charger_can->RegisterUserMessage(0x108);//Charger HV request
+   vehicle_can->RegisterUserMessage(0x153);//E39/E46 ASC1 message
+   vehicle_can->RegisterUserMessage(0x615);//E39/E46 IKE message    
 }
 
 extern "C" int main(void)
@@ -983,15 +942,18 @@ extern "C" int main(void)
    DigIo::mcp_sby.Clear();//enable can3
 
    Terminal t(USART3, TermCmds);
-   Can c(CAN1, (Can::baudrates)Param::GetInt(Param::canspeed));
-   Can c2(CAN2, (Can::baudrates)Param::GetInt(Param::canspeed), true);
+   FunctionPointerCallback canCb(CanCallback, SetCanFilters);
+   Stm32Can c(CAN1, (CanHardware::baudrates)Param::GetInt(Param::canspeed));
+   Stm32Can c2(CAN2, (CanHardware::baudrates)Param::GetInt(Param::canspeed), true);
+   CanMap cm(&c);
 
    // Set up CAN 1 callback and messages to listen for
-   c.SetReceiveCallback(CanCallback);
-   c2.SetReceiveCallback(CanCallback);
+   c.AddReceiveCallback(&canCb);
+   c2.AddReceiveCallback(&canCb);
+   TerminalCommands::SetCanMap(&cm);
 
-   can = &c;
-   can2 = &c2;
+   canInterface[0] = &c;
+   canInterface[1] = &c2;
    SetCanFilters();
 
     CANSPI_Initialize();// init the MCP25625 on CAN3
@@ -1004,7 +966,6 @@ extern "C" int main(void)
     s.AddTask(Ms10Task, 10);
     s.AddTask(Ms100Task, 100);
     s.AddTask(Ms200Task, 200);
-
 
    // ISA::initialize();//only call this once if a new sensor is fitted. Might put an option on web interface to call this....
    //  DigIo::prec_out.Set();//commence precharge
