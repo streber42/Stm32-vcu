@@ -176,10 +176,15 @@ void Can_E46::Msg43F(int8_t gear)
     Can::GetInterface(Param::GetInt(Param::veh_can))->Send(0x43F, (uint32_t*)bytes,8);
 }
 
-void Can_E46::Msg545(int32_t vspeed)
+void Can_E46::Msg545(int32_t vspeed,s32fp idc)
 {
     // int z = 0x60; // + y;  higher value lower MPG
-    consumption = (consumption + (vspeed/2)) % 65536;
+    // vspeed/3 ~=50
+    // vspeed/2 ~=30
+    // vspeed 20 / 3 = 6
+    // vspeed 20 /2 = 10
+
+    consumption = (consumption + (vspeed/Param::GetInt(Param::mpg_calib))) % 65536;
 
     // Data sent to instrument cluster. Status and slow moving data.
     // Fuel consumption is fuel usage (since start) in uL % 65536.

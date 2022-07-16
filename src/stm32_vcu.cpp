@@ -449,6 +449,7 @@ static void Ms10Task(void)
     int16_t previousSpeed=Param::GetInt(Param::speed);
     int16_t speed = 0;
     s32fp torquePercent;
+    s32fp idc = Param::Get(Param::idc);
     int opmode = Param::GetInt(Param::opmode);
     int newMode = MOD_OFF;
     int stt = STAT_NONE;
@@ -535,7 +536,7 @@ static void Ms10Task(void)
         Can_E46::Msg316(speed);//send rpm to e46 dash
         Can_E46::Msg329(tempGauge);//send heatsink temp to E64 dash temp gauge
         Can_E46::Msg43F(Param::GetInt(Param::dir));//set the gear indicator on the dash
-        Can_E46::Msg545(vspeed);
+        Can_E46::Msg545(vspeed,FP_TOINT(idc));
     }
     else if (targetVehicle == _vehmodes::BMW_E65)
     {

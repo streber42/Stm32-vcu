@@ -15,7 +15,7 @@ public:
     static		void Msg316(uint16_t outRPM);
     static		void Msg329(uint16_t tempValue);
     static		void Msg43F(int8_t gear);
-    static		void Msg545(int32_t vspeed);
+    static		void Msg545(int32_t vspeed, s32fp idc);
     static      void DecodeCAN(int id, uint32_t data[2]);
 
 private:

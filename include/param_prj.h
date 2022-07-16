@@ -86,6 +86,7 @@
     PARAM_ENTRY(CAT_CLOCK,   Pre_Hrs,      "Hours",       0,      59,   0,    53  ) \
     PARAM_ENTRY(CAT_CLOCK,   Pre_Min,      "Mins",       0,      59,   0,    54  ) \
     PARAM_ENTRY(CAT_CLOCK,   Pre_Dur,      "Mins",       0,      60,   0,    55  ) \
+    PARAM_ENTRY(CAT_THROTTLE, mpg_calib,   "ul",         1,      256, 1, 65) \
     VALUE_ENTRY(version,      VERSTR,  2000 ) \
     VALUE_ENTRY(hwver,        HWREVS,  2001 ) \
     VALUE_ENTRY(opmode,       OPMODES, 2002 ) \
