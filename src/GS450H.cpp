@@ -425,7 +425,7 @@ void GS450HClass::UpdateHTMState1Ms(int8_t gear)
             dma_clear_interrupt_flags(DMA1, DMA_CHANNEL6, DMA_TCIF);
             statusInv = 1;
             dc_bus_voltage = (((mth_data[82] | mth_data[83] << 8) - 5) / 2);
-            temp_inv_water = (mth_data[42] | mth_data[43] << 8);
+            temp_inv_water = (mth_data[41] | mth_data[40] << 8);
             temp_inv_inductor = (mth_data[86] | mth_data[87] << 8);
             mg1_speed = mth_data[6] | mth_data[7] << 8;
             mg2_speed = mth_data[31] | mth_data[32] << 8;
