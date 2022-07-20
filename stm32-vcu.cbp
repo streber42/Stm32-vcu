@@ -64,13 +64,16 @@
 		<Unit filename="include/hwdefs.h" />
 		<Unit filename="include/hwinit.h" />
 		<Unit filename="include/i3LIM.h" />
+		<Unit filename="include/inverter.h" />
 		<Unit filename="include/isa_shunt.h" />
 		<Unit filename="include/leafinv.h" />
+		<Unit filename="include/outlanderinverter.h" />
 		<Unit filename="include/param_prj.h" />
 		<Unit filename="include/stm32_vcu.h" />
 		<Unit filename="include/temp_meas.h" />
 		<Unit filename="include/throttle.h" />
 		<Unit filename="include/utils.h" />
+		<Unit filename="include/vehicle.h" />
 		<Unit filename="libopeninv/include/anain.h" />
 		<Unit filename="libopeninv/include/digio.h" />
 		<Unit filename="libopeninv/include/errormessage.h" />
@@ -95,9 +98,7 @@
 		</Unit>
 		<Unit filename="libopeninv/src/param_save.cpp" />
 		<Unit filename="libopeninv/src/params.cpp" />
-		<Unit filename="libopeninv/src/printf.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="libopeninv/src/printf.cpp" />
 		<Unit filename="libopeninv/src/stm32_can.cpp" />
 		<Unit filename="libopeninv/src/stm32scheduler.cpp" />
 		<Unit filename="libopeninv/src/terminal.cpp" />
@@ -117,32 +118,12 @@
 		<Unit filename="src/i3LIM.cpp" />
 		<Unit filename="src/isa_shunt.cpp" />
 		<Unit filename="src/leafinv.cpp" />
+		<Unit filename="src/outlanderinverter.cpp" />
 		<Unit filename="src/stm32_vcu.cpp" />
 		<Unit filename="src/temp_meas.cpp" />
 		<Unit filename="src/terminal_prj.cpp" />
 		<Unit filename="src/throttle.cpp" />
 		<Unit filename="src/utils.cpp" />
-		<Unit filename="test/Makefile">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="test/test.h">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="test/test_fp.cpp">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="test/test_fu.cpp">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="test/test_list.h">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="test/test_main.cpp">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="test/test_throttle.cpp">
-			<Option target="Test" />
-		</Unit>
 		<Extensions>
 			<DoxyBlocks>
 				<comment_style block="0" line="0" />

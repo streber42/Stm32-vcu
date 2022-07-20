@@ -1,9 +1,7 @@
 /*
  * This file is part of the tumanako_vc project.
  *
- * Copyright (C) 2020 Johannes Huebner <dev@johanneshuebner.com>
- *                      Damien Maguire <info@evbmw.com>
- * Yes I'm really writing software now........run.....run away.......
+ * Copyright (C) 2018 Johannes Huebner <dev@johanneshuebner.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,39 +15,42 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-#ifndef LEAFINV_H
-#define LEAFINV_H
-#include <stdint.h>
-#include "my_fp.h"
-#include "inverter.h"
+ */#ifndef OUTLANDERINVERTER_H
+#define OUTLANDERINVERTER_H
 
-class LeafINV: public Inverter
+#include <inverter.h>
+
+
+class OutlanderInverter : public Inverter
 {
 public:
+   /** Default constructor */
+   OutlanderInverter();
    void DecodeCAN(int id, uint32_t data[2]);
    void Task10Ms();
    void Task100Ms();
-   static bool ControlCharge(bool RunCh);
    void SetTorque(float torque);
    float GetMotorTemperature() { return motor_temp; }
    float GetInverterTemperature() { return inv_temp; }
-   float GetInverterVoltage() { return voltage / 2; }
-   float GetMotorSpeed() { return speed / 2; }
+   float GetInverterVoltage() { return voltage; }
+   float GetMotorSpeed() { return speed; }
    int GetInverterState() { return error; }
 
 private:
    static void nissan_crc(uint8_t *data, uint8_t polynomial);
    static int8_t fahrenheit_to_celsius(uint16_t fahrenheit);
    uint8_t run10ms;
-   uint8_t run100ms;
    uint32_t lastRecv;
    int16_t speed;
    int16_t inv_temp;
    int16_t motor_temp;
    bool error;
    uint16_t voltage;
-   int16_t final_torque_request;
+   uint32_t final_torque_request;
+
+   protected:
+
+   private:
 };
 
-#endif // LEAFINV_H
+#endif // OUTLANDERINVERTER_H
