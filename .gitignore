@@ -49,3 +49,6 @@ stm32_vcu.bin
 # hex output - only keep for releases
 stm32_vcu.hex
 workspace.code-workspace
+.vscode/configurationCache.log
+.vscode/dryrun.log
+.vscode/targets.log
