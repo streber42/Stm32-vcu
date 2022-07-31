@@ -22,6 +22,9 @@
 #include "temp_meas.h"
 #include "my_math.h"
 #include <stdint.h>
+// EV46 Start Custom
+#include <math.h>
+// EV46 End Custom
 
 #define TABLEN(a) sizeof(a) / sizeof(a[0])
 
@@ -127,3 +130,27 @@ float TempMeas::Lookup(int digit, Sensors sensorId)
    }
    return sensor->tempMax;
 }
+
+// EV46 Start Custom
+/////////////temp sensor data////////////////////
+float vcc = 5.0;
+float adc_step = 3.3 / 4096.0;
+float Rtop = 75000.0;
+float Ro = 47000.0;
+float To = 25 + 273;
+float B = 3500;
+float mg1_stat = 0;
+float mg2_stat = 0;
+
+float TempMeas::readThermistor(int adc) {
+
+  float raw = adc;
+  float voltage = raw * adc_step;
+
+  float Rt = (voltage * Rtop) / (vcc - voltage);
+
+  float temp = (1 / (1.0 / To + (1.0 / B) * log(Rt / Ro))) - 273;
+
+  return temp;
+}
+// EV46 End Custom

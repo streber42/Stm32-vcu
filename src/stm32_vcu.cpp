@@ -43,6 +43,10 @@ uint32_t ChgTicks=0,ChgTicks_1Min=0;
 uint8_t CabHeater,CabHeater_ctrl;
 uint32_t chademoStartTime = 0;
 
+// EV46 Start Custom
+extern "C" void __cxa_pure_virtual() { while (1); }
+// EV46 End Custom
+
 static volatile unsigned
 days=0,
 hours=0, minutes=0, seconds=0,
@@ -445,7 +449,9 @@ static void Ms10Task(void)
          //activate inv during precharge if not oi.
          if(targetInverter != InvModes::OpenI) DigIo::inv_out.Set();//inverter power on but not if we are in charge mode!
       }
-      DigIo::gp_out2.Set();//Negative contactors on
+      // EV46 Start Custom
+      // DigIo::gp_out2.Set();//Negative contactors on
+      // EV46 Stop Custom
       DigIo::gp_out1.Set();//Coolant pump on
       DigIo::prec_out.Set();//commence precharge
       opmode = MOD_PRECHARGE;

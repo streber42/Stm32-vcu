@@ -16,7 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define VER 1.00.A
+// EV46 Start Custom
+#define VER GIT_HASH
+// EV46 End Custom
 
 
 /* Entries must be ordered as follows:
@@ -133,7 +135,7 @@
     VALUE_ENTRY(din_forward,   ONOFF,   2038 ) \
     VALUE_ENTRY(din_reverse,   ONOFF,   2039 ) \
     VALUE_ENTRY(din_bms,       ONOFF,   2040 ) \
-    VALUE_ENTRY(din_12Vgp,     ONOFF,   2071 ) \
+    VALUE_ENTRY(din_12Vgp,     ONOFF,   2077 ) \
     VALUE_ENTRY(handbrk,       ONOFF,   2041 ) \
     VALUE_ENTRY(Gear1,         ONOFF,   2042 ) \
     VALUE_ENTRY(Gear2,         ONOFF,   2043 ) \
@@ -167,7 +169,7 @@
     VALUE_ENTRY(cpuload,       "%",     2063 ) \
 
 
-//Next value Id: 2077
+//Next value Id: 2078
 
 #define VERSTR STRINGIFY(4=VER)
 #define DMODES       "0=CLOSED, 1=OPEN, 2=ERROR, 3=INVALID"

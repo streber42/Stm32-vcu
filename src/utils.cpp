@@ -157,6 +157,14 @@ void SelectDirection(Vehicle* vehicle)
          selectedDir = 0;
    }
 
+   // EV46 Start Custom
+    if (selectedDir == -1) {
+        DigIo::gp_out2.Set(); // Turn on reverse lights
+    } else {
+        DigIo::gp_out2.Clear(); // Turn off reverse lights
+    }
+   // EV46 End Custom
+
    Param::SetInt(Param::dir, selectedDir);
 }
 

@@ -28,13 +28,24 @@ OBJCOPY		= $(PREFIX)-objcopy
 OBJDUMP		= $(PREFIX)-objdump
 MKDIR_P     = mkdir -p
 TERMINAL_DEBUG ?= 0
-CFLAGS		= -Os -Wall -Wextra -Ilibopeninv/include -Iinclude/ -Ilibopencm3/include \
-             -fno-common -fno-builtin -pedantic -DSTM32F1 -DMAX_USER_MESSAGES=30 \
+# EV46 Start Custom
+GIT_HASH=$(shell git rev-parse --short HEAD)
+COMPILE_TIME=$(shell date -u +'%Y-%m-%d %H:%M:%S UTC')
+GIT_BRANCH=$(shell git branch | grep "^\*" | sed 's/^..//')
+export VERSION_FLAGS=-DGIT_HASH=$(GIT_HASH) -DCOMPILE_TIME="\"$(COMPILE_TIME)\"" -DGIT_BRANCH="\"$(GIT_BRANCH)\""
+# EV46 End Custom
+
+# EV46 Start Custom
+CFLAGS		= -Os -Wall -Wextra -Werror -Ilibopeninv/include -Iinclude/ -Ilibopencm3/include \
+             -fno-common -fno-builtin -pedantic -DSTM32F1 -DMAX_USER_MESSAGES=30 $(VERSION_FLAGS) \
 				 -mcpu=cortex-m3 -mthumb -std=gnu99 -ffunction-sections -fdata-sections -ggdb3
-CPPFLAGS    = -Os -Wall -Wextra -Ilibopeninv/include -Iinclude/ -Ilibopencm3/include \
-            -fno-common -std=c++17 -pedantic -DSTM32F1 -DMAX_USER_MESSAGES=30  \
+# EV46 End Custom
+# EV46 Start Custom
+CPPFLAGS    = -Os -Wall -Wextra -Werror -Ilibopeninv/include -Iinclude/ -Ilibopencm3/include \
+            -fno-common -std=c++17 -pedantic -DSTM32F1 -DMAX_USER_MESSAGES=30 $(VERSION_FLAGS) \
 		 -ffunction-sections -fdata-sections -fno-builtin -fno-rtti -fno-exceptions \
 		 -fno-unwind-tables -mcpu=cortex-m3 -mthumb -ggdb3
+# EV46 End Custom
 LDSCRIPT	= $(BINARY).ld
 LDFLAGS  = -Llibopencm3/lib -T$(LDSCRIPT) -march=armv7 -nostartfiles -Wl,--gc-sections,-Map,linker.map
 OBJSL		= $(BINARY).o hwinit.o stm32scheduler.o params.o terminal.o terminal_prj.o \
@@ -48,7 +59,9 @@ vpath %.cpp src/ libopeninv/src/
 OPENOCD_BASE	= /usr
 OPENOCD		= $(OPENOCD_BASE)/bin/openocd
 OPENOCD_SCRIPTS	= $(OPENOCD_BASE)/share/openocd/scripts
-OPENOCD_FLASHER	= $(OPENOCD_SCRIPTS)/interface/parport.cfg
+# EV46 Start Custom
+OPENOCD_FLASHER	= $(OPENOCD_SCRIPTS)/interface/stlink-v2.cfg
+# EV46 End Custom
 OPENOCD_BOARD	= $(OPENOCD_SCRIPTS)/board/olimex_stm32_h103.cfg
 
 # Be silent per default, but 'make V=1' will show all compiler calls.
@@ -73,9 +86,11 @@ directories: ${OUT_DIR}
 ${OUT_DIR}:
 	$(Q)${MKDIR_P} ${OUT_DIR}
 
+# EV46 Start Custom
 $(BINARY): $(OBJS) $(LDSCRIPT)
 	@printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(LD) $(LDFLAGS) -o $(BINARY) $(OBJS) -lopencm3_stm32f1
+	$(Q)$(LD) $(LDFLAGS) -o $(BINARY) $(OBJS) -lopencm3_stm32f1 -lm
+# EV46 End Custom
 
 $(OUT_DIR)/%.o: %.c Makefile
 	@printf "  CC      $(subst $(shell pwd)/,,$(@))\n"

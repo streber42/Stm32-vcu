@@ -43,10 +43,106 @@ uint8_t htm_data_init[7][100]=
    {0,30,0,2,0,0,0,18,0,154,250,0,0,16,0,97,0,0,0,0,0,0,200,249,56,6,165,0,136,0,63,0,16,0,0,0,63,0,16,0,3,128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,16,0,75,12,45,248,21,6,0,0,16,0,0,0,202,0,211,0,16,0,0,0,134,16,0,0,130,10}
 };
 
+// EV46 Start Custom
+/////////regen data///////////////
+int16_t pedalmap_drive[11][6] = {     //torque 0-3500 (full scale for MG2)
+{350, 	700, 	1050, 	1575, 	2450, 	3500},
+{175, 	525, 	1050, 	1575, 	2450, 	3500},
+{0, 	350, 	875, 	1575, 	2450, 	3500},
+{-350, 	105, 	765, 	1487, 	2406, 	3500},
+{-525, 	0, 	656, 	1400, 	2362, 	3500},
+{-525, 	-35, 	546, 	1312, 	2318, 	3500},
+{-392, 	-70, 	437, 	1225, 	2275, 	3500},
+{-312, 	-105, 	328, 	1137, 	2231, 	3500},
+{-259, 	-140, 	218, 	1050, 	2187, 	3500},
+{-221, 	-175, 	109, 	962, 	2143, 	3500},
+{-193, 	-140, 	0, 	875, 	2100, 	3500} };
+
+int16_t pedalmap_reverse[5][6] = { //torque 0-3500 (full scale for MG2)
+{700, 	525, 	350, 	175, 	87, 	0},
+{350, 	-350, 	-525, 	-700, 	-875, 	-1050},
+{0, 	-700, 	-1050, 	-1330, 	-1575, 	-1750},
+{-350, 	-700, 	-1050, 	-1330, 	-1575, 	-1750},
+{-700, 	-875, 	-1120, 	-1330, 	-1575, 	-1750} };
+
+int16_t speedrange_drive[11] = //rpm
+{ -3500, 	-1750, 	0, 	1750, 	3500, 	5250, 	7000, 	8750, 	10500, 	12250, 	14000 };
+
+int16_t speedrange_reverse[5] = //rpm
+{ -3500, 	-1750, 	0, 	1750, 	3500 };
+
+short GS450HClass::get_torque()
+{
+    s32fp ThrotVal = utils::GetUserThrottleCommand(); // GetUserThrottleCommand
+    // int ThrotRange = parameters.Max_throttleVal - parameters.Min_throttleVal; //full range of min-max throttle params
+    int16_t torque = 0, map_x, map_y;
+    uint8_t pedal_index, speed_index;
+    // uint32_t pedal_range[6] = { parameters.Min_throttleVal, 	parameters.Min_throttleVal + ThrotRange / 5, 	parameters.Min_throttleVal + 2 * ThrotRange / 5, 	parameters.Min_throttleVal + 3 * ThrotRange / 5, 	parameters.Min_throttleVal + 4 * ThrotRange / 5, 	parameters.Max_throttleVal };
+    s32fp pedal_range[6] = {FP_FROMINT(0), FP_FROMINT(20), FP_FROMINT(40),FP_FROMINT(60), FP_FROMINT(80),FP_FROMINT(100)};
+    int16_t mg2_speed_temp = mg2_speed;
+    if (Param::GetInt(Param::dir) == 1) {
+        if (mg2_speed_temp < speedrange_drive[0]) {
+            mg2_speed_temp = speedrange_drive[0]; // force min speed if speed below expected range
+            //SerialDEBUG.print("Below speed map range");
+        }
+        pedal_index = utils::change(ThrotVal, pedal_range[0], pedal_range[5], 0, 5);
+        speed_index = utils::change(mg2_speed_temp, speedrange_drive[0], speedrange_drive[10], 0, 10);
+        //SerialDEBUG.print("Pedal map - Pedal/Speed "); SerialDEBUG.print(pedal_index); SerialDEBUG.print("/"); SerialDEBUG.println(speed_index);
+
+        if (pedal_index >= 5 && speed_index >= 10) {
+            return (pedalmap_drive[10][5]); // pedal and speed maxed out
+            //SerialDEBUG.println("Pedal map - Pedal & Speed maxed out");
+        }
+        if (pedal_index >= 5) {
+            return (utils::change(mg2_speed_temp, speedrange_drive[speed_index], speedrange_drive[speed_index + 1], pedalmap_drive[speed_index][5], pedalmap_drive[speed_index + 1][5])); // pedal maxed out
+            //SerialDEBUG.println("Pedal map - Pedal maxed out");;
+        }
+        if (speed_index >= 10) {
+            return (utils::change(ThrotVal, pedal_range[pedal_index], pedal_range[pedal_index + 1], pedalmap_drive[10][pedal_index], pedalmap_drive[10][pedal_index + 1])); // speed maxed out
+            //SerialDEBUG.println("Pedal map - Speed maxed out");
+        }
+
+        map_x = utils::change(ThrotVal, pedal_range[pedal_index], pedal_range[pedal_index + 1], pedalmap_drive[speed_index][pedal_index], pedalmap_drive[speed_index][pedal_index + 1]);
+        map_y = utils::change(ThrotVal, pedal_range[pedal_index], pedal_range[pedal_index + 1], pedalmap_drive[speed_index + 1][pedal_index], pedalmap_drive[speed_index + 1][pedal_index + 1]);
+        //SerialDEBUG.print("Pedal map - Interp x/y "); SerialDEBUG.print(map_x); SerialDEBUG.print("/"); SerialDEBUG.println(map_y);
+
+        torque = utils::change(mg2_speed_temp, speedrange_drive[speed_index], speedrange_drive[speed_index + 1], map_x, map_y);
+        //SerialDEBUG.print("Torque "); SerialDEBUG.print(torque), SerialDEBUG.print(", Throttle "); SerialDEBUG.print(ThrotVal), SerialDEBUG.print(", Speed "); SerialDEBUG.println(mg2_speed);
+
+        // FULL TORQUE!!!
+        //torque = (long)torque * 1750 / 3500;
+    }
+
+    if (Param::GetInt(Param::dir) == -1) {
+        if (mg2_speed_temp < speedrange_reverse[0]) mg2_speed_temp = speedrange_reverse[0]; // force min speed if speed below expected range
+        pedal_index = utils::change(ThrotVal, pedal_range[0], pedal_range[5], 0, 5);
+        speed_index = utils::change(mg2_speed_temp, speedrange_reverse[0], speedrange_reverse[4], 0, 4);
+
+        if (pedal_index >= 5 && speed_index >= 4) return (pedalmap_drive[10][4]); // pedal and speed maxed out
+        if (pedal_index >= 5) return (utils::change(mg2_speed_temp, speedrange_reverse[speed_index], speedrange_reverse[speed_index + 1], pedalmap_reverse[speed_index][5], pedalmap_reverse[speed_index + 1][5])); // pedal maxed out
+        if (speed_index >= 4) return (utils::change(ThrotVal, pedal_range[pedal_index], pedal_range[pedal_index + 1], pedalmap_reverse[4][pedal_index], pedalmap_reverse[4][pedal_index + 1])); // speed maxed out
+
+        map_x = utils::change(ThrotVal, pedal_range[pedal_index], pedal_range[pedal_index + 1], pedalmap_reverse[speed_index][pedal_index], pedalmap_reverse[speed_index][pedal_index + 1]);
+        map_y = utils::change(ThrotVal, pedal_range[pedal_index], pedal_range[pedal_index + 1], pedalmap_reverse[speed_index + 1][pedal_index], pedalmap_reverse[speed_index + 1][pedal_index + 1]);
+
+        torque = utils::change(mg2_speed_temp, speedrange_reverse[speed_index], speedrange_reverse[speed_index + 1], map_x, map_y);
+
+        // Scaling already happening in map
+        // torque = (long)torque * 1750 / 3500;
+    }
+
+    if (Param::GetInt(Param::dir) == 0) torque = 0;//no torque in neutral
+    return torque; //return torque
+}
+// EV46 End Custom
+
+
 void GS450HClass::SetTorque(float torquePercent)
 {
    scaledTorqueTarget = (torquePercent * 3500) / 100.0f;
-   mg2_torque = this->scaledTorqueTarget;
+   // EV46 Start Custom
+   mg2_torque = this->get_torque();
+   // EV46 End Custom
 
    if (scaledTorqueTarget < 0) mg1_torque = 0;
    else mg1_torque=((mg2_torque*5)/4);

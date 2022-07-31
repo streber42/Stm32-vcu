@@ -47,6 +47,9 @@ public:
     };
 
     static float Lookup(int digit, Sensors sensorId);
+    // EV46 Start Custom
+    static float readThermistor(int adc);
+    // EV46 End Custom
 };
 
 

@@ -48,6 +48,9 @@ private:
    uint8_t VerifyMTHChecksum(uint16_t );
    void CalcHTMChecksum(uint16_t);
    void setTimerState(bool);
+   // EV46 Start Custom
+   short get_torque();
+   // EV46 End Custom
 };
 
 #endif /* GS450H_h */
