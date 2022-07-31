@@ -5,6 +5,7 @@
 #include "anain.h"
 #include "my_math.h"
 #include "utils.h"
+#include <math.h>
 
 #define  LOW_Gear  0
 #define  HIGH_Gear  1
@@ -81,13 +82,34 @@ void GS450HClass::SetTorque(float torquePercent)
    // EV46 End Custom
 }
 
+float GS450HClass::readThermistor(int adc, float Rtop, float Ro, float To, float B) {
+   /////////////temp sensor data////////////////////
+   float vcc = 5.0;
+   float adc_step = 3.3 / 4096.0;
+   // float Rtop = 75000.0;
+   // float Ro = 47000.0;
+   // float To = 25 + 273;
+   // float B = 3500;
+
+   float raw = adc;
+   float voltage = raw * adc_step;
+
+   float Rt = (voltage * Rtop) / (vcc - voltage);
+
+   float temp = (1 / (1.0 / To + (1.0 / B) * log(Rt / Ro))) - 273;
+
+   return temp;
+}
+
 float GS450HClass::GetMotorTemperature()
 {
    int tmpmg1 = AnaIn::MG1_Temp.Get();//in the gs450h case we must read the analog temp values from sensors in the gearbox
    int tmpmg2 = AnaIn::MG2_Temp.Get();
-
-   float t1 = (tmpmg1*(-0.02058758))+56.56512898;//Trying a best fit line approach.
-   float t2 = (tmpmg2*(-0.02058758))+56.56512898;;
+ 
+   // float t1 = (tmpmg1*(-0.02058758))+56.56512898;//Trying a best fit line approach.
+   // float t2 = (tmpmg2*(-0.02058758))+56.56512898;;
+   float t1 = readThermistor(tmpmg1,75000.0,47000.0,25+273,3500);
+   float t2 = readThermistor(tmpmg2,75000.0,47000.0,25+273,3500);
    float tmpm = MAX(t1, t2);//which ever is the hottest gets displayed
 
    return float(tmpm);
@@ -246,7 +268,10 @@ void GS450HClass::Task1Ms()
          dma_clear_interrupt_flags(DMA1, DMA_CHANNEL6, DMA_TCIF);
          statusInv=1;
          dc_bus_voltage=(((mth_data[82]|mth_data[83]<<8)-5)/2);
-         temp_inv_water=(mth_data[42]|mth_data[43]<<8);
+         // EV46 Start
+         // Use only working temp sensor in damaged inverter
+         temp_inv_water=(mth_data[41]|mth_data[40]<<8);
+         // EV46 End
          temp_inv_inductor=(mth_data[86]|mth_data[87]<<8);
          mg1_speed=mth_data[6]|mth_data[7]<<8;
          mg2_speed=mth_data[31]|mth_data[32]<<8;
