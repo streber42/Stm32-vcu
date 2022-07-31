@@ -702,7 +702,7 @@ static void ConfigureVariantIO()
 }
 
 
-extern "C" void tim3_isr(void)
+extern "C" void tim4_isr(void)
 {
    scheduler->Run();
 }
@@ -810,7 +810,7 @@ extern "C" int main(void)
    CANSPI_Initialize();// init the MCP25625 on CAN3
    CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
 
-   Stm32Scheduler s(TIM3); //We never exit main so it's ok to put it on stack
+   Stm32Scheduler s(TIM4); //We never exit main so it's ok to put it on stack
    scheduler = &s;
 
    s.AddTask(Ms1Task, 1);

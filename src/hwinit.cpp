@@ -133,8 +133,8 @@ void nvic_setup(void)
    //nvic_set_priority(NVIC_DMA1_CHANNEL3_IRQ, 0x20);//usart3_RX high priority int
 
 
-   nvic_enable_irq(NVIC_TIM3_IRQ); //Scheduler on tim3
-   nvic_set_priority(NVIC_TIM3_IRQ, 0); //Highest priority
+   nvic_enable_irq(NVIC_TIM4_IRQ); //Scheduler on tim4
+   nvic_set_priority(NVIC_TIM4_IRQ, 0); //Highest priority
 
 
    nvic_enable_irq(NVIC_USB_LP_CAN_RX0_IRQ); //CAN RX
