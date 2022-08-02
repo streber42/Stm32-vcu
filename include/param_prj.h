@@ -24,7 +24,7 @@
    2. Temporary parameters (id = 0)
    3. Display values
  */
-//Next param id (increase when adding new parameter!): 75
+//Next param id (increase when adding new parameter!): 80
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
     PARAM_ENTRY(CAT_SETUP,     Inverter,     INVMODES, 0,      5,      0,      5  ) \
@@ -88,6 +88,11 @@
     PARAM_ENTRY(CAT_CLOCK,     Pre_Hrs,     "Hours",   0,      59,     0,      53  ) \
     PARAM_ENTRY(CAT_CLOCK,     Pre_Min,     "Mins",    0,      59,     0,      54  ) \
     PARAM_ENTRY(CAT_CLOCK,     Pre_Dur,     "Mins",    0,      60,     0,      55  ) \
+    PARAM_ENTRY(CAT_PWM,       Tim3_Presc,  "",        1,      72000,  16,     75  ) \
+    PARAM_ENTRY(CAT_PWM,       Tim3_Period, "",        1,      100000, 2100,   76  ) \
+    PARAM_ENTRY(CAT_PWM,       Tim3_1_OC,   "",        1,      100000, 1000,   77  ) \
+    PARAM_ENTRY(CAT_PWM,       Tim3_2_OC,   "",        1,      100000, 1000,   78  ) \
+    PARAM_ENTRY(CAT_PWM,       Tim3_3_OC,   "",        1,      100000, 1000,   79  ) \
     VALUE_ENTRY(version,       VERSTR,  2000 ) \
     VALUE_ENTRY(opmode,        OPMODES, 2002 ) \
     VALUE_ENTRY(chgtyp,        CHGTYPS, 2003 ) \
@@ -209,6 +214,7 @@
 #define CAT_CRUISE   "Cruise Control"
 #define CAT_LEXUS    "Gearbox Control"
 #define CAT_CHARGER  "Charger Control"
+#define CAT_PWM      "PWM Control"
 
 #define CAN_PERIOD_100MS    0
 #define CAN_PERIOD_10MS     1

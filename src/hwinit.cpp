@@ -33,6 +33,7 @@
 #include <libopencm3/stm32/rtc.h>
 #include "hwdefs.h"
 #include "hwinit.h"
+#include "params.h"
 
 /**
 * Start clocks of all needed peripherals
@@ -218,3 +219,36 @@ void tim2_setup()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
+void tim3_setup()
+{
+   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   // General purpose pwm output. Push/pull driven to +12v/gnd. Timer 3 Chan 3 PB0.
+   // General purpose pwm output. Push/pull driven to +12v/gnd. Timer 3 Chan 2 PA7.
+   // General purpose pwm output. Push/pull driven to +12v/gnd. Timer 3 Chan 1 PA6.
+   ////////////////////////////////////////////////////////////////////////
+   gpio_set_mode(GPIOB,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
+                 GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO0);	// GPIOB0=TIM3.CH3
+   gpio_set_mode(GPIOA,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
+                 GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO7);	// GPIOE9=TIM3.CH2
+   gpio_set_mode(GPIOA,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
+                 GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO6);	// GPIOE9=TIM3.CH1
+
+   timer_disable_counter(TIM3);
+   timer_set_mode(TIM3, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_CENTER_1,
+                  TIM_CR1_DIR_UP);
+   timer_set_prescaler(TIM3,Param::GetInt(Param::Tim3_Presc));
+   timer_set_oc_mode(TIM3, TIM_OC1, TIM_OCM_PWM2);
+   timer_set_oc_mode(TIM3, TIM_OC2, TIM_OCM_PWM2);
+   timer_set_oc_mode(TIM3, TIM_OC3, TIM_OCM_PWM2);
+   timer_enable_oc_output(TIM3, TIM_OC1);
+   timer_enable_oc_output(TIM3, TIM_OC2);
+   timer_enable_oc_output(TIM3, TIM_OC3);
+   timer_enable_break_main_output(TIM3);
+   timer_set_oc_value(TIM3, TIM_OC1, Param::GetInt(Param::Tim3_1_OC));
+   timer_set_oc_value(TIM3, TIM_OC2, Param::GetInt(Param::Tim3_2_OC));
+   timer_set_oc_value(TIM3, TIM_OC3, Param::GetInt(Param::Tim3_3_OC));
+   timer_set_period(TIM3, Param::GetInt(Param::Tim3_Period));
+   timer_enable_counter(TIM3);
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+}

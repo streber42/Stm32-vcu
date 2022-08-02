@@ -612,6 +612,13 @@ void Param::Change(Param::PARAM_NUM paramNum)
       canInterface[0]->SetBaudrate((CanHardware::baudrates)Param::GetInt(Param::canspeed));
       canInterface[1]->SetBaudrate((CanHardware::baudrates)Param::GetInt(Param::canspeed));
       break;
+   case Param::Tim3_Presc:
+   case Param::Tim3_Period:
+   case Param::Tim3_1_OC:
+   case Param::Tim3_2_OC:
+   case Param::Tim3_3_OC:
+      tim3_setup();
+      break;
    default:
       break;
    }
@@ -788,6 +795,7 @@ extern "C" int main(void)
    parm_load();
    spi2_setup();
    spi3_setup();
+   tim3_setup();
    Param::Change(Param::PARAM_LAST);
    DigIo::inv_out.Clear();//inverter power off during bootup
    DigIo::mcp_sby.Clear();//enable can3
