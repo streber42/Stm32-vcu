@@ -197,7 +197,7 @@
 #define ERRLIGHTS    "0=Off, 4=EPC, 8=engine"
 #define CRUISESTATES "0=None, 1=On, 2=Disable, 4=SetN, 8=SetP"
 #define CDMSTAT      "1=Charging, 2=Malfunction, 4=ConnLock, 8=BatIncomp, 16=SystemMalfunction, 32=Stop"
-#define HTTYPE       "0=None, 1=Ampera, 2=VW"
+#define HTTYPE       "0=None, 1=Ampera, 2=VW, 3=Tesla"
 #define HTCTRL       "0=Disable, 1=Enable, 2=Timer"
 #define CHGMODS      "0=Off, 1=HV_ON, 2=EXT_CAN 3=EXT_DIGI, 4=Volt_Ampera"
 #define CHGCTRL      "0=Enable, 1=Disable, 2=Timer"

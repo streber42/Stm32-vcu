@@ -512,26 +512,50 @@ static void Ms10Task(void)
    }
 
    //Cabin heat control
-   if((CabHeater_ctrl==1)&& (CabHeater==1)&&(opmode==MOD_RUN))//If we have selected an ampera heater are in run mode and heater not diabled...
+   if((CabHeater_ctrl==1)&&(opmode==MOD_RUN))//If we have selected an ampera heater are in run mode and heater not diabled...
    {
-      //TODO: multiplex with chademo
-      //DigIo::gp_out3.Set();//Heater enable and coolant pump on
+      switch (CabHeater) {
+        case 1:
+         //TODO: multiplex with chademo
+         //DigIo::gp_out3.Set();//Heater enable and coolant pump on
 
-      if(Ampera_Not_Awake)
-      {
-         AmperaHeater::sendWakeup();
-         Ampera_Not_Awake=false;
-      }
-      //gp in used as heat request from car (E46 in case of testing). May be poss via CAN also...
-      if(!Ampera_Not_Awake) AmperaHeater::controlPower(Param::GetInt(Param::HeatPwr),Param::GetBool(Param::HeatReq));
-
+         if(Ampera_Not_Awake)
+         {
+            AmperaHeater::sendWakeup();
+            Ampera_Not_Awake=false;
+         }
+         //gp in used as heat request from car (E46 in case of testing). May be poss via CAN also...
+         if(!Ampera_Not_Awake) AmperaHeater::controlPower(Param::GetInt(Param::HeatPwr),Param::GetBool(Param::HeatReq));
+         break;
+        case 2:
+          break;
+        case 3:
+          // set PWM
+          if (Param::GetBool(Param::HeatReq)) {
+            // Check temp and adjust PWM
+          } else {
+            // set PWM to 45%
+          }
+          break;
+         default:
+           break;
+      };
    };
 
    if(CabHeater_ctrl==0 || opmode!=MOD_RUN)
    {
       //TODO: multiplex with chademo
       //DigIo::gp_out3.Clear();//Heater enable and coolant pump off
-      Ampera_Not_Awake=true;
+      switch (CabHeater) {
+        case 1:
+          Ampera_Not_Awake=true;
+          break;
+        case 2:
+          break;
+        case 3:
+          // Turn off PWM
+          break;
+      };
    }
 }
 

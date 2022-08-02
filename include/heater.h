@@ -32,4 +32,11 @@ class VWHeater
 
 
 };
+
+class TeslaHeater
+{
+    public:
+
+
+};
 #endif // HEATER_H
