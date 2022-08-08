@@ -533,8 +533,9 @@ static void Ms10Task(void)
           // set PWM
           if (Param::GetBool(Param::HeatReq)) {
             // Check temp and adjust PWM
+            PWMHeater::Task10Ms();
           } else {
-            // set PWM to 45%
+            PWMHeater::disable_pwm();
           }
           break;
          default:
@@ -554,6 +555,7 @@ static void Ms10Task(void)
           break;
         case 3:
           // Turn off PWM
+          PWMHeater::disable_pwm();
           break;
       };
    }

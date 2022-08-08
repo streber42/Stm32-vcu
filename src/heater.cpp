@@ -1,4 +1,6 @@
 #include <heater.h>
+#include "utils.h"
+#include "temp_meas.h"
 
 //This class handles cabin heaters such as the Ampera heater (swcan on CAN3) or VW heater (LIN).
 
@@ -243,4 +245,63 @@ void AmperaHeater::controlPower(uint16_t heatPwr, bool heatReq)
    }
    break;
    }
+}
+void PWMHeater::enable_pwm()
+{
+   switch (Param::GetInt(Param::PWMChannel))
+   {
+   case 1:
+      timer_enable_oc_output(TIM3, TIM_OC1);
+      break;
+   case 2:
+      timer_enable_oc_output(TIM3, TIM_OC2);
+      break;
+   case 3:
+      timer_enable_oc_output(TIM3, TIM_OC3);
+      break;
+   }
+}
+void PWMHeater::disable_pwm()
+{
+   switch (Param::GetInt(Param::PWMChannel))
+   {
+   case 1:
+      timer_disable_oc_output(TIM3, TIM_OC1);
+      break;
+   case 2:
+      timer_disable_oc_output(TIM3, TIM_OC2);
+      break;
+   case 3:
+      timer_disable_oc_output(TIM3, TIM_OC3);
+      break;
+   }
+}
+
+// cycle 0-100 percent
+void PWMHeater::set_duty_cycle(float cycle) {
+   int new_oc = int(Param::GetFloat(Param::Tim3_Period) * cycle);
+   switch (Param::GetInt(Param::PWMChannel))
+   {
+   case 1:
+      timer_set_oc_value(TIM3, TIM_OC1, new_oc);
+      break;
+   case 2:
+      timer_set_oc_value(TIM3, TIM_OC2, new_oc);
+      break;
+   case 3:
+      timer_set_oc_value(TIM3, TIM_OC3, new_oc);
+      break;
+   }
+}
+
+void PWMHeater::Task10Ms() {
+   // TODO(Read thermistor and adjust pwm)
+   // only 20-30% seems to be useful
+   // start with 75C target
+   int tmpgp_1 = AnaIn::GP_analog1.Get();
+
+   // float t1 = TempMeas::Lookup(tmpgp_1, TempMeas::TEMP_JCURVE);
+   int diff = 2048 - tmpgp_1;
+   if (diff < 0) diff = 0;
+   set_duty_cycle(utils::change(diff, 0, 2048, 20,30));
 }

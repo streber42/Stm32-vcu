@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #define VER 1.00.A
+#include <libopencm3/stm32/timer.h>
 
 
 /* Entries must be ordered as follows:
@@ -24,7 +25,7 @@
    2. Temporary parameters (id = 0)
    3. Display values
  */
-//Next param id (increase when adding new parameter!): 80
+//Next param id (increase when adding new parameter!): 81
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
     PARAM_ENTRY(CAT_SETUP,     Inverter,     INVMODES, 0,      5,      0,      5  ) \
@@ -78,6 +79,7 @@
     PARAM_ENTRY(CAT_Heater,    Heater,      HTTYPE,    0,      2,      0,      57  ) \
     PARAM_ENTRY(CAT_Heater,    Control,     HTCTRL,    0,      2,      0,      58  ) \
     PARAM_ENTRY(CAT_Heater,    HeatPwr,     "W",       0,      6500,   0,      59  ) \
+    PARAM_ENTRY(CAT_Heater,    PWMChannel,  "",        1,      3,      1,      80  ) \
     PARAM_ENTRY(CAT_CLOCK,     Set_Day,     DOW,       0,      6,      0,      46  ) \
     PARAM_ENTRY(CAT_CLOCK,     Set_Hour,    "Hours",   0,      23,     0,      47  ) \
     PARAM_ENTRY(CAT_CLOCK,     Set_Min,     "Mins",    0,      59,     0,      48  ) \
@@ -203,6 +205,7 @@
 #define CHGCTRL      "0=Enable, 1=Disable, 2=Timer"
 #define CHGINT       "0=Unused, 1=i3LIM, 2=Chademo, 3=Leaf_PDM"
 #define CAN_DEV      "0=CAN1, 1=CAN2"
+#define PWM_CHANNEL  "0=PWM1, 1=PWM2, 2=PWM3"
 #define CAT_THROTTLE "Throttle"
 #define CAT_POWER    "Power Limit"
 #define CAT_CONTACT  "Contactor Control"
@@ -359,6 +362,12 @@ enum can_devices
     CAN_DEV2 = 1
 };
 
+enum pwm_channels
+{
+    PWM1 = TIM_OC1,
+    PWM2 = TIM_OC2,
+    PWM3 = TIM_OC3
+};
 
 
 extern const char* errorListString;

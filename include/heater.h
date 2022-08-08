@@ -8,6 +8,7 @@
 #include "CANSPI.h"
 #include "digio.h"
 #include "utils.h"
+#include <libopencm3/stm32/timer.h>
 
 class AmperaHeater
 {
@@ -33,9 +34,13 @@ class VWHeater
 
 };
 
-class TeslaHeater
+class PWMHeater
 {
     public:
+      static void enable_pwm();
+      static void disable_pwm();
+      static void set_duty_cycle(float cycle);
+      static void Task10Ms();
 
 
 };
