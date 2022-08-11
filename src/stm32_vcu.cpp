@@ -20,6 +20,7 @@
  */
 #include "stm32_vcu.h"
 #include <libopencm3/cm3/scb.h>
+extern "C" void __cxa_pure_virtual() { while (1); }
 
 static Stm32Scheduler* scheduler;
 static bool chargeMode = false;
