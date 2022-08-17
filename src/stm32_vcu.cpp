@@ -43,10 +43,6 @@ uint32_t ChgTicks=0,ChgTicks_1Min=0;
 uint8_t CabHeater,CabHeater_ctrl;
 uint32_t chademoStartTime = 0;
 
-// EV46 Start Custom
-extern "C" void __cxa_pure_virtual() { while (1); }
-// EV46 End Custom
-
 static volatile unsigned
 days=0,
 hours=0, minutes=0, seconds=0,
