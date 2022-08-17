@@ -270,7 +270,11 @@ void Can_E39::Msg545()  //DME4
    // Byte 4 - Oil Temperature
    bytes[4]=0x7E;
    // Byte 5 - Battery light, 0x01.
-   bytes[5]=0x10;
+   if (Param::GetFloat(Param::uaux) > 13.0) {
+     bytes[5] = 0x10;
+   } else {
+     bytes[5] = 0x11;
+   }
    // Byte 6 - Unused
    bytes[6]=0x00;
    // Byte 7 - 0x80 Oil Pressure (Red Oil light), Idle set speed
