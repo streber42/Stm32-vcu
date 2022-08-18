@@ -274,5 +274,19 @@ void Can_E46::DecodeCAN(int id, uint32_t data[2])
 
         Param::SetInt(Param::Veh_Speed,road_speed);
     }
-
+	//	615 comes from the instrument cluster				
+    /*
+     0x615	B0	AC signal.  Hex 80 when on (10000000)  Other bits say something else (inside temp? system pressure?)				
+	         B1	mainly 32 goes to zero once in a while
+	         B2	0
+	         B3	"Outside Air Temperature: x being temperature in Deg C, (x>=0 deg C,DEC2HEX(x),DEC2HEX(-x)+128) x range min -40  C max 50 C"
+          	B4	1 ignition on?
+	         B5	0
+	         B6	0
+	         B7	0
+   */	
+    if (id == 0x615) 
+    {
+      Param::SetInt(Param::ACReq, bytes[0] == 0x80);
+    }
 }

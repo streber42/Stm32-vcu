@@ -958,6 +958,7 @@ void setCanFilters() {
     vehicle_can->RegisterUserMessage(0x192);//E65 Shifter
     charger_can->RegisterUserMessage(0x108);//Charger HV request
     vehicle_can->RegisterUserMessage(0x153);//E39/E46 ASC1 message    
+    vehicle_can->RegisterUserMessage(0x615);//E39/E46 IKE message    
 }
 
 extern "C" int main(void)
