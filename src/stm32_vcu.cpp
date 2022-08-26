@@ -500,13 +500,13 @@ static void Ms10Task(void)
     if(targetInverter == _invmodes::GS450H)
     {
         gs450Inverter.setTorqueTarget(torquePercent);//map throttle for GS450HClass inverter
-        speed = GS450HClass::mg2_speed;//return MG2 rpm as speed param
+        speed = ABS(GS450HClass::mg2_speed);//return MG2 rpm as speed param
     }
 
        if(targetInverter == _invmodes::Prius_Gen3)
     {
         gs450Inverter.setTorqueTarget(torquePercent);//map throttle for GS450HClass inverter
-        speed = GS450HClass::mg2_speed;//return MG2 rpm as speed param
+        speed = ABS(GS450HClass::mg2_speed);//return MG2 rpm as speed param
     }
 
             if(targetInverter == _invmodes::OpenI)
