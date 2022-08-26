@@ -99,7 +99,7 @@ static void RunChaDeMo()
    if (Param::GetInt(Param::opmode) == MOD_CHARGE && (rtc_get_counter_val() - connectorLockTime) > 1000)
    {
        //do not do 10 seconds!
-       DigIo::gp_out3.Set();//Chademo relay on
+    //    DigIo::gp_out3.Set();//Chademo relay on
       ChaDeMo::SetContactor(true);
         chargeModeDC = true;   //DC charge mode
         Param::SetInt(Param::chgtyp,DCFC);
@@ -127,7 +127,7 @@ static void RunChaDeMo()
       {
 
          ChaDeMo::SetEnabled(false);
-         DigIo::gp_out3.Clear();//Chademo relay off
+        //  DigIo::gp_out3.Clear();//Chademo relay off
          chargeMode = false;
       }
 
@@ -152,6 +152,13 @@ static void Ms200Task(void)
     Param::SetInt(Param::ChgT,ChgDur_tmp);
     if (DigIo::gp_12Vin.Get()) {
         scb_reset_system();
+    }
+    // Turn on AC Relay when AC requested by IHKA
+    if (Param::GetBool(Param::ACReq)) {
+        
+        DigIo::gp_out3.Set();
+    } else {
+        DigIo::gp_out3.Clear();
     }
     if(ChgSet==2 && !ChgLck){ //if in timer mode and not locked out from a previous full charge.
         if(opmode!=MOD_CHARGE)
@@ -673,7 +680,7 @@ static void Ms10Task(void)
       //Cabin heat control
     if((CabHeater_ctrl==1)&& (CabHeater==1)&&(opmode==MOD_RUN))//If we have selected an ampera heater are in run mode and heater not diabled...
     {
-        DigIo::gp_out3.Set();//Heater enable and coolant pump on
+        // DigIo::gp_out3.Set();//Heater enable and coolant pump on
 
       if(Ampera_Not_Awake)
       {
@@ -687,7 +694,7 @@ static void Ms10Task(void)
 
     if(CabHeater_ctrl==0 || opmode!=MOD_RUN)
     {
-        DigIo::gp_out3.Clear();//Heater enable and coolant pump off
+        // DigIo::gp_out3.Clear();//Heater enable and coolant pump off
         Ampera_Not_Awake=true;
     }
 
