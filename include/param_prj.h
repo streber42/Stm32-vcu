@@ -24,7 +24,7 @@
    2. Temporary parameters (id = 0)
    3. Display values
  */
-//Next param id (increase when adding new parameter!): 65
+//Next param id (increase when adding new parameter!): 66
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
     PARAM_ENTRY(CAT_SETUP,Inverter,     INVMODES    ,  0,      5,      0,      5  ) \
@@ -34,6 +34,9 @@
     PARAM_ENTRY(CAT_SETUP,Shunt_CAN,    CAN_DEV,       0,      1,      0,      62 ) \
     PARAM_ENTRY(CAT_SETUP,LIM_CAN,      CAN_DEV,       0,      1,      0,      63 ) \
     PARAM_ENTRY(CAT_SETUP,Charger_CAN,  CAN_DEV,       0,      1,      1,      64 ) \
+    PARAM_ENTRY(CAT_SETUP,gp_out1_role, GPOUT_ROLES,   0,      3,      1,      65 ) \
+    PARAM_ENTRY(CAT_SETUP,gp_out2_role, GPOUT_ROLES,   0,      3,      2,      66 ) \
+    PARAM_ENTRY(CAT_SETUP,gp_out3_role, GPOUT_ROLES,   0,      3,      0,      67 ) \
     PARAM_ENTRY(CAT_THROTTLE,potmin,      "dig",     0,      4095,   0,      7  ) \
     PARAM_ENTRY(CAT_THROTTLE,potmax,      "dig",     0,      4095,   4095,   8  ) \
     PARAM_ENTRY(CAT_THROTTLE,pot2min,     "dig",     0,      4095,   4095,   9  ) \
@@ -200,6 +203,7 @@
 #define CDMSTAT      "1=Charging, 2=Malfunction, 4=ConnLock, 8=BatIncomp, 16=SystemMalfunction, 32=Stop"
 #define HtType      "0=None, 1=Ampera, 2=VW"
 #define HtCtrl      "0=Disable, 1=Enable, 2=Timer"
+#define GPOUT_ROLES "0=Disabled, 1=Coolant Pump, 2=Negative Contactor, 3=Reverse, 4=Chademo, 5=AC Relay"
 #define CAT_THROTTLE "Throttle"
 #define CAT_POWER    "Power Limit"
 #define CAT_CONTACT  "Contactor Control"
@@ -360,6 +364,15 @@ enum can_devices
     CAN_DEV2 = 1
 };
 
+enum gpout_roles
+{
+    DISABLED = 0,
+    COOLANT_PUMP = 1,
+    NEG_CON = 2,
+    REVERSE = 3,
+    CHADEMO = 4,
+    AC_RELAY = 5,
+};
 
 
 extern const char* errorListString;

@@ -155,9 +155,9 @@ void SelectDirection(_vehmodes targetVehicle, BMW_E65Class E65Vehicle)
     }
 
     if (selectedDir == -1) {
-        DigIo::gp_out2.Set(); // Turn on reverse lights
+        GPSet(REVERSE); // Turn on reverse lights
     } else {
-        DigIo::gp_out2.Clear(); // Turn off reverse lights
+        GPClear(REVERSE); // Turn off reverse lights
     }
 
     Param::SetInt(Param::dir, selectedDir);
@@ -287,6 +287,38 @@ uint32_t kwh_Used = FP_FROMFLT(ABS(Param::Get(Param::KWh)));
 if(SOCVal>100) SOCVal=100;
 Param::SetInt(Param::SOC,SOCVal);
 
+}
+
+void GPSet(int role)
+{
+    if (Param::Get(Param::gp_out1_role) == role)
+    {
+        DigIo::gp_out1.Set();
+    }
+    if (Param::Get(Param::gp_out2_role) == role)
+    {
+        DigIo::gp_out2.Set();
+    }
+    if (Param::Get(Param::gp_out3_role) == role)
+    {
+        DigIo::gp_out3.Set();
+    }
+}
+
+void GPClear(int role)
+{
+    if (Param::Get(Param::gp_out1_role) == role)
+    {
+        DigIo::gp_out1.Clear();
+    }
+    if (Param::Get(Param::gp_out2_role) == role)
+    {
+        DigIo::gp_out2.Clear();
+    }
+    if (Param::Get(Param::gp_out3_role) == role)
+    {
+        DigIo::gp_out3.Clear();
+    }
 }
 
 } // namespace utils

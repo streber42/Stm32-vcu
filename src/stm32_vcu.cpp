@@ -75,6 +75,45 @@ CAN3_Msg CAN3;
 
 void setCanFilters();
 
+static void StartCoolantPump(void)
+{
+    utils::GPSet(COOLANT_PUMP);
+}
+
+static void StopCoolantPump(void)
+{
+    utils::GPClear(COOLANT_PUMP);
+}
+
+static void CloseNegativeContactor(void)
+{
+    utils::GPSet(NEG_CON);
+}
+
+static void OpenNegativeContactor(void)
+{
+    utils::GPClear(NEG_CON);
+}
+
+static void CloseChademoRelay(void)
+{
+    utils::GPSet(CHADEMO);
+}
+
+static void OpenChademoRelay(void)
+{
+    utils::GPClear(CHADEMO);
+}
+static void CloseACRelay(void)
+{
+    utils::GPSet(AC_RELAY);
+}
+
+static void OpenACRelay(void)
+{
+    utils::GPClear(AC_RELAY);
+}
+
 static void RunChaDeMo()
 {
    static uint32_t connectorLockTime = 0;
@@ -98,8 +137,8 @@ static void RunChaDeMo()
    //10s after locking tell EVSE that we closed the contactor (in fact we have no control). Oh yes we do! Muhahahahaha
    if (Param::GetInt(Param::opmode) == MOD_CHARGE && (rtc_get_counter_val() - connectorLockTime) > 1000)
    {
-       //do not do 10 seconds!
-    //    DigIo::gp_out3.Set();//Chademo relay on
+       //do not do 10 seconds!    
+      CloseChademoRelay();
       ChaDeMo::SetContactor(true);
         chargeModeDC = true;   //DC charge mode
         Param::SetInt(Param::chgtyp,DCFC);
@@ -127,7 +166,7 @@ static void RunChaDeMo()
       {
 
          ChaDeMo::SetEnabled(false);
-        //  DigIo::gp_out3.Clear();//Chademo relay off
+         OpenChademoRelay();
          chargeMode = false;
       }
 
@@ -155,10 +194,9 @@ static void Ms200Task(void)
     }
     // Turn on AC Relay when AC requested by IHKA
     if (Param::GetBool(Param::ACReq)) {
-        
-        DigIo::gp_out3.Set();
+        CloseACRelay();
     } else {
-        DigIo::gp_out3.Clear();
+        OpenACRelay();
     }
     if(ChgSet==2 && !ChgLck){ //if in timer mode and not locked out from a previous full charge.
         if(opmode!=MOD_CHARGE)
@@ -576,8 +614,8 @@ static void Ms10Task(void)
           //activate inv during precharge if not oi.
       if(targetInverter != _invmodes::OpenI) DigIo::inv_out.Set();//inverter power on but not if we are in charge mode!
       }
-        // DigIo::gp_out2.Set();//Negative contactors on
-        DigIo::gp_out1.Set();//Coolant pump on
+        CloseNegativeContactor();
+        StartCoolantPump();
         DigIo::prec_out.Set();//commence precharge
         opmode = MOD_PRECHARGE;
         Param::SetInt(Param::opmode, opmode);
@@ -668,8 +706,8 @@ static void Ms10Task(void)
     {
         DigIo::inv_out.Clear();//inverter power off
         DigIo::dcsw_out.Clear();
-        // DigIo::gp_out2.Clear();//Negative contactors off
-        DigIo::gp_out1.Clear();//Coolant pump off
+        OpenNegativeContactor();
+        StopCoolantPump();
 //        DigIo::err_out.Clear();
         DigIo::prec_out.Clear();
         Param::SetInt(Param::dir, 0); // shift to park/neutral on shutdown
