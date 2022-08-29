@@ -195,8 +195,10 @@ static void Ms200Task(void)
     // Turn on AC Relay when AC requested by IHKA
     if (Param::GetBool(Param::ACReq)) {
         CloseACRelay();
+        timer_set_oc_value(TIM3,TIM_OC2,5000);
     } else {
         OpenACRelay();
+        timer_set_oc_value(TIM3,TIM_OC2,0);
     }
     if(ChgSet==2 && !ChgLck){ //if in timer mode and not locked out from a previous full charge.
         if(opmode!=MOD_CHARGE)
@@ -481,10 +483,15 @@ static void Ms100Task(void)
 
     }
 
-if(targetChgint != _interface::Chademo) //If we are not using Chademo then gp in can be used as a cabin heater request from the vehicle
-{
-    Param::SetInt(Param::HeatReq,DigIo::gp_12Vin.Get());
-}
+    if(targetChgint != _interface::Chademo) //If we are not using Chademo then gp in can be used as a cabin heater request from the vehicle
+    {
+        Param::SetInt(Param::HeatReq,DigIo::gp_12Vin.Get());
+        if ((opmode==MOD_RUN) && !Param::GetBool(Param::HeatReq)) {
+            timer_set_oc_value(TIM3,TIM_OC1,2000);
+        } else {
+            timer_set_oc_value(TIM3,TIM_OC1,0);
+        }
+    }
 
 }
 
@@ -663,6 +670,8 @@ static void Ms10Task(void)
         if (Param::GetBool(Param::din_start) || E65Vehicle.getTerminal15())
         {
             newMode = MOD_RUN;
+            // Start fan
+            timer_set_oc_value(TIM3,TIM_OC3,5000);
         }
 
          if (chargeMode)
@@ -713,6 +722,9 @@ static void Ms10Task(void)
         Param::SetInt(Param::dir, 0); // shift to park/neutral on shutdown
         Param::SetInt(Param::opmode, newMode);
         if(targetVehicle == _vehmodes::BMW_E65) E65Vehicle.DashOff();
+        timer_set_oc_value(TIM3,TIM_OC1,0);
+        timer_set_oc_value(TIM3,TIM_OC2,0);
+        timer_set_oc_value(TIM3,TIM_OC3,0);
     }
 
       //Cabin heat control
