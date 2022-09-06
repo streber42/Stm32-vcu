@@ -24,7 +24,7 @@
    2. Temporary parameters (id = 0)
    3. Display values
  */
-//Next param id (increase when adding new parameter!): 66
+//Next param id (increase when adding new parameter!): 67
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
     PARAM_ENTRY(CAT_SETUP,Inverter,     INVMODES    ,  0,      5,      0,      5  ) \
@@ -79,6 +79,7 @@
     PARAM_ENTRY(CAT_Heater,   Heater,       HtType,       0,      2,   0,    57  ) \
     PARAM_ENTRY(CAT_Heater,   Control,       HtCtrl,       0,      2,   0,    58  ) \
     PARAM_ENTRY(CAT_Heater,   HeatPwr,       "W",       0,      6500,   0,    59  ) \
+    PARAM_ENTRY(CAT_Heater,   HeatTempLimit, "°C",       0,      4096,   0,    66  ) \
     PARAM_ENTRY(CAT_CLOCK,   Set_Day,       Days,       0,      6,   0,    46  ) \
     PARAM_ENTRY(CAT_CLOCK,   Set_Hour,      "Hours",       0,      23,   0,    47  ) \
     PARAM_ENTRY(CAT_CLOCK,   Set_Min,      "Mins",       0,      59,   0,    48  ) \
@@ -172,8 +173,9 @@
     VALUE_ENTRY(cpuload,      "%",     2063 ) \
     VALUE_ENTRY(ACReq,         ONOFF,   2080 ) \
     VALUE_ENTRY(ACClutchReq,   ONOFF,   2081 ) \
+    VALUE_ENTRY(HeaterTemp,   "°C",     2082 ) \
 
-//Next value Id: 2082
+//Next value Id: 2083
 
 #define VERSTR STRINGIFY(4=VER)
 #define dmodes     "0=CLOSED, 1=OPEN, 2=ERROR, 3=INVALID"

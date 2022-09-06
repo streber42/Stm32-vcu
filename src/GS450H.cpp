@@ -207,9 +207,9 @@ void GS450HClass::run100msTask(uint8_t Lexus_Gear, uint16_t Lexus_Oil)
     int tmpmg2 = AnaIn::MG2_Temp.Get();
     Param::SetInt(Param::tmpmg1,tmpmg1);
     Param::SetInt(Param::tmpmg2,tmpmg2);
-    float temp_1 = TempMeas::readThermistor(tmpmg1);
+    float temp_1 = TempMeas::readLexusThermistor(tmpmg1);
     Param::SetFlt(Param::tmpmg1fp,FP_FROMFLT(temp_1));
-    float temp_2 = TempMeas::readThermistor(tmpmg2);
+    float temp_2 = TempMeas::readLexusThermistor(tmpmg2);
     Param::SetFlt(Param::tmpmg2fp,FP_FROMFLT(temp_2));
 
     mTemps[0] = FP_FROMFLT(temp_1);

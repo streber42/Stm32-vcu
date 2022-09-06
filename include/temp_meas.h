@@ -47,7 +47,9 @@ public:
     };
 
     static s32fp Lookup(int digit, Sensors sensorId);
-    static float readThermistor(int adc);
+    static float readLexusThermistor(int adc);
+    static float readTeslaHeaterThermistor(int adc);
+    static float readThermistor(int adc, float Rtop, float Ro, float To, float B);
 };
 
 

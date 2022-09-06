@@ -132,14 +132,20 @@ s32fp TempMeas::Lookup(int digit, Sensors sensorId) {
 /////////////temp sensor data////////////////////
 float vcc = 5.0;
 float adc_step = 3.3 / 4096.0;
-float Rtop = 75000.0;
-float Ro = 47000.0;
-float To = 25 + 273;
-float B = 3500;
-float mg1_stat = 0;
-float mg2_stat = 0;
+// float Rtop = 75000.0;
+// float Ro = 47000.0;
+// float To = 25 + 273;
+// float B = 3500;
 
-float TempMeas::readThermistor(int adc) {
+float TempMeas::readLexusThermistor(int adc) {
+  return TempMeas::readThermistor(adc,75000.0,47000.0,25+273,3500);
+}
+
+float TempMeas::readTeslaHeaterThermistor(int adc) {
+  return TempMeas::readThermistor(adc, 10000.0, 10000.0, 25+273, 5500);
+}
+
+float TempMeas::readThermistor(int adc, float Rtop, float Ro, float To, float B) {
 
   float raw = adc;
   float voltage = raw * adc_step;
