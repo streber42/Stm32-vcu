@@ -291,15 +291,15 @@ Param::SetInt(Param::SOC,SOCVal);
 
 void GPSet(int role)
 {
-    if (Param::Get(Param::gp_out1_role) == role)
+    if (Param::GetInt(Param::gp_out1_role) == role)
     {
         DigIo::gp_out1.Set();
     }
-    if (Param::Get(Param::gp_out2_role) == role)
+    if (Param::GetInt(Param::gp_out2_role) == role)
     {
         DigIo::gp_out2.Set();
     }
-    if (Param::Get(Param::gp_out3_role) == role)
+    if (Param::GetInt(Param::gp_out3_role) == role)
     {
         DigIo::gp_out3.Set();
     }
@@ -307,15 +307,15 @@ void GPSet(int role)
 
 void GPClear(int role)
 {
-    if (Param::Get(Param::gp_out1_role) == role)
+    if (Param::GetInt(Param::gp_out1_role) == role)
     {
         DigIo::gp_out1.Clear();
     }
-    if (Param::Get(Param::gp_out2_role) == role)
+    if (Param::GetInt(Param::gp_out2_role) == role)
     {
         DigIo::gp_out2.Clear();
     }
-    if (Param::Get(Param::gp_out3_role) == role)
+    if (Param::GetInt(Param::gp_out3_role) == role)
     {
         DigIo::gp_out3.Clear();
     }
