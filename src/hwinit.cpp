@@ -298,7 +298,7 @@ void tim3_setup()
    timer_disable_counter(TIM3);
    timer_set_mode(TIM3, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_CENTER_1,
                   TIM_CR1_DIR_UP);
-   timer_set_prescaler(TIM3,36);
+   timer_set_prescaler(TIM3,72);
    timer_set_oc_mode(TIM3, TIM_OC1, TIM_OCM_PWM2);
    timer_set_oc_mode(TIM3, TIM_OC2, TIM_OCM_PWM2);
    timer_set_oc_mode(TIM3, TIM_OC3, TIM_OCM_PWM2);
