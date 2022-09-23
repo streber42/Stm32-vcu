@@ -488,8 +488,8 @@ static void Ms100Task(void)
         Param::SetInt(Param::HeatReq,DigIo::HV_req.Get());
         // Param::SetFlt(Param::HeaterTemp, TempMeas::readTeslaHeaterThermistor(AnaIn::GP_analog1.Get()));
         Param::SetInt(Param::HeaterTemp,AnaIn::GP_analog1.Get());
-        if ((opmode==MOD_RUN) & Param::GetBool(Param::HeatReq) && (Param::GetInt(Param::HeaterTemp) < Param::GetInt(Param::HeatTempLimit))) {
-            timer_set_oc_value(TIM3,TIM_OC1,Param::GetInt(Param::HeatPwr));
+        if ((opmode==MOD_RUN) && Param::GetBool(Param::HeatReq) && (Param::GetInt(Param::HeaterTemp) < Param::GetInt(Param::HeatTempMax)) && (Param::GetInt(Param::HeaterTemp) > Param::GetInt(Param::HeatTempMin))) {
+           timer_set_oc_value(TIM3, TIM_OC1, Param::GetInt(Param::HeatPwr));
         } else {
             timer_set_oc_value(TIM3,TIM_OC1,0);
         }

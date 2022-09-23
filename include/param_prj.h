@@ -24,7 +24,7 @@
    2. Temporary parameters (id = 0)
    3. Display values
  */
-//Next param id (increase when adding new parameter!): 69
+//Next param id (increase when adding new parameter!): 70
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
     PARAM_ENTRY(CAT_SETUP,Inverter,     INVMODES    ,  0,      5,      0,      5  ) \
@@ -79,7 +79,8 @@
     PARAM_ENTRY(CAT_Heater,   Heater,       HtType,       0,      2,   0,    57  ) \
     PARAM_ENTRY(CAT_Heater,   Control,       HtCtrl,       0,      2,   0,    58  ) \
     PARAM_ENTRY(CAT_Heater,   HeatPwr,       "W",       0,      6500,   0,    59  ) \
-    PARAM_ENTRY(CAT_Heater,   HeatTempLimit, "°C",      0,      4096,   0,    68  ) \
+    PARAM_ENTRY(CAT_Heater,   HeatTempMax, "°C",      0,      4096,   0,    68  ) \
+    PARAM_ENTRY(CAT_Heater,   HeatTempMin, "°C",      0,      4096,   2048,    69  ) \
     PARAM_ENTRY(CAT_CLOCK,   Set_Day,       Days,       0,      6,   0,    46  ) \
     PARAM_ENTRY(CAT_CLOCK,   Set_Hour,      "Hours",       0,      23,   0,    47  ) \
     PARAM_ENTRY(CAT_CLOCK,   Set_Min,      "Mins",       0,      59,   0,    48  ) \
