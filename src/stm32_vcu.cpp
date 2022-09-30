@@ -360,6 +360,7 @@ static void Ms100Task(void)
     utils::SelectDirection(targetVehicle, E65Vehicle);
     utils::ProcessUdc(oldTime, GetInt(Param::speed));
     utils::CalcSOC();
+    Param::SetInt(Param::WaterTemp,AnaIn::GP_analog2.Get());
 
 
         if(targetInverter == _invmodes::OpenI)

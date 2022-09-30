@@ -175,8 +175,9 @@
     VALUE_ENTRY(ACReq,         ONOFF,   2080 ) \
     VALUE_ENTRY(ACClutchReq,   ONOFF,   2081 ) \
     VALUE_ENTRY(HeaterTemp,   "°C",     2082 ) \
+    VALUE_ENTRY(WaterTemp,    "°C",     2083) \
 
-//Next value Id: 2083
+//Next value Id: 2084
 
 #define VERSTR STRINGIFY(4=VER)
 #define dmodes     "0=CLOSED, 1=OPEN, 2=ERROR, 3=INVALID"
