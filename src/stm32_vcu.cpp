@@ -128,7 +128,9 @@ static void RunChaDeMo()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void Ms200Task(void)
 {
-//    DigIo::led2_out.Toggle();
+   #ifdef TEST_P107
+   DigIo::led2_out.Toggle();
+   #endif
    if(chargerClass::HVreq==true) Param::SetInt(Param::hvChg,1);
    if(chargerClass::HVreq==false) Param::SetInt(Param::hvChg,0);
    int opmode = Param::GetInt(Param::opmode);
@@ -932,7 +934,6 @@ extern "C" int main(void)
 
    parm_Change(Param::PARAM_LAST);
    parm_Change(Param::Inverter); //Set loaded inverter
-   setCanFilters();
 
    //  CANSPI_Initialize();// init the MCP25625 on CAN3
    //  CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
