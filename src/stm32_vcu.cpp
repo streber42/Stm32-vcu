@@ -339,9 +339,7 @@ if(count_one==1)    //just a dummy routine that sweeps the pots for testing.
     DigIo::pot2_cs.Set();
     count_one=0;
 }
-
-
-
+  CustomMs200Task();
 }
 
 
@@ -495,7 +493,7 @@ static void Ms100Task(void)
             timer_set_oc_value(TIM3,TIM_OC1,0);
         }
     }
-
+    CustomMs100Task();
 }
 
 
@@ -750,10 +748,7 @@ static void Ms10Task(void)
         // DigIo::gp_out3.Clear();//Heater enable and coolant pump off
         Ampera_Not_Awake=true;
     }
-
-
-
-
+   CustomMs10Task();
 }
 
 
@@ -773,6 +768,7 @@ static void Ms1Task(void)
         // Torque updated in 10ms loop.
         gs450Inverter.UpdateHTMState1Ms(Param::Get(Param::dir));
     }
+   CustomMs1Task();
 }
 
 

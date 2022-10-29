@@ -34,6 +34,7 @@
 #include "CANSPI.h"
 #include "chademo.h"
 #include "heater.h"
+#include "custom.h"
 
 /*
 typedef union {
