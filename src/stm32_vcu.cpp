@@ -19,7 +19,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "stm32_vcu.h"
-#include <libopencm3/cm3/scb.h>
 
 #define RMS_SAMPLES 256
 #define SQRT2OV1 0.707106781187
@@ -104,16 +103,6 @@ static void OpenChademoRelay(void)
 {
     utils::GPClear(CHADEMO);
 }
-static void CloseACRelay(void)
-{
-    utils::GPSet(AC_RELAY);
-}
-
-static void OpenACRelay(void)
-{
-    utils::GPClear(AC_RELAY);
-}
-
 static void RunChaDeMo()
 {
    static uint32_t connectorLockTime = 0;
@@ -189,17 +178,6 @@ static void Ms200Task(void)
     Param::SetInt(Param::Min,minutes);
     Param::SetInt(Param::Sec,seconds);
     Param::SetInt(Param::ChgT,ChgDur_tmp);
-    if (DigIo::gp_12Vin.Get()) {
-        scb_reset_system();
-    }
-    // Turn on AC Relay when AC requested by IHKA
-    if (Param::GetBool(Param::ACReq)) {
-        CloseACRelay();
-        timer_set_oc_value(TIM3,TIM_OC2,5000);
-    } else {
-        OpenACRelay();
-        timer_set_oc_value(TIM3,TIM_OC2,0);
-    }
     if(ChgSet==2 && !ChgLck){ //if in timer mode and not locked out from a previous full charge.
         if(opmode!=MOD_CHARGE)
             {
@@ -485,13 +463,6 @@ static void Ms100Task(void)
     if(targetChgint != _interface::Chademo) //If we are not using Chademo then gp in can be used as a cabin heater request from the vehicle
     {
         Param::SetInt(Param::HeatReq,DigIo::HV_req.Get());
-        // Param::SetFlt(Param::HeaterTemp, TempMeas::readTeslaHeaterThermistor(AnaIn::GP_analog1.Get()));
-        Param::SetInt(Param::HeaterTemp,AnaIn::GP_analog1.Get());
-        if ((opmode==MOD_RUN) && Param::GetBool(Param::HeatReq) && (Param::GetInt(Param::HeaterTemp) < Param::GetInt(Param::HeatTempMax)) && (Param::GetInt(Param::HeaterTemp) > Param::GetInt(Param::HeatTempMin))) {
-           timer_set_oc_value(TIM3, TIM_OC1, Param::GetInt(Param::HeatPwr));
-        } else {
-            timer_set_oc_value(TIM3,TIM_OC1,0);
-        }
     }
     CustomMs100Task();
 }
@@ -723,9 +694,6 @@ static void Ms10Task(void)
         Param::SetInt(Param::dir, 0); // shift to park/neutral on shutdown
         Param::SetInt(Param::opmode, newMode);
         if(targetVehicle == _vehmodes::BMW_E65) E65Vehicle.DashOff();
-        timer_set_oc_value(TIM3,TIM_OC1,0);
-        timer_set_oc_value(TIM3,TIM_OC2,0);
-        timer_set_oc_value(TIM3,TIM_OC3,0);
     }
 
       //Cabin heat control
