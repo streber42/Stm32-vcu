@@ -24,19 +24,19 @@
    2. Temporary parameters (id = 0)
    3. Display values
  */
-//Next param id (increase when adding new parameter!): 70
+//Next param id (increase when adding new parameter!): 82
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
     PARAM_ENTRY(CAT_SETUP,Inverter,     INVMODES    ,  0,      5,      0,      5  ) \
     PARAM_ENTRY(CAT_SETUP,Vehicle,      VEHMODES    ,  0,      6,      0,      6  ) \
-    PARAM_ENTRY(CAT_SETUP,Inverter_CAN, CAN_DEV,       0,      1,      0,      60 ) \
-    PARAM_ENTRY(CAT_SETUP,Vehicle_CAN,  CAN_DEV,       0,      1,      1,      61 ) \
-    PARAM_ENTRY(CAT_SETUP,Shunt_CAN,    CAN_DEV,       0,      1,      0,      62 ) \
-    PARAM_ENTRY(CAT_SETUP,LIM_CAN,      CAN_DEV,       0,      1,      0,      63 ) \
-    PARAM_ENTRY(CAT_SETUP,Charger_CAN,  CAN_DEV,       0,      1,      1,      64 ) \
-    PARAM_ENTRY(CAT_SETUP,gp_out1_role, GPOUT_ROLES,   0,      5,      1,      65 ) \
-    PARAM_ENTRY(CAT_SETUP,gp_out2_role, GPOUT_ROLES,   0,      5,      2,      66 ) \
-    PARAM_ENTRY(CAT_SETUP,gp_out3_role, GPOUT_ROLES,   0,      5,      0,      67 ) \
+    PARAM_ENTRY(CAT_SETUP,Inverter_CAN, CAN_DEV,       0,      1,      0,      70 ) \
+    PARAM_ENTRY(CAT_SETUP,Vehicle_CAN,  CAN_DEV,       0,      1,      1,      71 ) \
+    PARAM_ENTRY(CAT_SETUP,Shunt_CAN,    CAN_DEV,       0,      1,      0,      72 ) \
+    PARAM_ENTRY(CAT_SETUP,LIM_CAN,      CAN_DEV,       0,      1,      0,      73 ) \
+    PARAM_ENTRY(CAT_SETUP,Charger_CAN,  CAN_DEV,       0,      1,      1,      74 ) \
+    PARAM_ENTRY(CAT_SETUP,gp_out1_role, GPOUT_ROLES,   0,      5,      1,      77 ) \
+    PARAM_ENTRY(CAT_SETUP,gp_out2_role, GPOUT_ROLES,   0,      5,      2,      78 ) \
+    PARAM_ENTRY(CAT_SETUP,gp_out3_role, GPOUT_ROLES,   0,      5,      0,      79 ) \
     PARAM_ENTRY(CAT_THROTTLE,potmin,      "dig",     0,      4095,   0,      7  ) \
     PARAM_ENTRY(CAT_THROTTLE,potmax,      "dig",     0,      4095,   4095,   8  ) \
     PARAM_ENTRY(CAT_THROTTLE,pot2min,     "dig",     0,      4095,   4095,   9  ) \
@@ -79,8 +79,8 @@
     PARAM_ENTRY(CAT_Heater,   Heater,       HtType,       0,      2,   0,    57  ) \
     PARAM_ENTRY(CAT_Heater,   Control,       HtCtrl,       0,      2,   0,    58  ) \
     PARAM_ENTRY(CAT_Heater,   HeatPwr,       "W",       0,      6500,   0,    59  ) \
-    PARAM_ENTRY(CAT_Heater,   HeatTempMax, "°C",      0,      4096,   0,    68  ) \
-    PARAM_ENTRY(CAT_Heater,   HeatTempMin, "°C",      0,      4096,   2048,    69  ) \
+    PARAM_ENTRY(CAT_Heater,   HeatTempMax, "°C",      0,      4096,   0,    80  ) \
+    PARAM_ENTRY(CAT_Heater,   HeatTempMin, "°C",      0,      4096,   2048,    81  ) \
     PARAM_ENTRY(CAT_CLOCK,   Set_Day,       Days,       0,      6,   0,    46  ) \
     PARAM_ENTRY(CAT_CLOCK,   Set_Hour,      "Hours",       0,      23,   0,    47  ) \
     PARAM_ENTRY(CAT_CLOCK,   Set_Min,      "Mins",       0,      59,   0,    48  ) \
