@@ -36,7 +36,7 @@ class IOMatrix
 
       enum analoguepinfuncs
       {
-         NONE_ANAL, PILOT_PROX, VAC_SENSOR, LAST_ANAL
+         NONE_ANAL, PILOT_PROX, VAC_SENSOR, CAB_HEAT_TEMP, LAST_ANAL
       };
 
       static void AssignFromParams();
