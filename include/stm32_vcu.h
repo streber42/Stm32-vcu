@@ -55,6 +55,7 @@
 #include "chademo.h"
 #include "heater.h"
 #include "amperaheater.h"
+#include "PWMHeater.h"
 #include "inverter.h"
 #include "vehicle.h"
 #include "chargerhw.h"

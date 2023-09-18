@@ -91,9 +91,9 @@ AmperaHeater::AmperaHeater()
    //ctor
 }
 
-void AmperaHeater::SetPower(uint16_t power, bool heatReq)
+void AmperaHeater::SetPower(uint8_t duty_cycle, bool heatReq)
 {
-   if(power==0) isAwake = false;//if we are disabled do nothing but set isAwake to false for next wakeup ...
+   if(duty_cycle==0) isAwake = false;//if we are disabled do nothing but set isAwake to false for next wakeup ...
    else//otherwise do everything
    {
 
@@ -148,7 +148,7 @@ void AmperaHeater::SetPower(uint16_t power, bool heatReq)
       txMessage_Ampera.frame.dlc = 5;
       txMessage_Ampera.frame.data0 = 0x02;
       // map requested power to valid range of heater (0 - 0x85)
-      if(heatReq) txMessage_Ampera.frame.data1 = utils::change(power, 0, 6500, 0, 133);//transmitt heater power command when requested
+      if(heatReq) txMessage_Ampera.frame.data1 = utils::change(duty_cycle, 0, 100, 0, 133);//transmitt heater power command when requested
       if(!heatReq) txMessage_Ampera.frame.data1 = 0x00;//else send 0 power request.
       txMessage_Ampera.frame.data2 = 0x00;
       txMessage_Ampera.frame.data3 = 0x00;
