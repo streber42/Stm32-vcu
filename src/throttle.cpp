@@ -21,7 +21,7 @@
 #include "throttle.h"
 #include "my_math.h"
 
-#define POT_SLACK 200
+#define POT_SLACK 400
 
 int Throttle::potmin[2];
 int Throttle::potmax[2];
