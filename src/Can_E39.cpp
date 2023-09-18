@@ -412,9 +412,13 @@ void Can_E39::DecodeCAN(int id, uint32_t* data)
       //Vehicle speed signal in Km/h
       //Calculation = ( (HEX[MSB] * 256) + HEX[LSB]) * 0.0625
       //Min: 0x160 (0 Km/h)
-
-      float road_speed = 0.0625f * (((bytes[2] << 8) | (bytes[1])) - 0x160);
-
+      // uint16_t road_speed = (((bytes[2]<<8)+(bytes[1])) / 16.0f);
+      // uint16_t road_speed=(((bytes[2]<<8)+(bytes[1])) >> 8);//*0.0625
+      float road_speed = (((bytes[2]<<8)+(bytes[1] & 0xF8)) * 0.0625f);
+      if(!isE46) {
+        road_speed -= 0x160;
+      }
+      // Param::SetInt(Param::Veh_Speed, road_speed);
       Param::SetFloat(Param::Veh_Speed, road_speed);
    }
 
