@@ -9,7 +9,7 @@ class noHeater: public Heater
 
 public:
       void SetTargetTemperature(float temp) { (void)temp; } //Not supported (yet)?
-      void SetPower(uint16_t, bool){};
+      void SetPower(uint8_t, bool){};
 
 private:
 
