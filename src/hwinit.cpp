@@ -219,7 +219,20 @@ void tim2_setup()
 
 void tim3_setup()
 {
-   timer_disable_counter(TIM3);
+   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   // Setup all 3 PWM ports to output a 1khz 50% duty cycle PWM signal
+   // General purpose pwm output. Push/pull driven to +12v/gnd. Timer 3 Chan 3 PB0.
+   // General purpose pwm output. Push/pull driven to +12v/gnd. Timer 3 Chan 2 PA7.
+   // General purpose pwm output. Push/pull driven to +12v/gnd. Timer 3 Chan 1 PA6.
+   ////////////////////////////////////////////////////////////////////////
+   gpio_set_mode(GPIOB,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
+                 GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO0);	// GPIOB0=TIM3.CH3
+   gpio_set_mode(GPIOA,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
+                 GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO7);	// GPIOE9=TIM3.CH2
+   gpio_set_mode(GPIOA,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
+                 GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO6);	// GPIOE9=TIM3.CH1
+
+  timer_disable_counter(TIM3);
    //edge aligned PWM
    timer_set_alignment(TIM3, TIM_CR1_CMS_EDGE);
    timer_enable_preload(TIM3);
@@ -237,9 +250,9 @@ void tim3_setup()
    timer_enable_oc_output(TIM3, TIM_OC1);
    timer_enable_oc_output(TIM3, TIM_OC2);
    timer_enable_oc_output(TIM3, TIM_OC3);
-   timer_set_period(TIM3, 7200); //default to 10 kHz
+   timer_set_period(TIM3, 7200); //default to 1 kHz
    timer_set_oc_value(TIM3, TIM_OC1, 3600); //50%
    timer_generate_event(TIM3, TIM_EGR_UG);
-   timer_set_prescaler(TIM3, 719); //100 kHz base speed
+   timer_set_prescaler(TIM3, 72); //10 kHz base speed
    timer_enable_counter(TIM3);
 }

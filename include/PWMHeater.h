@@ -1,7 +1,8 @@
 /*
- * This file is part of the tumanako_vc project.
+ * This file is part of the ZombieVerter project.
  *
  * Copyright (C) 2018 Johannes Huebner <dev@johanneshuebner.com>
+ *               2021-2022 Damien Maguire <info@evbmw.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,23 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef AMPERAHEATER_H
-#define AMPERAHEATER_H
+#ifndef PWMHEATER_H
+#define PWMHEATER_H
 
 #include <heater.h>
 
 
-class AmperaHeater : public Heater
+class PWMHeater : public Heater
 {
    public:
       /** Default constructor */
-      AmperaHeater();
+      PWMHeater();
       void SetTargetTemperature(float temp) { (void)temp; } //Not supported (yet)?
       void SetPower(uint8_t power, bool HeatReq);
-
-   private:
-      bool isAwake=false;
-      void SendWakeup();
 };
 
-#endif // AMPERAHEATER_H
+#endif // PWMHEATER_H

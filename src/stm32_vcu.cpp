@@ -68,6 +68,7 @@ static Can_OI openInv;
 static OutlanderInverter outlanderInv;
 static noHeater Heaternone;
 static AmperaHeater amperaHeater;
+static PWMHeater pwmHeater;
 static Inverter* selectedInverter = &openInv;
 static Vehicle* selectedVehicle = &vagVehicle;
 static Heater* selectedHeater = &Heaternone;
@@ -556,6 +557,9 @@ static void UpdateHeater()
          break;
       case HeatType::VW:
          break;
+      case HeatType::PWM:
+      selectedHeater = &pwmHeater;
+        break;
    }
    //This will call SetCanFilters() via the Clear Callback
    canInterface[0]->ClearUserMessages();
