@@ -17,7 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define VER 2.02.A
+// EV46 Start Custom
+#define VER GIT_HASH
+// EV46 End Custom
 
 
 /* Entries must be ordered as follows:
