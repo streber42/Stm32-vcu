@@ -34,6 +34,9 @@ public:
    float GetMotorSpeed() { return mg2_speed; }
    int GetInverterState();
    void DeInit() { setTimerState(false); } //called when switching to another inverter, similar to a destructor
+   // EV46 Start Custom
+   short get_torque();
+   // EV46 End Custom
 
    //Lexus/Toyota specific functions
    void SetPrius();
