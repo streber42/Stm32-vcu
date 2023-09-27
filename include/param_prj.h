@@ -28,7 +28,7 @@
    3. Display values
  */
 //Next param id (increase when adding new parameter!): 109
-//Next private param id (increase when adding new parameter!): 115
+//Next private param id (increase when adding new parameter!): 116
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
     PARAM_ENTRY(CAT_SETUP,     Inverter,     INVMODES, 0,      6,      0,      5  ) \
@@ -65,6 +65,7 @@
     PARAM_ENTRY(CAT_THROTTLE,  throtmax,    "%",       0,      100,    100,    25 ) \
     PARAM_ENTRY(CAT_THROTTLE,  throtmin,    "%",      -100,    0,     -100,    26 ) \
     PARAM_ENTRY(CAT_THROTTLE,  throtdead,   "%",       0,      50,     10,     76 ) \
+    PARAM_ENTRY(CAT_THROTTLE,  usethrotmap, ONOFF,     0,      1,      1,      115 ) \
     PARAM_ENTRY(CAT_LEXUS,     Gear,        LOWHIGH,   0,      2,      0,      27 ) \
     PARAM_ENTRY(CAT_LEXUS,     OilPump,     "%",       0,      100,    50,     28 ) \
     PARAM_ENTRY(CAT_CRUISE,    cruisestep,  "rpm",     1,      1000,   200,    29 ) \
