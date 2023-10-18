@@ -26,6 +26,7 @@
    3. Display values
  */
 //Next param id (increase when adding new parameter!): 109
+//Next private param id (increase when adding new parameter!): 115
 /*              category     name         unit       min     max     default id */
 #define PARAM_LIST \
     PARAM_ENTRY(CAT_SETUP,     Inverter,     INVMODES, 0,      6,      0,      5  ) \
@@ -130,6 +131,12 @@
     PARAM_ENTRY(CAT_PWM,       Tim3_1_OC,   "",        1,      100000, 3600,   102 ) \
     PARAM_ENTRY(CAT_PWM,       Tim3_2_OC,   "",        1,      100000, 3600,   103 ) \
     PARAM_ENTRY(CAT_PWM,       Tim3_3_OC,   "",        1,      100000, 3600,   104 ) \
+    PARAM_ENTRY(CAT_PLCHLD,    PlcHld109,   "dig",     0,      4095,   0,      109 ) \
+    PARAM_ENTRY(CAT_PLCHLD,    PlcHld110,   "dig",     0,      4095,   0,      110 ) \
+    PARAM_ENTRY(CAT_PLCHLD,    PlcHld111,   "dig",     0,      4095,   0,      111 ) \
+    PARAM_ENTRY(CAT_PLCHLD,    PlcHld112,   "dig",     0,      4095,   0,      112 ) \
+    PARAM_ENTRY(CAT_PLCHLD,    PlcHld113,   "dig",     0,      4095,   0,      113 ) \
+    PARAM_ENTRY(CAT_PLCHLD,    PlcHld114,   "dig",     0,      4095,   0,      114 ) \
     VALUE_ENTRY(version,       VERSTR,              2000 ) \
     VALUE_ENTRY(opmode,        OPMODES,             2002 ) \
     VALUE_ENTRY(chgtyp,        CHGTYPS,             2003 ) \
@@ -214,6 +221,12 @@
     VALUE_ENTRY(cpuload,       "%",                 2063 ) \
     VALUE_ENTRY(PPVal,         "dig",               2094 ) \
     VALUE_ENTRY(BrkVacVal,     "dig",               2095 ) \
+    VALUE_ENTRY(P2096,          ONOFF,              2096 ) \
+    VALUE_ENTRY(P2097,          ONOFF,              2097 ) \
+    VALUE_ENTRY(P2098,          ONOFF,              2098 ) \
+    VALUE_ENTRY(P2099,          ONOFF,              2099 ) \
+    VALUE_ENTRY(P2100,          ONOFF,              2100 ) \
+
 
 
 //Next value Id: 2096
@@ -276,6 +289,7 @@
 #define CAT_SHUNT    "ISA Shunt Control"
 #define CAT_IOPINS   "General Purpose I/O"
 #define CAT_PWM      "PWM Control"
+#define CAT_PLCHLD   "Placeholder"
 
 #define CAN_PERIOD_100MS    0
 #define CAN_PERIOD_10MS     1
