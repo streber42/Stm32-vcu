@@ -789,7 +789,7 @@ extern "C" int main(void)
    DigIo::inv_out.Clear();//inverter power off during bootup
    DigIo::mcp_sby.Clear();//enable can3
 
-   Terminal t(USART3, TermCmds);
+   Terminal t(USART3, TermCmds,false,!Param::GetBool(Param::UseRS232));
    FunctionPointerCallback canCb(CanCallback, SetCanFilters);
    Stm32Can c(CAN1, CanHardware::Baud500);
    Stm32Can c2(CAN2, CanHardware::Baud500, true);
