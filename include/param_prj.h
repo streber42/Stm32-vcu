@@ -213,6 +213,8 @@
     VALUE_ENTRY(AC_Amps,       "A",                 2089 ) \
     VALUE_ENTRY(HeatTemp,      "dig",               2091 ) \
     VALUE_ENTRY(PWMHeatOn,     ONOFF,               2092 ) \
+    VALUE_ENTRY(Speed_MSB,     "dig",               2093 ) \
+    VALUE_ENTRY(Speed_LSB,     "dig",               2094 ) \
     VALUE_ENTRY(cpuload,       "%",                 2063 ) \
     VALUE_ENTRY(P2091,          ONOFF,              2091 ) \
     VALUE_ENTRY(P2092,          ONOFF,              2092 ) \
