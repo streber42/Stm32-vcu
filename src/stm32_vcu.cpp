@@ -488,50 +488,16 @@ static void Ms100Task(void) {
       &DigIo::dummypin) // digital input has priority, check if used
   {
     Param::SetInt(Param::HeatReq, IOMatrix::GetPin(IOMatrix::HEATREQ)->Get());
-  } else if (Param::GetInt(Param::GPA1Func) == IOMatrix::HEATER_POT ||
-             Param::GetInt(Param::GPA2Func) ==
-                 IOMatrix::HEATER_POT) // check if Anolgue Heater input used
+  }
+
+  // Reading HeaterPot
+  if (Param::GetInt(Param::GPA1Func) == IOMatrix::HEATER_POT ||
+      Param::GetInt(Param::GPA2Func) ==
+          IOMatrix::HEATER_POT) // check if Anolgue Heater input used
   {
     int htrPotVal = IOMatrix::GetAnaloguePin(IOMatrix::HEATER_POT)
                         ->Get(); // Get input value
     Param::SetInt(Param::HtPotVal, htrPotVal);
-
-    if (Param::GetInt(Param::HeatPotDir) == 2 ||
-        Param::GetInt(Param::HeatPotDir) ==
-            3) // If higher then threshold is HEAT ON
-    {
-
-      if (htrPotVal >
-          Param::GetInt(Param::HeatPotOn)) // if value is above threshold
-      {
-        if (Param::GetInt(Param::HeatPotDir) == 3)
-          Param::SetInt(
-              Param::HeatPercnt,
-              utils::change(htrPotVal, Param::GetInt(Param::HeatPotOn),
-                            Param::GetInt(Param::HeatPotFull), 0,
-                            100));        // map threshold to 0 and full to 100
-        Param::SetInt(Param::HeatReq, 1); // On
-      } else {
-        Param::SetInt(Param::HeatReq, 0); // Off
-      }
-    } else if (Param::GetInt(Param::HeatPotDir) == 0 ||
-               Param::GetInt(Param::HeatPotDir) ==
-                   1) // If higher then threshold is HEAT ON
-    {
-      if (htrPotVal <
-          Param::GetInt(Param::HeatPotOn)) // if value is below threshold
-      {
-        if (Param::GetInt(Param::HeatPotDir) == 1)
-          Param::SetInt(
-              Param::HeatPercnt,
-              utils::change(htrPotVal, Param::GetInt(Param::HeatPotOn),
-                            Param::GetInt(Param::HeatPotFull), 0,
-                            100));        // map threshold to 100 and full to 0
-        Param::SetInt(Param::HeatReq, 1); // On
-      } else {
-        Param::SetInt(Param::HeatReq, 0); // Of
-      }
-    }
   }
 
   // Reading HVrequest inpput
@@ -595,9 +561,29 @@ static void ControlCabHeater(int opmode) {
       opmode == MOD_PREHEAT) {
     IOMatrix::GetPin(IOMatrix::HEATERENABLE)
         ->Set(); // Heater enable and coolant pump on
+    bool heaterPotControl = utils::ProcessHeaterPot();
+    bool heatReq = false;
     selectedHeater->SetTargetTemperature(50); // TODO: Currently does nothing
-    selectedHeater->SetPower(Param::GetInt(Param::HeatPwr),
-                             Param::GetBool(Param::HeatReq));
+    // Legacy mode
+    switch (Param::GetInt(Param::Control)) {
+    case 0:
+      break;
+    case 1:
+    case 2:
+      // Legacy Mode
+      if (IOMatrix::GetPin(IOMatrix::HEATREQ) != &DigIo::dummypin) {
+        heatReq = Param::GetInt(Param::HeatReq);
+      } else {
+        heatReq = heaterPotControl;
+      }
+      break;
+    case 3:
+      heatReq = heatReq && heaterPotControl;
+      break;
+    default:
+      heatReq = false;
+    }
+    selectedHeater->SetPower(Param::GetInt(Param::HeatPwr), heatReq);
   } else {
     IOMatrix::GetPin(IOMatrix::HEATERENABLE)
         ->Clear(); // Disable heater and coolant pump

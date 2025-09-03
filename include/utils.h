@@ -48,6 +48,7 @@ void SpeedoStart();
 void GS450hOilPump(uint16_t pumpdc);
 void SetTempgaugePWM(bool en);
 void SetSocgaugePWM(bool en);
+bool ProcessHeaterPot();
 } // namespace utils
 
 #endif

@@ -764,4 +764,40 @@ void GS450hOilPump(uint16_t pumpdc) {
   }
 }
 
+// Implement HeaterPot logic and adjust HeaterPower if desired
+bool ProcessHeaterPot() {
+  int htrPotVal = Param::GetInt(Param::HtPotVal);
+  int heatPotDir = Param::GetInt(Param::HeatPotDir);
+  if (heatPotDir == 2 || heatPotDir == 3) // If higher then threshold is HEAT ON
+  {
+    if (htrPotVal >
+        Param::GetInt(Param::HeatPotOn)) // if value is above threshold
+    {
+      if (heatPotDir == 3)
+        Param::SetInt(Param::HeatPercnt,
+                      utils::change(htrPotVal, Param::GetInt(Param::HeatPotOn),
+                                    Param::GetInt(Param::HeatPotFull), 0,
+                                    100)); // map threshold to 0 and full to 100
+      return true;                         // On
+    } else {
+      return false; // Off
+    }
+  } else if (heatPotDir == 0 ||
+             heatPotDir == 1) { // If higher then threshold is HEAT ON
+    if (htrPotVal <
+        Param::GetInt(Param::HeatPotOn)) // if value is below threshold
+    {
+      if (heatPotDir == 1)
+        Param::SetInt(Param::HeatPercnt,
+                      utils::change(htrPotVal, Param::GetInt(Param::HeatPotOn),
+                                    Param::GetInt(Param::HeatPotFull), 0,
+                                    100)); // map threshold to 100 and full to 0
+      return true;                         // On
+    } else {
+      return false; // Of
+    }
+  }
+  return false;
+}
+
 } // namespace utils

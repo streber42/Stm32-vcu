@@ -110,7 +110,7 @@
   PARAM_ENTRY(CAT_BMS, BMS_TminLimit, "°C", -100, 100, 5, 94)                  \
   PARAM_ENTRY(CAT_BMS, BMS_TmaxLimit, "°C", -100, 100, 50, 95)                 \
   PARAM_ENTRY(CAT_HEATER, Heater, HTTYPE, 0, 6, 0, 57)                         \
-  PARAM_ENTRY(CAT_HEATER, Control, HTCTRL, 0, 2, 0, 58)                        \
+  PARAM_ENTRY(CAT_HEATER, Control, HTCTRL, 0, 3, 0, 58)                        \
   PARAM_ENTRY(CAT_HEATER, HeatPwr, "W", 0, 6500, 0, 59)                        \
   PARAM_ENTRY(CAT_HEATER, HeatPercnt, "%", 0, 100, 0, 124)                     \
   PARAM_ENTRY(CAT_HEATER, HeatPotDir, ABOVEBELOW, 0, 4, 0, 150)                \
@@ -332,7 +332,7 @@
   "32=Stop"
 #define HTTYPE                                                                 \
   "0=None, 1=Ampera, 2=VWCoolant, 3=VWAir, 4=OutlanderCan, 5=MGCoolant, 6=PWM"
-#define HTCTRL "0=Disable, 1=Enable, 2=Timer"
+#define HTCTRL "0=Disable, 1=Enable, 2=Timer, 3=HeatReqAndPot"
 #define CHGMODS                                                                \
   "0=Off, 1=EXT_DIGI, 2=Volt_Ampera, 3=Leaf_PDM, 4=TeslaOI, 5=Out_lander, "    \
   "6=Elcon, 7=MGgen2"
