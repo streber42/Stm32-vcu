@@ -905,10 +905,10 @@ extern "C" int main(void)
    //  CANSPI_Initialize();// init the MCP25625 on CAN3
    //  CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
 
-    xTaskCreate(rtos_Ms1Task, "Ms1Task",100,NULL,configMAX_PRIORITIES-1,NULL);
-    xTaskCreate(rtos_Ms10Task, "Ms10Task",100,NULL,configMAX_PRIORITIES-2,NULL);
-    xTaskCreate(rtos_Ms100Task, "Ms100Task",100,NULL,configMAX_PRIORITIES-3,NULL);
-    xTaskCreate(rtos_Ms200Task, "Ms200Task",100,NULL,configMAX_PRIORITIES-4,NULL);
+    xTaskCreate(rtos_Ms1Task, "Ms1Task",200,NULL,configMAX_PRIORITIES-1,NULL);
+    xTaskCreate(rtos_Ms10Task, "Ms10Task",200,NULL,configMAX_PRIORITIES-2,NULL);
+    xTaskCreate(rtos_Ms100Task, "Ms100Task",200,NULL,configMAX_PRIORITIES-3,NULL);
+    xTaskCreate(rtos_Ms200Task, "Ms200Task",200,NULL,configMAX_PRIORITIES-4,NULL);
     xTaskCreate(rtos_term_Run, "TermTask",300,NULL,configMAX_PRIORITIES-5,NULL);
 
 
